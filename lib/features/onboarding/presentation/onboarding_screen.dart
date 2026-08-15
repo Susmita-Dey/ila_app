@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/widgets/ila_logo.dart';
+import '../../../core/widgets/illustrations/illustration_sanctuary.dart';
 import '../../../main.dart';
 
 class OnboardingScreen extends StatelessWidget {
@@ -19,7 +19,7 @@ class OnboardingScreen extends StatelessWidget {
             children: [
               const Spacer(),
               const Center(
-                child: IlaLogo(size: 64, style: IlaLogoStyle.cairn),
+                child: IllustrationSanctuary(size: 170),
               ),
               const SizedBox(height: 48),
               const Text(

@@ -1,60 +1,69 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+void main() {
+  testWidgets('Generate assets', (tester) async {
+    final directory = Directory('assets/branding');
+    if (!directory.existsSync()) {
+      directory.createSync(recursive: true);
+    }
 
-  final directory = Directory('assets/branding');
-  if (!directory.existsSync()) {
-    directory.createSync(recursive: true);
-  }
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder, const Rect.fromLTWH(0, 0, 1024, 1024));
 
-  // 1. Generate 1024x1024 App Icon (Warm Ivory canvas + Solid Cairn)
-  final recorder = ui.PictureRecorder();
-  final canvas = Canvas(recorder, const Rect.fromLTWH(0, 0, 1024, 1024));
+    // Canvas: Warm Cream (#FAF8F5)
+    canvas.drawRect(const Rect.fromLTWH(0, 0, 1024, 1024), Paint()..color = const Color(0xFFFAF8F5));
 
-  // Background Fill: Warm Ivory (#FBF9F5)
-  final bgPaint = Paint()..color = const Color(0xFFFBF9F5);
-  canvas.drawRect(const Rect.fromLTWH(0, 0, 1024, 1024), bgPaint);
+    // Centered 600x600 Scaled Viewport
+    canvas.save();
+    canvas.translate(212, 212);
 
-  // Scaled High-Resolution Cairn Vector Mark
-  canvas.save();
-  canvas.translate(262, 262); // Centered 500x500 viewport
+    // 1. Organic Dusty Blush Watercolor Spot Wash
+    final blushSpot = Paint()..color = const Color(0x33DCAE9F)..style = PaintingStyle.fill;
+    canvas.drawOval(
+      Rect.fromCenter(center: const Offset(360, 260), width: 420, height: 420),
+      blushSpot,
+    );
 
-  // Base Stone: Deep Ink (#1E242B)
-  final baseStone = Path()
-    ..addRRect(RRect.fromRectAndCorners(
-      Rect.fromCenter(center: const Offset(250, 340), width: 360, height: 190),
-      topLeft: const Radius.circular(100),
-      topRight: const Radius.circular(100),
-      bottomLeft: const Radius.circular(90),
-      bottomRight: const Radius.circular(90),
-    ));
-  canvas.drawPath(baseStone, Paint()..color = const Color(0xFF1E242B)..isAntiAlias = true);
+    // 2. Organic Washed Sage Accent Wash
+    final sageSpot = Paint()..color = const Color(0x338A9A86)..style = PaintingStyle.fill;
+    canvas.drawOval(
+      Rect.fromCenter(center: const Offset(230, 380), width: 300, height: 300),
+      sageSpot,
+    );
 
-  // Top Stone: Muted Sage (#7A8B7B)
-  final topStone = Path()
-    ..addRRect(RRect.fromRectAndCorners(
-      Rect.fromCenter(center: const Offset(220, 180), width: 240, height: 150),
-      topLeft: const Radius.circular(80),
-      topRight: const Radius.circular(80),
-      bottomLeft: const Radius.circular(70),
-      bottomRight: const Radius.circular(70),
-    ));
-  canvas.drawPath(topStone, Paint()..color = const Color(0xFF7A8B7B)..isAntiAlias = true);
-  canvas.restore();
+    // 3. Charcoal Line Art Monogram Arch
+    final strokePaint = Paint()
+      ..color = const Color(0xFF1E242B)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 46.0
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
 
-  final picture = recorder.endRecording();
-  final img = await picture.toImage(1024, 1024);
-  final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
-  final pngBytes = byteData!.buffer.asUint8List();
+    // Floating Dot (Clarity Seed)
+    canvas.drawCircle(const Offset(300, 100), 48.0, Paint()..color = const Color(0xFF1E242B));
 
-  // Write Master PNGs
-  await File('assets/branding/ila_icon.png').writeAsBytes(pngBytes);
-  await File('assets/branding/ila_splash.png').writeAsBytes(pngBytes);
-  await File('assets/branding/ila_icon_foreground.png').writeAsBytes(pngBytes);
+    // Arch Stem
+    final arch = Path();
+    arch.moveTo(180, 520);
+    arch.lineTo(180, 290);
+    arch.cubicTo(180, 195, 420, 195, 420, 290);
+    arch.lineTo(420, 520);
+    canvas.drawPath(arch, strokePaint);
 
-  print('Production icon assets created successfully at assets/branding/');
-  exit(0);
+    canvas.restore();
+
+    final picture = recorder.endRecording();
+    final img = picture.toImageSync(1024, 1024);
+    final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
+    final pngBytes = byteData!.buffer.asUint8List();
+
+    await File('assets/branding/ila_icon.png').writeAsBytes(pngBytes);
+    await File('assets/branding/ila_splash.png').writeAsBytes(pngBytes);
+    await File('assets/branding/ila_icon_foreground.png').writeAsBytes(pngBytes);
+
+    print('Production icon assets created with Dusty Blush & Washed Sage palette.');
+  });
 }

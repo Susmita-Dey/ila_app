@@ -1,124 +1,58 @@
 import 'package:flutter/material.dart';
-
-enum IlaLogoStyle { cairn, arch }
+import '../theme/app_theme.dart';
 
 class IlaLogo extends StatelessWidget {
   final double size;
-  final IlaLogoStyle style;
-  final Color? inkColor;
-  final Color? sageColor;
-
-  const IlaLogo({
-    super.key,
-    this.size = 32,
-    this.style = IlaLogoStyle.cairn,
-    this.inkColor,
-    this.sageColor,
-  });
+  const IlaLogo({super.key, this.size = 32});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: size,
       height: size,
-      child: CustomPaint(
-        painter: style == IlaLogoStyle.cairn
-            ? _IlaCairnPainter(
-                inkColor: inkColor ?? const Color(0xFF1E242B),
-                sageColor: sageColor ?? const Color(0xFF7A8B7B),
-              )
-            : _IlaArchPainter(
-                inkColor: inkColor ?? const Color(0xFF1E242B),
-                sageColor: sageColor ?? const Color(0xFF7A8B7B),
-              ),
-      ),
+      child: CustomPaint(painter: _IlaEditorialLogoPainter()),
     );
   }
 }
 
-/// Solid Minimalist Cairn (Balanced Organic River Stones)
-class _IlaCairnPainter extends CustomPainter {
-  final Color inkColor;
-  final Color sageColor;
-
-  _IlaCairnPainter({required this.inkColor, required this.sageColor});
-
+class _IlaEditorialLogoPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
 
-    // Base Grounding Stone (Deep Ink)
-    final basePaint = Paint()
-      ..color = inkColor
-      ..style = PaintingStyle.fill
-      ..isAntiAlias = true;
+    // 1. Organic Watercolor Spot Wash (Blush & Sage blend)
+    final blushWash = Paint()..color = AppColors.blushTint..style = PaintingStyle.fill;
+    canvas.drawOval(
+      Rect.fromCenter(center: Offset(w * 0.60, h * 0.44), width: w * 0.65, height: h * 0.65),
+      blushWash,
+    );
 
-    final baseStone = Path()
-      ..addRRect(RRect.fromRectAndCorners(
-        Rect.fromCenter(center: Offset(w * 0.50, h * 0.68), width: w * 0.72, height: h * 0.38),
-        topLeft: Radius.circular(w * 0.20),
-        topRight: Radius.circular(w * 0.20),
-        bottomLeft: Radius.circular(w * 0.18),
-        bottomRight: Radius.circular(w * 0.18),
-      ));
-    canvas.drawPath(baseStone, basePaint);
+    final sageWash = Paint()..color = AppColors.sageTint..style = PaintingStyle.fill;
+    canvas.drawOval(
+      Rect.fromCenter(center: Offset(w * 0.38, h * 0.62), width: w * 0.45, height: h * 0.45),
+      sageWash,
+    );
 
-    // Resting Balance Stone (Muted Sage)
-    final topPaint = Paint()
-      ..color = sageColor
-      ..style = PaintingStyle.fill
-      ..isAntiAlias = true;
+    // 2. Charcoal Line Art
+    final inkPaint = Paint()
+      ..color = AppColors.charcoalInk
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = w * 0.075
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
 
-    final topStone = Path()
-      ..addRRect(RRect.fromRectAndCorners(
-        Rect.fromCenter(center: Offset(w * 0.44, h * 0.36), width: w * 0.48, height: h * 0.30),
-        topLeft: Radius.circular(w * 0.16),
-        topRight: Radius.circular(w * 0.16),
-        bottomLeft: Radius.circular(w * 0.14),
-        bottomRight: Radius.circular(w * 0.14),
-      ));
-    canvas.drawPath(topStone, topPaint);
-  }
+    // Floating Dot (Clarity Seed)
+    canvas.drawCircle(Offset(w * 0.50, h * 0.18), w * 0.08, Paint()..color = AppColors.charcoalInk);
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
+    // Architectural Arch Stem
+    final arch = Path();
+    arch.moveTo(w * 0.30, h * 0.86);
+    arch.lineTo(w * 0.30, h * 0.48);
+    arch.cubicTo(w * 0.30, h * 0.34, w * 0.70, h * 0.34, w * 0.70, h * 0.48);
+    arch.lineTo(w * 0.70, h * 0.86);
 
-/// The Sanctuary Arch ('i' Monogram)
-class _IlaArchPainter extends CustomPainter {
-  final Color inkColor;
-  final Color sageColor;
-
-  _IlaArchPainter({required this.inkColor, required this.sageColor});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-
-    // Floating Dot / Seed (Muted Sage)
-    final dotPaint = Paint()
-      ..color = sageColor
-      ..style = PaintingStyle.fill
-      ..isAntiAlias = true;
-    canvas.drawCircle(Offset(w * 0.5, h * 0.20), w * 0.09, dotPaint);
-
-    // Arch Body / Pillar (Deep Ink)
-    final archPaint = Paint()
-      ..color = inkColor
-      ..style = PaintingStyle.fill
-      ..isAntiAlias = true;
-
-    final archPath = Path()
-      ..addRRect(RRect.fromRectAndCorners(
-        Rect.fromLTWH(w * 0.36, h * 0.38, w * 0.28, h * 0.48),
-        topLeft: Radius.circular(w * 0.14),
-        topRight: Radius.circular(w * 0.14),
-        bottomLeft: Radius.circular(w * 0.06),
-        bottomRight: Radius.circular(w * 0.06),
-      ));
-    canvas.drawPath(archPath, archPaint);
+    canvas.drawPath(arch, inkPaint);
   }
 
   @override

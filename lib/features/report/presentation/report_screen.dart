@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import 'report_controller.dart';
 
+import '../../../core/widgets/illustrations/illustration_report.dart';
+
 class ReportScreen extends ConsumerStatefulWidget {
   const ReportScreen({super.key});
 
@@ -74,9 +76,16 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       ? const Center(child: CircularProgressIndicator())
                       : (data == null || data.totalCycles == 0)
                           ? const Center(
-                              child: Text(
-                                'No data available for this period.',
-                                style: TextStyle(color: AppColors.mutedSage),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  IllustrationReport(size: 140),
+                                  SizedBox(height: 16),
+                                  Text(
+                                    'No data available for this period.',
+                                    style: TextStyle(color: AppColors.mutedSage),
+                                  ),
+                                ],
                               ),
                             )
                           : Column(

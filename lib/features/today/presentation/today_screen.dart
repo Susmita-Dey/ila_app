@@ -9,8 +9,8 @@ import '../../routines/presentation/routine_setup_sheet.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_provider.dart';
 import '../../../core/utils/dev_seed_data.dart';
-import '../../../core/widgets/Ila_logo.dart';
-import '../../../core/widgets/illustrations/calm_empty_state.dart';
+import '../../../core/widgets/ila_logo.dart';
+import '../../../core/widgets/illustrations/illustration_caught_up.dart';
 
 class TodayScreen extends ConsumerWidget {
   const TodayScreen({super.key});
@@ -37,7 +37,7 @@ class TodayScreen extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const IlaLogo(size: 26, style: IlaLogoStyle.cairn),
+                    const IlaLogo(size: 26),
                     const SizedBox(width: 8),
                     Text(
                       'Ila',
@@ -108,7 +108,7 @@ class TodayScreen extends ConsumerWidget {
                       const Center(
                         child: Column(
                           children: [
-                            CalmEmptyStateIllustration(width: 160, height: 120),
+                            IllustrationCaughtUp(size: 150),
                             SizedBox(height: 16),
                             Text(
                               "You're all caught up for today.",

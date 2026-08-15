@@ -80,15 +80,28 @@ class _QuickLogSheetState extends ConsumerState<QuickLogSheet> {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: _colors.map((color) => ChoiceChip(
-                label: Text(color),
-                selected: _selectedColor == color,
-                onSelected: (selected) => setState(() => _selectedColor = selected ? color : null),
-                selectedColor: AppColors.deepInk,
-                labelStyle: TextStyle(color: _selectedColor == color ? AppColors.warmIvory : AppColors.deepInk),
-                backgroundColor: AppColors.cardBg,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              )).toList(),
+              children: _colors.map((color) {
+                Color getSelectedColor() {
+                  if (color.contains('Pink')) return AppColors.dustyBlush;
+                  if (color.contains('Brown')) return AppColors.clayTerracotta;
+                  return AppColors.charcoalInk;
+                }
+                
+                return ChoiceChip(
+                  label: Text(color),
+                  selected: _selectedColor == color,
+                  onSelected: (selected) => setState(() => _selectedColor = selected ? color : null),
+                  selectedColor: getSelectedColor(),
+                  labelStyle: TextStyle(color: _selectedColor == color ? AppColors.warmIvory : AppColors.deepInk),
+                  backgroundColor: AppColors.cardBg,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(
+                      color: _selectedColor == color ? AppColors.charcoalInk : Colors.transparent,
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
             const SizedBox(height: 16),
 
@@ -162,14 +175,21 @@ class _QuickLogSheetState extends ConsumerState<QuickLogSheet> {
               onPressed: _selectedFlow == null ? null : () async {
                 String? parsedColor;
                 if (_selectedColor != null) {
-                  if (_selectedColor!.contains('Red')) parsedColor = 'BrightRed';
-                  else if (_selectedColor!.contains('Brown')) parsedColor = 'DarkBrown';
-                  else parsedColor = 'Pink';
+                  if (_selectedColor!.contains('Red')) {
+                    parsedColor = 'BrightRed';
+                  } else if (_selectedColor!.contains('Brown')) {
+                    parsedColor = 'DarkBrown';
+                  } else {
+                    parsedColor = 'Pink';
+                  }
                 }
 
                 String parsedClot = 'None';
-                if (_selectedClots.contains('Small')) parsedClot = 'Small';
-                else if (_selectedClots.contains('Large')) parsedClot = 'Large';
+                if (_selectedClots.contains('Small')) {
+                  parsedClot = 'Small';
+                } else if (_selectedClots.contains('Large')) {
+                  parsedClot = 'Large';
+                }
 
                 await ref.read(cycleControllerProvider.notifier).logCycleEvent(
                   date: DateTime.now(),
