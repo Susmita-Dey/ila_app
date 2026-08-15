@@ -1,0 +1,53 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../../core/providers/database_provider.dart';
+import '../domain/report_payload.dart';
+import '../service/doctor_pdf_generator.dart';
+import 'package:intl/intl.dart';
+
+part 'report_controller.g.dart';
+
+class ReportState {
+  final bool isGenerating;
+  final DoctorReportData? previewData;
+
+  ReportState({this.isGenerating = false, this.previewData});
+}
+
+@riverpod
+class ReportController extends _$ReportController {
+  @override
+  ReportState build() {
+    return ReportState();
+  }
+
+  Future<void> generatePreview(int months) async {
+    state = ReportState(isGenerating: true, previewData: state.previewData);
+    
+    final dao = ref.read(reportDaoProvider);
+    final endDate = DateTime.now();
+    final startDate = DateTime(endDate.year, endDate.month - months, endDate.day);
+    
+    final rangeLabel = 'Last $months Months (${DateFormat('MMM yyyy').format(startDate)} - ${DateFormat('MMM yyyy').format(endDate)})';
+    
+    final data = await dao.generateReport(
+      startDate: startDate,
+      endDate: endDate,
+      rangeLabel: rangeLabel,
+    );
+    
+    state = ReportState(isGenerating: false, previewData: data);
+  }
+
+  Future<void> exportPdf() async {
+    final data = state.previewData;
+    if (data == null) return;
+
+    state = ReportState(isGenerating: true, previewData: data);
+    
+    try {
+      await DoctorPdfGenerator.generateAndShare(data);
+    } finally {
+      state = ReportState(isGenerating: false, previewData: data);
+    }
+  }
+}
