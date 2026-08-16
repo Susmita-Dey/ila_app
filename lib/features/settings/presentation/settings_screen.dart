@@ -7,7 +7,9 @@ import '../../../core/providers/database_provider.dart';
 import '../../today/presentation/today_controller.dart';
 import '../../cycle/presentation/cycle_controller.dart';
 import '../../report/presentation/report_controller.dart';
+import '../../../core/services/backup_service.dart';
 import 'widgets/feedback_dialog.dart';
+import '../../../l10n/app_localizations.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -52,6 +54,87 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Text(
+              AppLocalizations.of(context)!.settingsDataPrivacy,
+              style: const TextStyle(
+                color: AppColors.deepInk,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Card(
+            color: AppColors.cardBg,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: const BorderSide(color: AppColors.lightBorder),
+            ),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.cloud_off, color: AppColors.brandAction),
+                  title: Text(AppLocalizations.of(context)!.settingsOfflineBadge, style: const TextStyle(fontWeight: FontWeight.bold)),
+                ),
+                const Divider(height: 1, color: AppColors.lightBorder),
+                ListTile(
+                  leading: const Icon(Icons.lock_outline, color: AppColors.deepInk),
+                  title: const Text('Export Encrypted Backup'),
+                  subtitle: const Text('Save your data locally as an AES-256 encrypted file'),
+                  trailing: const Icon(Icons.download_outlined, color: AppColors.mutedSage),
+                  onTap: () async {
+                    // Prompt for passphrase
+                    String? passphrase;
+                    await showDialog(
+                      context: context,
+                      builder: (context) {
+                        final controller = TextEditingController();
+                        return AlertDialog(
+                          backgroundColor: AppColors.warmIvory,
+                          title: const Text('Backup Passphrase', style: TextStyle(color: AppColors.deepInk, fontWeight: FontWeight.bold)),
+                          content: TextField(
+                            controller: controller,
+                            obscureText: true,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter a strong passphrase',
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Cancel', style: TextStyle(color: AppColors.deepInk)),
+                            ),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(backgroundColor: AppColors.brandAction, foregroundColor: Colors.white),
+                              onPressed: () {
+                                if (controller.text.isNotEmpty) {
+                                  passphrase = controller.text;
+                                  Navigator.pop(context);
+                                }
+                              },
+                              child: const Text('Export'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+
+                    if (passphrase != null && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Encrypting backup...')),
+                      );
+                      final db = ref.read(appDatabaseProvider);
+                      await BackupService.exportEncryptedBackup(db, passphrase!);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Text(

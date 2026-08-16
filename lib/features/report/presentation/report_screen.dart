@@ -31,7 +31,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     return Scaffold(
       backgroundColor: AppColors.warmIvory,
       appBar: AppBar(
-        title: const Text('Clinical Summary'),
+        title: const Text('My Insights'),
       ),
       body: SafeArea(
         child: Padding(

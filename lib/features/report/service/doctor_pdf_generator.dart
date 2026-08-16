@@ -18,12 +18,12 @@ class DoctorPdfGenerator {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
-                'PATIENT HEALTH SUMMARY — CLINICAL OBSERVATION RECORD',
+                'PATIENT HEALTH SUMMARY - CLINICAL OBSERVATION RECORD',
                 style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
               ),
               pw.SizedBox(height: 4),
               pw.Text(
-                'Observation Window: ${data.dateRange}  •  Source: Ila Local-First Log',
+                'Observation Window: ${data.dateRange}  |  Source: Ila Local-First Log',
                 style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
               ),
               pw.Divider(thickness: 1.5, color: PdfColors.black),
@@ -40,7 +40,7 @@ class DoctorPdfGenerator {
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     _buildStatBlock('Total Cycles', '${data.totalCycles} Recorded'),
-                    _buildStatBlock('Cycle Range', '${data.cycleRangeMin} – ${data.cycleRangeMax} Days'),
+                    _buildStatBlock('Cycle Range', '${data.cycleRangeMin} - ${data.cycleRangeMax} Days'),
                     _buildStatBlock('Median Length', '${data.medianCycleLength} Days'),
                     _buildStatBlock('Med Adherence', '${data.adherencePercentage}%'),
                     _buildStatBlock('Large Clots / Flooding', '${data.totalHeavyWithClotsDays + data.floodingEventsCount} Days'),
@@ -97,7 +97,7 @@ class DoctorPdfGenerator {
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Text('Self-reported patient record. Prepared for clinical review.', style: const pw.TextStyle(fontSize: 6.5)),
-                  pw.Text('Zero Cloud Storage • Local Verification', style: const pw.TextStyle(fontSize: 6.5)),
+                  pw.Text('Zero Cloud Storage | Local Verification', style: const pw.TextStyle(fontSize: 6.5)),
                 ],
               ),
             ],

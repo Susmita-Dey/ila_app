@@ -1,50 +1,70 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as enc;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../database/app_database.dart';
 
 class BackupService {
-  final AppDatabase db;
-
-  BackupService(this.db);
-
-  Future<void> exportEncryptedBackup(String passphrase) async {
-    // 1. Fetch all data
+  static Future<void> exportEncryptedBackup(AppDatabase db, String passphrase) async {
+    // 1. Query all tables (Runs asynchronously via Drift)
     final cycleEvents = await db.select(db.cycleEvents).get();
     final routines = await db.select(db.routines).get();
     final routineLogs = await db.select(db.routineLogs).get();
     final interventions = await db.select(db.treatmentInterventions).get();
 
-    // 2. Serialize to JSON map
-    final data = {
+    // Map to simple primitive Maps on the main thread (very fast)
+    final dataMaps = {
       'cycleEvents': cycleEvents.map((e) => e.toJson()).toList(),
       'routines': routines.map((e) => e.toJson()).toList(),
       'routineLogs': routineLogs.map((e) => e.toJson()).toList(),
-      'treatmentInterventions': interventions.map((e) => e.toJson()).toList(),
+      'interventions': interventions.map((e) => e.toJson()).toList(),
     };
 
-    final jsonStr = jsonEncode(data);
+    // 2. Offload heavy serialization and encryption to a background Isolate
+    final finalPayload = await compute(_performHeavyEncryption, {
+      'data': dataMaps,
+      'passphrase': passphrase,
+    });
 
-    // 3. Encrypt AES-256
-    // Pad or truncate passphrase to 32 chars for AES-256 key
-    final keyStr = passphrase.padRight(32, '0').substring(0, 32);
-    final key = enc.Key.fromUtf8(keyStr);
-    final iv = enc.IV.fromLength(16);
-    
-    final encrypter = enc.Encrypter(enc.AES(key));
-    final encrypted = encrypter.encrypt(jsonStr, iv: iv);
+    // 3. Write to temporary file
+    final tempDir = await getTemporaryDirectory();
+    final file = File('${tempDir.path}/ila_data.ila_backup');
+    await file.writeAsString(finalPayload);
 
-    // Combine IV and Ciphertext
-    final payload = '${iv.base64}:${encrypted.base64}';
-
-    // 4. Save to temp file and share
-    final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/ila_data.ila_backup');
-    await file.writeAsString(payload);
-
+    // 4. Native Share
     // ignore: deprecated_member_use
-    await Share.shareXFiles([XFile(file.path)], text: 'My Ila Health Backup');
+    await Share.shareXFiles([XFile(file.path)], subject: 'Ila Encrypted Backup');
   }
+}
+
+/// Runs in a background Isolate to prevent UI freezing
+String _performHeavyEncryption(Map<String, dynamic> args) {
+  final dataMaps = args['data'] as Map<String, dynamic>;
+  final passphrase = args['passphrase'] as String;
+
+  final payload = {
+    'version': 1,
+    'timestamp': DateTime.now().toIso8601String(),
+    'data': dataMaps,
+  };
+
+  // Heavy operation 1: JSON Encoding
+  final jsonString = jsonEncode(payload);
+
+  // Heavy operation 2: Cryptographic Hashing (SHA-256)
+  // Generates a mathematically secure 32-byte key from the passphrase
+  final bytes = utf8.encode(passphrase);
+  final digest = sha256.convert(bytes);
+  final key = enc.Key(Uint8List.fromList(digest.bytes));
+  final iv = enc.IV.fromSecureRandom(16);
+
+  // Heavy operation 3: AES-256 Encryption
+  final encrypter = enc.Encrypter(enc.AES(key));
+  final encrypted = encrypter.encrypt(jsonString, iv: iv);
+
+  // Prepend IV so we can decrypt later
+  return '${iv.base64}:${encrypted.base64}';
 }

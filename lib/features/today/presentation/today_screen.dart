@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import 'today_controller.dart';
 import '../../cycle/presentation/cycle_controller.dart';
@@ -52,7 +53,7 @@ class TodayScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              title: _buildHeader(cycleState.value?.currentCycleDay),
+              title: _buildHeader(context, cycleState.value?.currentCycleDay),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.science_outlined),
@@ -140,17 +141,17 @@ class TodayScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(int? cycleDay) {
+  Widget _buildHeader(BuildContext context, int? cycleDay) {
     final now = DateTime.now();
     final dateStr = DateFormat('d MMM').format(now);
-    final cycleStr = cycleDay != null ? 'Day $cycleDay' : 'Log Cycle';
+    final cycleStr = cycleDay != null ? AppLocalizations.of(context)!.cycleDay(cycleDay) : AppLocalizations.of(context)!.logCycle;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Good evening.',
-          style: TextStyle(
+        Text(
+          AppLocalizations.of(context)!.greetingEvening,
+          style: const TextStyle(
             color: AppColors.deepInk,
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -158,7 +159,7 @@ class TodayScreen extends ConsumerWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          '$cycleStr Â· $dateStr',
+          '$cycleStr · $dateStr',
           style: const TextStyle(
             color: AppColors.mutedSage,
             fontSize: 14,
