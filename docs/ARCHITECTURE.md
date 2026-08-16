@@ -63,11 +63,20 @@ erDiagram
 ```
 
 ### Core Tables & Relationships:
-- **`CycleEvents`**: The central table for logging flows, symptoms, and pain. The `isTrueCycleStart` flag differentiates between actual menstrual phase starts (Day 1) and mid-cycle spotting, ensuring median cycle lengths and PMDD predictions are mathematically sound.
+- **`CycleEvents`**: The central table for logging flows, symptoms, and pain. The `isTrueCycleStart` flag differentiates between actual menstrual phase starts (Day 1) and mid-cycle spotting, ensuring median cycle lengths and PMDD predictions are mathematically sound. Uses `@TableIndex` on `date` for 10-year query optimization.
 - **`TreatmentInterventions`**: Logs medical interventions (e.g., "Started Metformin"). This table is cross-referenced against `CycleEvents` to calculate "Pre-Treatment" vs "Post-Treatment" benchmarks (median cycle length, heavy bleeding days).
-- **`Routines` & `RoutineLogs`**: `Routines` defines the regimen (e.g., `Cyclic_21_7` or `Daily`), while `RoutineLogs` tracks the daily adherence (`Taken`, `Missed`). The `ReportDao` aggregates these logs to provide a 6-month Adherence Percentage for the doctor.
+- **`Routines` & `RoutineLogs`**: `Routines` defines the regimen (e.g., `Cyclic_21_7` or `Daily`), while `RoutineLogs` tracks the daily adherence (`Taken`, `Missed`). Uses `@TableIndex` on `scheduledDate`.
+
+## 3. Security, Privacy & Export (V3 Horizon)
+- **App Masking**: The `IlaApp` lifecycle observer instantly flips an obscuring boolean when the app goes into the `paused` or `inactive` state, hiding clinical data from the iOS/Android app switcher.
+- **Biometric Gate (`local_auth`)**: Every time the app resumes or starts, it triggers `AuthService.authenticate()`, blocking the UI until FaceID or Fingerprint is provided (gracefully failing open to PIN if biometrics fail).
+- **AES-256 Encrypted Backups (`encrypt`, `share_plus`)**: The `BackupService` queries the entire SQLite dataset, serializes it to JSON, encrypts it using AES-256, and writes it to a `.ila_backup` file exported through the native OS share sheet.
 
 ## 3. State Management (Riverpod)
 - **Dependency Injection**: Riverpod provides global access to the `AppDatabase` and its associated DAOs (`CycleDao`, `RoutineDao`, `ReportDao`).
 - **Reactive UI**: The UI listens to database changes via StreamProviders (e.g., watching all logs for today). When the user taps "Mark as Taken", the Controller modifies the database, and the StreamProvider automatically pushes the new state to the UI without manual `setState` calls.
 - **Business Logic Separation**: Controllers (like `TodayController` and `ReportController`) handle the heavy lifting (date math, PDF generation) and sit completely separate from the Widget tree.
+
+## 5. UI & Polish (`flutter_animate`)
+- **Micro-Animations**: All primary components (`CycleGraph`, `QuickLogSheet`, `OnboardingScreen`) are augmented with `flutter_animate` to chain fading, sliding, and scaling animations without the boilerplate of Flutter `AnimationController`s.
+- **PCOS Guardrails**: The `CycleGraph` component dynamically measures the screen width using a `LayoutBuilder` and visually caps anomalous cycles (45-120 days) rather than overflowing, alerting the user with an `Ila Rose` warning badge.
