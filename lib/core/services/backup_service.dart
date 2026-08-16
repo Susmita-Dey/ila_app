@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as enc;
+import 'package:pointycastle/export.dart' as pc;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../database/app_database.dart';
@@ -54,17 +55,22 @@ String _performHeavyEncryption(Map<String, dynamic> args) {
   // Heavy operation 1: JSON Encoding
   final jsonString = jsonEncode(payload);
 
-  // Heavy operation 2: Cryptographic Hashing (SHA-256)
+  // Heavy operation 2: Cryptographic Key Derivation (PBKDF2)
   // Generates a mathematically secure 32-byte key from the passphrase
-  final bytes = utf8.encode(passphrase);
-  final digest = sha256.convert(bytes);
-  final key = enc.Key(Uint8List.fromList(digest.bytes));
+  // using 100,000 iterations of SHA-256 to prevent brute-force attacks
+  final salt = enc.IV.fromSecureRandom(16);
+  
+  final derivator = pc.KeyDerivator('SHA-256/HMAC/PBKDF2')
+    ..init(pc.Pbkdf2Parameters(salt.bytes, 100000, 32));
+    
+  final derivedKeyBytes = derivator.process(Uint8List.fromList(utf8.encode(passphrase)));
+  final key = enc.Key(derivedKeyBytes);
   final iv = enc.IV.fromSecureRandom(16);
 
   // Heavy operation 3: AES-256 Encryption
   final encrypter = enc.Encrypter(enc.AES(key));
   final encrypted = encrypter.encrypt(jsonString, iv: iv);
 
-  // Prepend IV so we can decrypt later
-  return '${iv.base64}:${encrypted.base64}';
+  // Prepend salt and IV so we can decrypt later
+  return '${salt.base64}:${iv.base64}:${encrypted.base64}';
 }

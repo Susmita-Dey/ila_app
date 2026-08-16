@@ -9,6 +9,7 @@ import '../../cycle/presentation/cycle_controller.dart';
 import '../../report/presentation/report_controller.dart';
 import '../../../core/services/backup_service.dart';
 import 'widgets/feedback_dialog.dart';
+import 'widgets/backup_passphrase_dialog.dart';
 import '../../../l10n/app_localizations.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -85,41 +86,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   subtitle: const Text('Save your data locally as an AES-256 encrypted file'),
                   trailing: const Icon(Icons.download_outlined, color: AppColors.mutedSage),
                   onTap: () async {
-                    // Prompt for passphrase
-                    String? passphrase;
-                    await showDialog(
+                    final passphrase = await showDialog<String>(
                       context: context,
-                      builder: (context) {
-                        final controller = TextEditingController();
-                        return AlertDialog(
-                          backgroundColor: AppColors.warmIvory,
-                          title: const Text('Backup Passphrase', style: TextStyle(color: AppColors.deepInk, fontWeight: FontWeight.bold)),
-                          content: TextField(
-                            controller: controller,
-                            obscureText: true,
-                            decoration: const InputDecoration(
-                              hintText: 'Enter a strong passphrase',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('Cancel', style: TextStyle(color: AppColors.deepInk)),
-                            ),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(backgroundColor: AppColors.brandAction, foregroundColor: Colors.white),
-                              onPressed: () {
-                                if (controller.text.isNotEmpty) {
-                                  passphrase = controller.text;
-                                  Navigator.pop(context);
-                                }
-                              },
-                              child: const Text('Export'),
-                            ),
-                          ],
-                        );
-                      },
+                      builder: (context) => const BackupPassphraseDialog(),
                     );
 
                     if (passphrase != null && context.mounted) {
