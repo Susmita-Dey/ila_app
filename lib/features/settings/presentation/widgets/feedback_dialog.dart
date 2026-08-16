@@ -126,8 +126,8 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
         ElevatedButton(
           onPressed: _submit,
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.deepInk,
-            foregroundColor: AppColors.warmIvory,
+            backgroundColor: AppColors.brandAction,
+            foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           child: const Text('Share Feedback'),

@@ -49,8 +49,8 @@ class OnboardingScreen extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.deepInk,
-                  foregroundColor: AppColors.warmIvory,
+                  backgroundColor: AppColors.brandAction,
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),

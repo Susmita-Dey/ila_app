@@ -1,4 +1,4 @@
-﻿class PhaseState {
+class PhaseState {
   final int currentPhase;
   final int dayInPhase;
   final int totalPhaseDays;

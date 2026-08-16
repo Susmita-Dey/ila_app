@@ -202,8 +202,8 @@ class _QuickLogSheetState extends ConsumerState<QuickLogSheet> {
                 if (context.mounted) Navigator.of(context).pop();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.deepInk,
-                foregroundColor: AppColors.warmIvory,
+                backgroundColor: AppColors.brandAction,
+                foregroundColor: Colors.white,
                 disabledBackgroundColor: AppColors.lightBorder,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 padding: const EdgeInsets.symmetric(vertical: 16),

@@ -13,57 +13,43 @@ void main() {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder, const Rect.fromLTWH(0, 0, 1024, 1024));
 
-    // Canvas: Warm Cream (#FAF8F5)
-    canvas.drawRect(const Rect.fromLTWH(0, 0, 1024, 1024), Paint()..color = const Color(0xFFFAF8F5));
+    // Background: Crisp White
+    canvas.drawRect(const Rect.fromLTWH(0, 0, 1024, 1024), Paint()..color = const Color(0xFFFAFAFA));
 
-    // Centered 600x600 Scaled Viewport
     canvas.save();
-    canvas.translate(212, 212);
+    // Center and scale the geometry
+    canvas.translate(332, 180); 
 
-    // 1. Organic Dusty Blush Watercolor Spot Wash
-    final blushSpot = Paint()..color = const Color(0x33DCAE9F)..style = PaintingStyle.fill;
-    canvas.drawOval(
-      Rect.fromCenter(center: const Offset(360, 260), width: 420, height: 420),
-      blushSpot,
+    // 1. Cycle Dot (Ila Rose)
+    canvas.drawCircle(
+      const Offset(180, 120), 
+      120, 
+      Paint()..color = const Color(0xFFF43F5E)..isAntiAlias = true
     );
 
-    // 2. Organic Washed Sage Accent Wash
-    final sageSpot = Paint()..color = const Color(0x338A9A86)..style = PaintingStyle.fill;
-    canvas.drawOval(
-      Rect.fromCenter(center: const Offset(230, 380), width: 300, height: 300),
-      sageSpot,
-    );
-
-    // 3. Charcoal Line Art Monogram Arch
-    final strokePaint = Paint()
-      ..color = const Color(0xFF1E242B)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 46.0
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    // Floating Dot (Clarity Seed)
-    canvas.drawCircle(const Offset(300, 100), 48.0, Paint()..color = const Color(0xFF1E242B));
-
-    // Arch Stem
-    final arch = Path();
-    arch.moveTo(180, 520);
-    arch.lineTo(180, 290);
-    arch.cubicTo(180, 195, 420, 195, 420, 290);
-    arch.lineTo(420, 520);
-    canvas.drawPath(arch, strokePaint);
+    // 2. Routine Capsule (Onyx Black)
+    final stemPath = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+        Rect.fromCenter(center: const Offset(180, 520), width: 240, height: 480),
+        const Radius.circular(120),
+      ));
+    canvas.drawPath(stemPath, Paint()..color = const Color(0xFF111111)..isAntiAlias = true);
 
     canvas.restore();
 
     final picture = recorder.endRecording();
-    final img = picture.toImageSync(1024, 1024);
-    final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
-    final pngBytes = byteData!.buffer.asUint8List();
+    
+    // Using tester.runAsync prevents the headless test environment from hanging during Image rasterization
+    await tester.runAsync(() async {
+      final img = await picture.toImage(1024, 1024);
+      final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
+      final pngBytes = byteData!.buffer.asUint8List();
 
-    await File('assets/branding/ila_icon.png').writeAsBytes(pngBytes);
-    await File('assets/branding/ila_splash.png').writeAsBytes(pngBytes);
-    await File('assets/branding/ila_icon_foreground.png').writeAsBytes(pngBytes);
+      await File('assets/branding/ila_icon.png').writeAsBytes(pngBytes);
+      await File('assets/branding/ila_splash.png').writeAsBytes(pngBytes);
+      await File('assets/branding/ila_icon_foreground.png').writeAsBytes(pngBytes);
+    });
 
-    print('Production icon assets created with Dusty Blush & Washed Sage palette.');
+    print('Bold, high-contrast production icons generated successfully.');
   });
 }

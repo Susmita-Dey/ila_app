@@ -105,17 +105,16 @@ class TodayScreen extends ConsumerWidget {
                     const SizedBox(height: 32),
                     if (todayState.value?.missedRecentLogs.isEmpty == true &&
                         todayState.value?.todayLog?.status == 'Taken')
-                      const Center(
+                      Center(
                         child: Column(
                           children: [
-                            IllustrationCaughtUp(size: 150),
-                            SizedBox(height: 16),
+                            const IllustrationCaughtUp(size: 150),
+                            const SizedBox(height: 24),
                             Text(
-                              "You're all caught up for today.",
-                              style: TextStyle(
-                                color: AppColors.mutedSage,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
+                              "You're all caught up.",
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.charcoalInk,
                               ),
                             ),
                           ],
@@ -202,8 +201,8 @@ class TodayScreen extends ConsumerWidget {
                       ElevatedButton(
                         onPressed: () => ref.read(todayControllerProvider.notifier).markTaken(log.scheduledDate),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.deepInk,
-                          foregroundColor: AppColors.warmIvory,
+                          backgroundColor: AppColors.brandAction,
+                          foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         ),
@@ -326,8 +325,8 @@ class TodayScreen extends ConsumerWidget {
                         ref.read(todayControllerProvider.notifier).markTaken(DateTime.now());
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.deepInk,
-                        foregroundColor: AppColors.warmIvory,
+                        backgroundColor: AppColors.brandAction,
+                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         elevation: 0,
                       ),

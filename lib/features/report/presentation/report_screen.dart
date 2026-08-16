@@ -122,8 +122,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                 icon: const Icon(Icons.ios_share),
                 label: const Text('Generate Doctor Summary', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.deepInk,
-                  foregroundColor: AppColors.warmIvory,
+                  backgroundColor: AppColors.brandAction,
+                  foregroundColor: Colors.white,
                   disabledBackgroundColor: AppColors.lightBorder,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

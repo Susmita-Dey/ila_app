@@ -1,37 +1,36 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Canvas & Surfaces
-  static const Color warmCanvas = Color(0xFFFAF8F5); // Warm Cream / Ivory
+  // Stark, Clean Canvas (Like Cal.com or Notion)
+  static const Color warmCanvas = Color(0xFFFAFAFA); 
   static const Color cardSurface = Color(0xFFFFFFFF);
-  static const Color cardBorder = Color(0xFFEAE4DC);
+  static const Color cardBorder = Color(0xFFE5E5E5);
 
-  // Typography & Primary Strokes
-  static const Color charcoalInk = Color(0xFF1E242B);
-  static const Color mutedText = Color(0xFF6B7280);
+  // High-Contrast Typography
+  static const Color charcoalInk = Color(0xFF111111); // Absolute Onyx
+  static const Color mutedText = Color(0xFF737373);
 
-  // Editorial Accent Washes (20% Opacity for Watercolor Fills)
-  static const Color washedSage = Color(0xFF8A9A86);
-  static const Color sageTint = Color(0x338A9A86); // 20% opacity
+  // The Singular Brand Color: "Ila Rose" (Vibrant, highly saturated pinkish-rose)
+  static const Color brandAction = Color(0xFFF43F5E); 
+  static const Color brandLight = Color(0xFFFFF1F2); // 10% opacity for selected states
 
-  static const Color dustyBlush = Color(0xFFDCAE9F);
-  static const Color blushTint = Color(0x33DCAE9F); // 20% opacity
-
-  static const Color clayTerracotta = Color(0xFFD98A72);
-  static const Color clayTint = Color(0x33D98A72); // 20% opacity
-
-  static const Color warmOchre = Color(0xFFE8C58C);
-  static const Color ochreTint = Color(0x33E8C58C); // 20% opacity
-  
   // Legacy aliases to prevent compile errors during transition
   static const Color warmIvory = warmCanvas;
   static const Color deepInk = charcoalInk;
-  static const Color mutedSage = washedSage;
+  static const Color mutedSage = mutedText;
   static const Color lightBorder = cardBorder;
   static const Color cardBg = cardSurface;
   static const Color alertRed = Color(0xFFD9534F);
-  static const Color softLavender = Color(0xFF9B8FB1);
-  static const Color subtlePeach = Color(0xFFE89A7D);
+  static const Color softLavender = brandLight;
+  static const Color subtlePeach = brandLight;
+  static const Color washedSage = cardBorder; // Fallback
+  static const Color sageTint = brandLight;
+  static const Color dustyBlush = brandLight;
+  static const Color blushTint = brandLight;
+  static const Color clayTerracotta = brandAction;
+  static const Color clayTint = brandLight;
+  static const Color warmOchre = brandLight;
+  static const Color ochreTint = brandLight;
 }
 
 class AppTheme {
@@ -39,10 +38,11 @@ class AppTheme {
     return ThemeData(
       scaffoldBackgroundColor: AppColors.warmCanvas,
       useMaterial3: true,
+      fontFamily: 'Inter', // Premium geometric sans-serif (ensure it's in pubspec if strictly needed, but fallback to system sans-serif like Roboto/SF Pro)
       colorScheme: const ColorScheme.light(
         surface: AppColors.warmCanvas,
         primary: AppColors.charcoalInk,
-        secondary: AppColors.washedSage,
+        secondary: AppColors.brandAction,
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.warmCanvas,
@@ -51,7 +51,8 @@ class AppTheme {
         titleTextStyle: TextStyle(
           color: AppColors.charcoalInk,
           fontSize: 20,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w800, // Unapologetically bold
+          letterSpacing: -0.5, // Tight kerning
         ),
       ),
       cardTheme: CardThemeData(
@@ -63,8 +64,25 @@ class AppTheme {
         ),
       ),
       textTheme: const TextTheme(
-        bodyMedium: TextStyle(color: AppColors.charcoalInk, height: 1.5),
-        bodyLarge: TextStyle(color: AppColors.charcoalInk, height: 1.5),
+        titleLarge: TextStyle(color: AppColors.charcoalInk, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+        titleMedium: TextStyle(color: AppColors.charcoalInk, fontWeight: FontWeight.w700, letterSpacing: -0.3),
+        bodyLarge: TextStyle(color: AppColors.charcoalInk, height: 1.5, letterSpacing: -0.2),
+        bodyMedium: TextStyle(color: AppColors.charcoalInk, height: 1.5, letterSpacing: -0.2),
+        bodySmall: TextStyle(color: AppColors.mutedText, height: 1.5, letterSpacing: -0.1),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.brandAction,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
+          ),
+        ),
       ),
     );
   }
