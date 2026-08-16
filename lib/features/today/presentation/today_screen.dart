@@ -13,6 +13,7 @@ import '../../../core/providers/database_provider.dart';
 import '../../../core/utils/dev_seed_data.dart';
 import '../../../core/widgets/ila_logo.dart';
 import '../../../core/widgets/illustrations/illustration_caught_up.dart';
+import '../../../core/widgets/illustrations/illustration_routine.dart';
 
 class TodayScreen extends ConsumerWidget {
   const TodayScreen({super.key});
@@ -241,18 +242,18 @@ class TodayScreen extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: AppColors.cardBg,
+          color: AppColors.cardSurface,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppColors.lightBorder),
+          border: Border.all(color: AppColors.cardBorder),
         ),
         child: const Column(
           children: [
-            Icon(Icons.add_circle_outline, size: 48, color: AppColors.softLavender),
+            IllustrationRoutine(size: 100),
             SizedBox(height: 16),
             Text(
               'Set up a medication routine',
               style: TextStyle(
-                color: AppColors.deepInk,
+                color: AppColors.charcoalInk,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),

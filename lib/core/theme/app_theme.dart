@@ -133,39 +133,14 @@ class AppTheme {
         backgroundColor: AppColors.warmCanvas,
         hourMinuteTextColor: AppColors.charcoalInk,
         hourMinuteColor: AppColors.cardSurface,
-        dayPeriodTextColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return Colors.white;
-          return AppColors.charcoalInk;
-        }),
-        dayPeriodColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return AppColors.brandAction;
-          return AppColors.cardSurface;
-        }),
+        dayPeriodTextColor: AppColors.charcoalInk,
+        dayPeriodColor: AppColors.cardSurface,
         dialHandColor: AppColors.brandAction,
         dialBackgroundColor: AppColors.cardSurface,
-        dialTextColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return Colors.white;
-          return AppColors.charcoalInk;
-        }),
+        dialTextColor: AppColors.charcoalInk,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         hourMinuteShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.cardBorder)),
         dayPeriodShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.cardBorder)),
-      ),
-      dialogTheme: DialogTheme(
-        backgroundColor: AppColors.warmCanvas,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        titleTextStyle: const TextStyle(
-          color: AppColors.charcoalInk,
-          fontSize: 20,
-          fontWeight: FontWeight.w800,
-          letterSpacing: -0.5,
-        ),
-        contentTextStyle: const TextStyle(
-          color: AppColors.mutedText,
-          fontSize: 16,
-          height: 1.5,
-        ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../theme/app_theme.dart';
 
 class IllustrationCaughtUp extends StatelessWidget {
@@ -17,6 +18,13 @@ class IllustrationCaughtUp extends StatelessWidget {
       child: CustomPaint(
         painter: _CaughtUpPainter(),
       ),
+    )
+    .animate(onPlay: (controller) => controller.repeat(reverse: true))
+    .scale(
+      begin: const Offset(1.0, 1.0),
+      end: const Offset(1.03, 0.97),
+      duration: 2000.ms,
+      curve: Curves.easeInOutSine,
     );
   }
 }
@@ -27,38 +35,79 @@ class _CaughtUpPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    // 1. The Floating Cycle Dot (Ila Rose)
-    final dotPaint = Paint()
-      ..color = AppColors.brandAction.withOpacity(0.15) // Soft background wash
-      ..style = PaintingStyle.fill
-      ..isAntiAlias = true;
-    
-    // Draw a larger soft rose circle in the background
-    canvas.drawCircle(Offset(w * 0.50, h * 0.50), w * 0.45, dotPaint);
-
-    final solidDotPaint = Paint()
-      ..color = AppColors.brandAction
-      ..style = PaintingStyle.fill
-      ..isAntiAlias = true;
-
-    // Draw a precise solid rose cycle dot
-    canvas.drawCircle(Offset(w * 0.70, h * 0.30), w * 0.12, solidDotPaint);
-
-    // 2. The Geometric Checkmark (Onyx)
-    final checkPaint = Paint()
+    final strokePaint = Paint()
       ..color = AppColors.charcoalInk
       ..style = PaintingStyle.stroke
-      ..strokeWidth = w * 0.08
+      ..strokeWidth = w * 0.03
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
       ..isAntiAlias = true;
 
-    final checkPath = Path();
-    checkPath.moveTo(w * 0.28, h * 0.52);
-    checkPath.lineTo(w * 0.45, h * 0.68);
-    checkPath.lineTo(w * 0.75, h * 0.38);
+    final fillPaint = Paint()
+      ..color = AppColors.warmCanvas
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
 
-    canvas.drawPath(checkPath, checkPaint);
+    final roseFill = Paint()
+      ..color = AppColors.brandAction.withValues(alpha: 0.1)
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+
+    // 1. Pillow (Background)
+    canvas.save();
+    canvas.translate(w * 0.5, h * 0.75);
+    canvas.rotate(-0.05);
+    final pillowRect = RRect.fromLTRBR(-w * 0.4, -h * 0.15, w * 0.4, h * 0.15, Radius.circular(h * 0.05));
+    canvas.drawRRect(pillowRect, roseFill);
+    canvas.drawRRect(pillowRect, strokePaint);
+    canvas.restore();
+
+    // 2. Lumi the Cloud (Body)
+    final path1 = Path()..addRRect(RRect.fromLTRBR(w * 0.2, h * 0.45, w * 0.8, h * 0.75, Radius.circular(h * 0.15)));
+    final path2 = Path()..addOval(Rect.fromCircle(center: Offset(w * 0.4, h * 0.45), radius: w * 0.15));
+    final path3 = Path()..addOval(Rect.fromCircle(center: Offset(w * 0.65, h * 0.55), radius: w * 0.18));
+    
+    var cloudPath = Path.combine(PathOperation.union, path1, path2);
+    cloudPath = Path.combine(PathOperation.union, cloudPath, path3);
+
+    canvas.drawPath(cloudPath, fillPaint);
+    canvas.drawPath(cloudPath, strokePaint);
+
+    // 3. Sleeping Eyes (Arcs)
+    final eyePath = Path();
+    eyePath.moveTo(w * 0.35, h * 0.6);
+    eyePath.quadraticBezierTo(w * 0.4, h * 0.65, w * 0.45, h * 0.6);
+    
+    eyePath.moveTo(w * 0.55, h * 0.6);
+    eyePath.quadraticBezierTo(w * 0.6, h * 0.65, w * 0.65, h * 0.6);
+    
+    canvas.drawPath(eyePath, strokePaint);
+
+    // 4. Blush
+    canvas.drawCircle(Offset(w * 0.32, h * 0.65), w * 0.04, roseFill);
+    canvas.drawCircle(Offset(w * 0.68, h * 0.65), w * 0.04, roseFill);
+
+    // 5. Zzz (Floating above)
+    final zPaint = Paint()
+      ..color = AppColors.brandAction
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = w * 0.025
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final zPath = Path();
+    // Big Z
+    zPath.moveTo(w * 0.65, h * 0.2);
+    zPath.lineTo(w * 0.75, h * 0.2);
+    zPath.lineTo(w * 0.65, h * 0.3);
+    zPath.lineTo(w * 0.75, h * 0.3);
+    // Small Z
+    zPath.moveTo(w * 0.8, h * 0.1);
+    zPath.lineTo(w * 0.85, h * 0.1);
+    zPath.lineTo(w * 0.8, h * 0.15);
+    zPath.lineTo(w * 0.85, h * 0.15);
+
+    canvas.drawPath(zPath, zPaint);
   }
 
   @override
