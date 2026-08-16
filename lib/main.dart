@@ -63,7 +63,9 @@ class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _authenticate();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _authenticate();
+    });
   }
 
   Future<void> _authenticate() async {
@@ -113,10 +115,33 @@ class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
           children: [
             if (child != null) child,
             if (_obscureUI)
-              Container(
-                color: AppColors.warmIvory,
-                child: const Center(
-                  child: IlaLogo(size: 80),
+              GestureDetector(
+                onTap: () {
+                  if (!_isAuthenticating) {
+                    _authenticate();
+                  }
+                },
+                child: Container(
+                  color: AppColors.warmIvory,
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const IlaLogo(size: 80),
+                        if (!_isAuthenticating) ...[
+                          const SizedBox(height: 24),
+                          const Text(
+                            'Tap to unlock',
+                            style: TextStyle(
+                              color: AppColors.charcoalInk,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
                 ),
               ),
           ],
