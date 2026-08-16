@@ -70,7 +70,7 @@ erDiagram
 ## 3. Security, Privacy & Export
 - **App Masking**: The `IlaApp` lifecycle observer instantly flips an obscuring boolean when the app goes into the `paused` or `inactive` state, hiding clinical data from the iOS/Android app switcher.
 - **Biometric Gate (`local_auth`)**: Every time the app resumes or starts, it triggers `AuthService.authenticate()`, blocking the UI until FaceID or Fingerprint is provided (gracefully failing open to PIN if biometrics fail).
-- **AES-256 Encrypted Backups (`encrypt`, `share_plus`)**: The `BackupService` queries the entire SQLite dataset, serializes it to JSON, encrypts it using AES-256, and writes it to a `.ila_backup` file exported through the native OS share sheet.
+- **AES-256 Encrypted Backups (`encrypt`, `share_plus`)**: The `BackupService` queries the entire SQLite dataset, serializes it to JSON, encrypts it using AES-256 (hardened with PBKDF2 key derivation and a random 16-byte salt), and writes it to a `.ila_backup` file exported through the native OS share sheet.
 
 ## 4. State Management (Riverpod)
 - **Dependency Injection**: Riverpod provides global access to the `AppDatabase` and its associated DAOs (`CycleDao`, `RoutineDao`, `ReportDao`).

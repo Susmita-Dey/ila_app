@@ -14,7 +14,7 @@ It generates a standardized clinical PDF for a 7-minute doctor consultation whil
 ## ✨ Core Features
 
 *   **100% Local-First Architecture:** Zero cloud sync. Zero accounts. Data is stored in an encrypted SQLite database strictly on the device.
-*   **Biometric Security & Encrypted Backups:** Protected by FaceID/Fingerprint locks and fully exportable via AES-256 encrypted payloads.
+*   **Biometric Security & Encrypted Backups:** Protected by FaceID/Fingerprint locks and fully exportable via AES-256 encrypted payloads (hardened by PBKDF2 key derivation).
 *   **Clinical Report Generator:** A 1-tap engine that condenses 6 months of adherence, PMDD luteal phase clustering, and treatment benchmarks into a standardized, 1-page A4 PDF.
 *   **PCOS & Extreme Cycle Guardrails:** Beautiful, responsive cycle graphs that dynamically handle and visually cap highly irregular cycles (45-120 days).
 *   **Smart Disambiguation:** Differentiates between true cycle starts (Day 1) and pre-period spotting for accurate baseline data.

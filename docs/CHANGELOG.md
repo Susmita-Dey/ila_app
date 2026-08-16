@@ -2,6 +2,23 @@
 
 All notable changes to the **Ila Health** project will be documented in this file.
 
+## [1.1.0] - 2026-08-16
+
+### Security
+- **Hardened Local Backups:** Replaced the legacy single-iteration hash with a cryptographically secure **PBKDF2** key derivation function (`pointycastle` 100,000 iterations). Added unique salt prepending to prevent dictionary/brute-force attacks on exported `.ila` backups.
+
+### Stability & Performance
+- **Report Generation Optimization:** Offloaded heavy clinical mathematics and adherence aggregation to a background Isolate (`compute`) during PDF generation, preventing UI frame drops when parsing large multi-year date ranges.
+- **Memory Leak Resolution:** Extracted `AlertDialog` into a dedicated stateful widget (`BackupPassphraseDialog`) to properly dispose `TextEditingController`s, resolving a memory leak in the Settings screen.
+- **Onboarding Polish:** Fixed a dangling `PageController` reference in `OnboardingScreen` ensuring it's successfully destroyed after navigation.
+
+### Bug Fixes
+- **Flaky Testing Framework:** Eliminated cross-test timer bleeding ("Timer pending after widget tree disposal") by integrating formal Riverpod `ProviderContainer` scoping and explicit Drift database tear-downs.
+
+### UI & UX
+- **Language Localization Preparations:** Completed structural preparations for ARB/l10n files. Adopted the "Insights" and "Sanctuary" language mappings across core UI elements.
+- **Offline Reliability:** Verified the underlying PDF generation logic to operate entirely isolated from network modules, ensuring robust offline-first functionality for intermittent internet areas.
+
 ## [1.0.0] - Launch Release
 
 Welcome to the first official release of **Ila Health**! Built with a relentless focus on absolute privacy, venture-backed utility aesthetics, and clinical accuracy, Ila is designed to be the ultimate safe haven for women's health tracking.
