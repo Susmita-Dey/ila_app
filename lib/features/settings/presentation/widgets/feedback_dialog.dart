@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/diagnostics/diagnostics_service.dart';
+import '../../../../core/services/feedback_service.dart';
 
 class FeedbackDialog extends StatefulWidget {
   const FeedbackDialog({super.key});
@@ -30,13 +30,18 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
     final feedback = _textController.text.trim();
     if (feedback.isEmpty) return;
 
-    Navigator.of(context).pop();
-
-    await DiagnosticsService.exportDiagnosticsPackage(
-      userFeedback: feedback,
+    final navigator = Navigator.of(context);
+    
+    await FeedbackService.sendFeedback(
+      context: context,
       category: _selectedCategory,
+      feedbackText: feedback,
       includeDiagnostics: _includeDiagnostics,
     );
+    
+    if (mounted) {
+      navigator.pop();
+    }
   }
 
   @override
@@ -45,7 +50,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
       backgroundColor: AppColors.warmIvory,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       title: const Text(
-        'Test Feedback',
+        'Send Feedback',
         style: TextStyle(
           color: AppColors.deepInk,
           fontWeight: FontWeight.bold,
@@ -67,12 +72,18 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                   onSelected: (selected) {
                     if (selected) setState(() => _selectedCategory = cat);
                   },
-                  selectedColor: AppColors.deepInk,
+                  selectedColor: AppColors.brandAction,
                   labelStyle: TextStyle(
-                    color: isSelected ? AppColors.warmIvory : AppColors.deepInk,
+                    color: isSelected ? Colors.white : AppColors.charcoalInk,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
-                  backgroundColor: AppColors.cardBg,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  backgroundColor: AppColors.cardSurface,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(
+                      color: isSelected ? AppColors.brandAction : AppColors.cardBorder,
+                    ),
+                  ),
                 );
               }).toList(),
             ),
@@ -84,18 +95,18 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                 hintText: 'What happened, or what felt confusing?',
                 hintStyle: const TextStyle(color: AppColors.mutedSage),
                 filled: true,
-                fillColor: AppColors.cardBg,
+                fillColor: AppColors.cardSurface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.lightBorder),
+                  borderSide: const BorderSide(color: AppColors.cardBorder),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.lightBorder),
+                  borderSide: const BorderSide(color: AppColors.cardBorder),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.deepInk),
+                  borderSide: const BorderSide(color: AppColors.charcoalInk),
                 ),
               ),
             ),
@@ -104,10 +115,11 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
               contentPadding: EdgeInsets.zero,
               title: const Text(
                 'Include anonymous system diagnostics log',
-                style: TextStyle(fontSize: 14, color: AppColors.deepInk),
+                style: TextStyle(fontSize: 14, color: AppColors.charcoalInk),
               ),
               value: _includeDiagnostics,
-              activeColor: AppColors.deepInk,
+              activeColor: AppColors.brandAction,
+              checkColor: Colors.white,
               controlAffinity: ListTileControlAffinity.leading,
               onChanged: (val) {
                 setState(() {
@@ -121,7 +133,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel', style: TextStyle(color: AppColors.mutedSage)),
+          child: const Text('Cancel', style: TextStyle(color: AppColors.charcoalInk)),
         ),
         ElevatedButton(
           onPressed: _submit,
@@ -130,7 +142,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
-          child: const Text('Share Feedback'),
+          child: const Text('Send via Email'),
         ),
       ],
     );

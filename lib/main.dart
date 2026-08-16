@@ -12,9 +12,11 @@ import 'core/widgets/ila_logo.dart';
 import 'core/services/auth_service.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   
   // 1. Flutter Framework Errors (Render/Widget build errors)
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -32,13 +34,28 @@ void main() async {
     return true;
   };
 
-  // Initialize notifications
-  await NotificationService.init();
+  bool hasOnboarded = false;
 
-  ErrorLogger.info('App Initialized');
+  try {
+    debugPrint('[INIT] Starting Initialization Sequence...');
+    
+    debugPrint('[INIT] Initializing Notifications...');
+    await NotificationService.init();
+    debugPrint('[INIT] Notifications Initialized successfully.');
 
-  final prefs = await SharedPreferences.getInstance();
-  final bool hasOnboarded = prefs.getBool('has_onboarded') ?? false;
+    debugPrint('[INIT] Fetching SharedPreferences...');
+    final prefs = await SharedPreferences.getInstance();
+    hasOnboarded = prefs.getBool('has_onboarded') ?? false;
+    debugPrint('[INIT] SharedPreferences fetched successfully.');
+
+    ErrorLogger.info('App Initialized');
+  } catch (e, stack) {
+    debugPrint('[INIT ERROR] Initialization failed: $e');
+    ErrorLogger.error('Initialization Error', e, stack);
+  } finally {
+    debugPrint('[INIT] Removing FlutterNativeSplash...');
+    FlutterNativeSplash.remove();
+  }
 
   runApp(
     ProviderScope(
@@ -56,20 +73,36 @@ class IlaApp extends StatefulWidget {
 }
 
 class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
-  bool _obscureUI = true;
+  bool _obscureUI = false; // Default to false until we know app lock is enabled
   bool _isAuthenticating = false;
+  bool _isAuthenticated = false;
+  DateTime? _backgroundedTime;
+  bool _appLockEnabled = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _authenticate();
+    _loadAppLockSetting();
+  }
+
+  Future<void> _loadAppLockSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isLocked = prefs.getBool('app_lock_enabled') ?? false;
+    setState(() {
+      _appLockEnabled = isLocked;
     });
+
+    if (isLocked && widget.hasOnboarded) {
+      setState(() => _obscureUI = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _authenticate();
+      });
+    }
   }
 
   Future<void> _authenticate() async {
-    if (_isAuthenticating) return;
+    if (_isAuthenticating || !_appLockEnabled || !widget.hasOnboarded) return;
     
     setState(() {
       _isAuthenticating = true;
@@ -80,6 +113,7 @@ class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
     
     if (mounted) {
       setState(() {
+        _isAuthenticated = success;
         _obscureUI = !success;
         _isAuthenticating = false;
       });
@@ -94,12 +128,33 @@ class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!_appLockEnabled || !widget.hasOnboarded) return;
+
     if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
-      setState(() {
-        _obscureUI = true;
-      });
+      if (!_isAuthenticating) {
+        _backgroundedTime = DateTime.now();
+        setState(() {
+          _obscureUI = true;
+          _isAuthenticated = false;
+        });
+      }
     } else if (state == AppLifecycleState.resumed) {
-      _authenticate();
+      if (_isAuthenticating) return;
+
+      if (_backgroundedTime != null) {
+        final diff = DateTime.now().difference(_backgroundedTime!);
+        // Only lock if backgrounded for more than 10 seconds
+        if (diff.inSeconds > 10) {
+          _authenticate();
+        } else {
+          setState(() {
+            _obscureUI = false;
+            _isAuthenticated = true;
+          });
+        }
+      } else {
+        _authenticate();
+      }
     }
   }
 

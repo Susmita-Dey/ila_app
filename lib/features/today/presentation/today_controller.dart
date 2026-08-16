@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/providers/database_provider.dart';
 import '../../../core/database/app_database.dart';
@@ -37,14 +38,24 @@ class TodayState {
 @riverpod
 class TodayController extends _$TodayController {
   @override
-  Stream<TodayState> build() async* {
+  Stream<TodayState> build() {
     final dao = ref.watch(routineDaoProvider);
     final now = DateTime.now();
 
-    await for (final routine in dao.watchActiveRoutine()) {
+    final controller = StreamController<TodayState>();
+    StreamSubscription? routineSub;
+    StreamSubscription? logSub;
+
+    ref.onDispose(() {
+      routineSub?.cancel();
+      logSub?.cancel();
+      controller.close();
+    });
+
+    routineSub = dao.watchActiveRoutine().listen((routine) async {
       if (routine == null) {
-        yield TodayState();
-        continue;
+        controller.add(TodayState());
+        return;
       }
 
       // Compute PhaseState if it's a cyclic routine
@@ -66,9 +77,6 @@ class TodayController extends _$TodayController {
         );
       }
 
-      // Get today's log
-      final todayLogStream = dao.watchLogForDate(routine.id, now);
-      
       // Calculate missed logs in the past 72 hours
       final threeDaysAgo = now.subtract(const Duration(days: 3));
       final recentLogs = await dao.getLogsInRange(routine.id, threeDaysAgo, now.subtract(const Duration(days: 1)));
@@ -77,8 +85,6 @@ class TodayController extends _$TodayController {
       List<RoutineLog> missedRecent = [];
       for (int i = 1; i <= 3; i++) {
         final d = now.subtract(Duration(days: i));
-        // We only care if they should have taken a pill that day.
-        // If they were on a break, they don't miss anything.
         final pastPhase = PhaseState.calculate(
           startDate: routine.startDate,
           targetDate: d,
@@ -100,15 +106,19 @@ class TodayController extends _$TodayController {
         }
       }
 
-      await for (final todayLog in todayLogStream) {
-        yield TodayState(
+      // Get today's log
+      logSub?.cancel();
+      logSub = dao.watchLogForDate(routine.id, now).listen((todayLog) {
+        controller.add(TodayState(
           activeRoutine: routine,
           todayLog: todayLog,
           phaseState: phaseState,
           missedRecentLogs: missedRecent,
-        );
-      }
-    }
+        ));
+      });
+    });
+
+    return controller.stream;
   }
 
   Future<void> markTaken(DateTime date) async {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart' as flutter_local_notifications;
 import '../../../core/theme/app_theme.dart';
 import '../../../main.dart';
 
@@ -15,13 +16,28 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
+  bool _enableAppLock = false;
+
   void _completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('has_onboarded', true);
+    if (_enableAppLock) {
+      await prefs.setBool('app_lock_enabled', true);
+    }
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => const MainNavigation()),
     );
+  }
+
+  Future<void> _requestNotificationPermission() async {
+    // Calling NotificationService.init or the specific request function
+    // For iOS, DarwinSettings handles it. For Android 13+, use flutter_local_notifications.
+    if (Theme.of(context).platform == TargetPlatform.android) {
+      final plugin = flutter_local_notifications.FlutterLocalNotificationsPlugin();
+      await plugin.resolvePlatformSpecificImplementation<
+          flutter_local_notifications.AndroidFlutterLocalNotificationsPlugin>()?.requestNotificationsPermission();
+    }
   }
 
   @override
@@ -47,11 +63,44 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     title: 'Track With\nPrecision.',
                     description: 'Log your symptoms, flow, and treatments effortlessly. Built for complex cycles and PCOS.',
                     icon: Icons.water_drop_outlined,
+                    actionWidget: Padding(
+                      padding: const EdgeInsets.only(top: 24.0),
+                      child: OutlinedButton.icon(
+                        onPressed: _requestNotificationPermission,
+                        icon: const Icon(Icons.notifications_active_outlined),
+                        label: const Text('Enable Daily Reminders'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.charcoalInk,
+                          iconColor: AppColors.charcoalInk,
+                        ),
+                      ),
+                    ),
                   ),
                   _buildPage(
                     title: 'Secured by\nBiometrics.',
                     description: 'Your clinical data is protected by FaceID and unbreakable AES-256 encrypted backups.',
                     icon: Icons.fingerprint,
+                    actionWidget: Padding(
+                      padding: const EdgeInsets.only(top: 24.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.cardSurface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.cardBorder),
+                        ),
+                        child: SwitchListTile(
+                          title: const Text('Enable Biometric / PIN Lock', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.charcoalInk)),
+                          subtitle: const Text('Require authentication to open the app', style: TextStyle(color: AppColors.mutedSage, fontSize: 12)),
+                          value: _enableAppLock,
+                          activeColor: AppColors.brandAction,
+                          onChanged: (val) {
+                            setState(() {
+                              _enableAppLock = val;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -83,13 +132,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         _completeOnboarding();
                       }
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.brandAction,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                      elevation: 0,
-                    ),
                     child: Text(
                       _currentPage == 2 ? 'Get Started' : 'Next',
                       style: const TextStyle(fontWeight: FontWeight.bold),
@@ -104,7 +146,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildPage({required String title, required String description, required IconData icon}) {
+  Widget _buildPage({required String title, required String description, required IconData icon, Widget? actionWidget}) {
     return Padding(
       padding: const EdgeInsets.all(32.0),
       child: Column(
@@ -138,6 +180,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               height: 1.5,
             ),
           ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOut),
+          if (actionWidget != null) actionWidget.animate().fadeIn(delay: 800.ms).slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOut),
         ],
       ),
     );

@@ -75,6 +75,7 @@ class AppTheme {
           backgroundColor: AppColors.brandAction,
           foregroundColor: Colors.white,
           elevation: 0,
+          minimumSize: const Size(double.infinity, 54),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           textStyle: const TextStyle(
@@ -82,6 +83,88 @@ class AppTheme {
             fontWeight: FontWeight.w700,
             letterSpacing: -0.2,
           ),
+          iconColor: Colors.white, // Explicitly force white icon on brandAction
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.charcoalInk,
+          minimumSize: const Size(double.infinity, 54),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          side: const BorderSide(color: AppColors.cardBorder, width: 1.5),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
+          ),
+          iconColor: AppColors.charcoalInk,
+        ),
+      ),
+      datePickerTheme: DatePickerThemeData(
+        backgroundColor: AppColors.warmCanvas,
+        surfaceTintColor: Colors.transparent,
+        headerBackgroundColor: AppColors.brandAction,
+        headerForegroundColor: Colors.white,
+        dividerColor: AppColors.cardBorder,
+        dayStyle: const TextStyle(color: AppColors.charcoalInk, fontWeight: FontWeight.w500),
+        weekdayStyle: const TextStyle(color: AppColors.mutedText, fontWeight: FontWeight.w600),
+        yearStyle: const TextStyle(color: AppColors.charcoalInk),
+        todayForegroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return Colors.white;
+          return AppColors.brandAction;
+        }),
+        todayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return AppColors.brandAction;
+          return Colors.transparent;
+        }),
+        dayForegroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return Colors.white;
+          if (states.contains(WidgetState.disabled)) return AppColors.mutedText.withValues(alpha: 0.5);
+          return AppColors.charcoalInk;
+        }),
+        dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return AppColors.brandAction;
+          return Colors.transparent;
+        }),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      ),
+      timePickerTheme: TimePickerThemeData(
+        backgroundColor: AppColors.warmCanvas,
+        hourMinuteTextColor: AppColors.charcoalInk,
+        hourMinuteColor: AppColors.cardSurface,
+        dayPeriodTextColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return Colors.white;
+          return AppColors.charcoalInk;
+        }),
+        dayPeriodColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return AppColors.brandAction;
+          return AppColors.cardSurface;
+        }),
+        dialHandColor: AppColors.brandAction,
+        dialBackgroundColor: AppColors.cardSurface,
+        dialTextColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return Colors.white;
+          return AppColors.charcoalInk;
+        }),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        hourMinuteShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.cardBorder)),
+        dayPeriodShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.cardBorder)),
+      ),
+      dialogTheme: DialogTheme(
+        backgroundColor: AppColors.warmCanvas,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        titleTextStyle: const TextStyle(
+          color: AppColors.charcoalInk,
+          fontSize: 20,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.5,
+        ),
+        contentTextStyle: const TextStyle(
+          color: AppColors.mutedText,
+          fontSize: 16,
+          height: 1.5,
         ),
       ),
     );

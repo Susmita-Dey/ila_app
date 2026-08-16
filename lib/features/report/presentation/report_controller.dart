@@ -22,13 +22,23 @@ class ReportController extends _$ReportController {
   }
 
   Future<void> generatePreview(int months) async {
+    final endDate = DateTime.now();
+    final startDate = DateTime(endDate.year, endDate.month - months, endDate.day);
+    await generatePreviewForRange(startDate, endDate, isCustom: false);
+  }
+
+  Future<void> generatePreviewForRange(DateTime startDate, DateTime endDate, {bool isCustom = true}) async {
     state = ReportState(isGenerating: true, previewData: state.previewData);
     
     final dao = ref.read(reportDaoProvider);
-    final endDate = DateTime.now();
-    final startDate = DateTime(endDate.year, endDate.month - months, endDate.day);
+    String rangeLabel;
     
-    final rangeLabel = 'Last $months Months (${DateFormat('MMM yyyy').format(startDate)} - ${DateFormat('MMM yyyy').format(endDate)})';
+    if (isCustom) {
+      rangeLabel = '${DateFormat('MMM d, yyyy').format(startDate)} – ${DateFormat('MMM d, yyyy').format(endDate)}';
+    } else {
+      final months = (endDate.difference(startDate).inDays / 30).round();
+      rangeLabel = 'Last $months Months (${DateFormat('MMM yyyy').format(startDate)} - ${DateFormat('MMM yyyy').format(endDate)})';
+    }
     
     final data = await dao.generateReport(
       startDate: startDate,

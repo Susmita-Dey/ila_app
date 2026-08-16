@@ -42,13 +42,30 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
               // Range Selector
               SegmentedButton<int>(
                 segments: const [
-                  ButtonSegment(value: 3, label: Text('Last 3 Months')),
-                  ButtonSegment(value: 6, label: Text('Last 6 Months')),
+                  ButtonSegment(value: 3, label: Text('3 Months')),
+                  ButtonSegment(value: 6, label: Text('6 Months')),
+                  ButtonSegment(value: 0, label: Text('Custom')),
                 ],
                 selected: {_selectedMonths},
-                onSelectionChanged: (Set<int> newSelection) {
-                  setState(() => _selectedMonths = newSelection.first);
-                  ref.read(reportControllerProvider.notifier).generatePreview(_selectedMonths);
+                onSelectionChanged: (Set<int> newSelection) async {
+                  final selection = newSelection.first;
+                  
+                  if (selection == 0) {
+                    final now = DateTime.now();
+                    final picked = await showDateRangePicker(
+                      context: context,
+                      firstDate: now.subtract(const Duration(days: 365 * 10)),
+                      lastDate: now,
+                    );
+                    
+                    if (picked != null) {
+                      setState(() => _selectedMonths = 0);
+                      ref.read(reportControllerProvider.notifier).generatePreviewForRange(picked.start, picked.end);
+                    }
+                  } else {
+                    setState(() => _selectedMonths = selection);
+                    ref.read(reportControllerProvider.notifier).generatePreview(selection);
+                  }
                 },
                 style: ButtonStyle(
                   backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
@@ -124,7 +141,9 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.brandAction,
                   foregroundColor: Colors.white,
+                  iconColor: Colors.white, // Explicit white icon
                   disabledBackgroundColor: AppColors.lightBorder,
+                  disabledIconColor: AppColors.mutedSage,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
