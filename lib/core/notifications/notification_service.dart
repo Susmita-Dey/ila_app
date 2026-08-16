@@ -22,9 +22,9 @@ class NotificationService {
     await _notificationsPlugin.initialize(settings: initializationSettings);
   }
 
-  static Future<void> scheduleDailyReminder(int hour, int minute) async {
+  static Future<void> scheduleRoutineReminder(int routineId, String routineName, int hour, int minute) async {
     // Cancel previous
-    await _notificationsPlugin.cancelAll();
+    await _notificationsPlugin.cancel(id: routineId);
 
     final now = tz.TZDateTime.now(tz.local);
     tz.TZDateTime scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
@@ -34,18 +34,18 @@ class NotificationService {
     }
 
     const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'Ila_daily_channel',
-      'Daily Reminders',
-      channelDescription: 'Neutral daily reminders for your routine',
+      'Ila_routine_channel',
+      'Routine Reminders',
+      channelDescription: 'Neutral daily reminders for your routines',
       importance: Importance.max,
       priority: Priority.high,
     );
     const NotificationDetails platformDetails = NotificationDetails(android: androidDetails);
 
     await _notificationsPlugin.zonedSchedule(
-      id: 0,
+      id: routineId,
       title: 'Ila',
-      body: 'Your $hour:${minute.toString().padLeft(2, '0')} reminder is ready.',
+      body: 'Time for your $routineName routine.',
       scheduledDate: scheduledDate,
       notificationDetails: platformDetails,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,

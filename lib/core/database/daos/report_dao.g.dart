@@ -23,7 +23,5 @@ class ReportDaoManager {
       $$RoutineLogsTableTableManager(_db.attachedDatabase, _db.routineLogs);
   $$TreatmentInterventionsTableTableManager get treatmentInterventions =>
       $$TreatmentInterventionsTableTableManager(
-        _db.attachedDatabase,
-        _db.treatmentInterventions,
-      );
+          _db.attachedDatabase, _db.treatmentInterventions);
 }

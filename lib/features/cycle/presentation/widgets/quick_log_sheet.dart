@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../cycle_controller.dart';
 
@@ -211,7 +212,7 @@ class _QuickLogSheetState extends ConsumerState<QuickLogSheet> {
               ),
               child: const Text('Save Entry', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             ),
-          ],
+          ].animate(interval: 50.ms).fadeIn(duration: 300.ms).slideY(begin: 0.1, duration: 300.ms),
         ),
       ),
     );

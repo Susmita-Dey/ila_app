@@ -15,15 +15,15 @@ final cycleControllerProvider = CycleControllerProvider._();
 final class CycleControllerProvider
     extends $StreamNotifierProvider<CycleController, CycleState> {
   CycleControllerProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'cycleControllerProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'cycleControllerProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$cycleControllerHash();
@@ -41,14 +41,11 @@ abstract class _$CycleController extends $StreamNotifier<CycleState> {
   @override
   WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<CycleState>, CycleState>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<CycleState>, CycleState>,
-              AsyncValue<CycleState>,
-              Object?,
-              Object?
-            >;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<CycleState>, CycleState>,
+        AsyncValue<CycleState>,
+        Object?,
+        Object?>;
     return element.handleCreate(ref, build);
   }
 }

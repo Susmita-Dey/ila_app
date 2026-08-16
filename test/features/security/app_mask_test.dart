@@ -9,7 +9,7 @@ void main() {
   testWidgets('App obscures UI when inactive or paused to prevent screenshots', (tester) async {
     await tester.pumpWidget(
       const ProviderScope(
-        child: IlaApp(),
+        child: IlaApp(hasOnboarded: true),
       ),
     );
     // Actually we should test the Container with warmIvory background.
@@ -27,14 +27,14 @@ void main() {
     
     // Simulate AppLifecycleState.inactive (user opens app switcher)
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
     
     // Now the obscure overlay should be present
     expect(find.descendant(of: find.byType(Stack), matching: find.byType(IlaLogo)).last, findsOneWidget);
     
     // Simulate AppLifecycleState.resumed
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
     
     // The overlay should be gone (but the Onboarding screen might still have an IlaLogo or Sanctuary)
     // The key is that the obscure UI builder state flips correctly, we test it implicitly via the state changes.

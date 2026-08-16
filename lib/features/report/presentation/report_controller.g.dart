@@ -15,15 +15,15 @@ final reportControllerProvider = ReportControllerProvider._();
 final class ReportControllerProvider
     extends $NotifierProvider<ReportController, ReportState> {
   ReportControllerProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'reportControllerProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'reportControllerProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$reportControllerHash();
@@ -41,7 +41,7 @@ final class ReportControllerProvider
   }
 }
 
-String _$reportControllerHash() => r'fe52c0158316611ef766b7b4f8c22eb7a5bfe17e';
+String _$reportControllerHash() => r'66b8b955b1e0dd00ef27e98e6ec92a7bb6fa1668';
 
 abstract class _$ReportController extends $Notifier<ReportState> {
   ReportState build();
@@ -49,14 +49,8 @@ abstract class _$ReportController extends $Notifier<ReportState> {
   @override
   WhenComplete runBuild() {
     final ref = this.ref as $Ref<ReportState, ReportState>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<ReportState, ReportState>,
-              ReportState,
-              Object?,
-              Object?
-            >;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<ReportState, ReportState>, ReportState, Object?, Object?>;
     return element.handleCreate(ref, build);
   }
 }

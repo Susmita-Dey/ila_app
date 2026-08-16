@@ -139,7 +139,7 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
             ElevatedButton(
               onPressed: () async {
                 final timeStr = '${_reminderTime.hour.toString().padLeft(2, '0')}:${_reminderTime.minute.toString().padLeft(2, '0')}';
-                await ref.read(routineDaoProvider).insertRoutine(
+                final routineId = await ref.read(routineDaoProvider).insertRoutine(
                   name: 'My Routine',
                   regimenType: _selectedRegimen,
                   startDate: _startDate,
@@ -147,7 +147,7 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
                 );
                 
                 // Schedule local notification
-                await NotificationService.scheduleDailyReminder(_reminderTime.hour, _reminderTime.minute);
+                await NotificationService.scheduleRoutineReminder(routineId, 'My Routine', _reminderTime.hour, _reminderTime.minute);
                 
                 // The provider will automatically update due to the stream
                 if (context.mounted) Navigator.of(context).pop();

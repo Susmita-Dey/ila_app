@@ -15,15 +15,15 @@ final todayControllerProvider = TodayControllerProvider._();
 final class TodayControllerProvider
     extends $StreamNotifierProvider<TodayController, TodayState> {
   TodayControllerProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'todayControllerProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'todayControllerProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$todayControllerHash();
@@ -41,14 +41,11 @@ abstract class _$TodayController extends $StreamNotifier<TodayState> {
   @override
   WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<TodayState>, TodayState>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<TodayState>, TodayState>,
-              AsyncValue<TodayState>,
-              Object?,
-              Object?
-            >;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<TodayState>, TodayState>,
+        AsyncValue<TodayState>,
+        Object?,
+        Object?>;
     return element.handleCreate(ref, build);
   }
 }

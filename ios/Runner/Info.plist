@@ -72,5 +72,7 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>NSFaceIDUsageDescription</key>
+		<string>We use FaceID to secure your private health data.</string>
 	</dict>
 </plist>

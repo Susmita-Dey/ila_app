@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+@TableIndex(name: 'idx_cycle_events_date', columns: {#date})
 class CycleEvents extends Table {
   IntColumn get id => integer().autoIncrement()();
   DateTimeColumn get date => dateTime()();
@@ -24,6 +25,7 @@ class Routines extends Table {
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
 }
 
+@TableIndex(name: 'idx_routine_logs_date', columns: {#scheduledDate})
 class RoutineLogs extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get routineId => integer().references(Routines, #id)();

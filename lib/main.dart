@@ -9,6 +9,9 @@ import 'core/notifications/notification_service.dart';
 import 'core/diagnostics/error_logger.dart';
 import 'dart:ui';
 import 'core/widgets/ila_logo.dart';
+import 'core/services/auth_service.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,27 +37,51 @@ void main() async {
 
   ErrorLogger.info('App Initialized');
 
+  final prefs = await SharedPreferences.getInstance();
+  final bool hasOnboarded = prefs.getBool('has_onboarded') ?? false;
+
   runApp(
-    const ProviderScope(
-      child: IlaApp(),
+    ProviderScope(
+      child: IlaApp(hasOnboarded: hasOnboarded),
     ),
   );
 }
 
 class IlaApp extends StatefulWidget {
-  const IlaApp({super.key});
+  final bool hasOnboarded;
+  const IlaApp({super.key, required this.hasOnboarded});
 
   @override
   State<IlaApp> createState() => _IlaAppState();
 }
 
 class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
-  bool _obscureUI = false;
+  bool _obscureUI = true;
+  bool _isAuthenticating = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _authenticate();
+  }
+
+  Future<void> _authenticate() async {
+    if (_isAuthenticating) return;
+    
+    setState(() {
+      _isAuthenticating = true;
+      _obscureUI = true;
+    });
+
+    final success = await AuthService.authenticate();
+    
+    if (mounted) {
+      setState(() {
+        _obscureUI = !success;
+        _isAuthenticating = false;
+      });
+    }
   }
 
   @override
@@ -65,10 +92,13 @@ class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    setState(() {
-      // Obscure the UI when the app is in the background or app switcher
-      _obscureUI = state == AppLifecycleState.inactive || state == AppLifecycleState.paused;
-    });
+    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+      setState(() {
+        _obscureUI = true;
+      });
+    } else if (state == AppLifecycleState.resumed) {
+      _authenticate();
+    }
   }
 
   @override
@@ -76,7 +106,7 @@ class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
     return MaterialApp(
       title: 'Ila',
       theme: AppTheme.light,
-      home: const OnboardingScreen(),
+      home: widget.hasOnboarded ? const MainNavigation() : const OnboardingScreen(),
       debugShowCheckedModeBanner: false,
       builder: (context, child) {
         return Stack(

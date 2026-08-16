@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/theme/app_theme.dart';
 import 'today_controller.dart';
 import '../../cycle/presentation/cycle_controller.dart';
 import '../../cycle/presentation/widgets/quick_log_sheet.dart';
+import '../../cycle/presentation/widgets/cycle_graph.dart';
 import '../../routines/presentation/routine_setup_sheet.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_provider.dart';
@@ -88,6 +90,13 @@ class TodayScreen extends ConsumerWidget {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
+                            if (cycleState.value?.currentCycleDay != null) ...[
+                              CycleGraph(currentDay: cycleState.value!.currentCycleDay!)
+                                .animate()
+                                .fadeIn(duration: 400.ms)
+                                .slideY(begin: 0.1, end: 0, duration: 400.ms),
+                              const SizedBox(height: 24),
+                            ],
                             if (state.missedRecentLogs.isNotEmpty)
                               _buildCatchUpDrawer(context, ref, state.missedRecentLogs),
                             if (state.activeRoutine == null)
@@ -95,7 +104,7 @@ class TodayScreen extends ConsumerWidget {
                             else
                               _buildMedicationCard(context, ref, state),
                           ],
-                        );
+                        ).animate().fade(duration: 400.ms).slideY(begin: 0.05, end: 0);
                       },
                       loading: () => const Center(child: CircularProgressIndicator()),
                       error: (err, stack) => Text('Error: $err'),

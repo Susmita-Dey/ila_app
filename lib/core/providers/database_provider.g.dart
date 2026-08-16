@@ -16,15 +16,15 @@ final class AppDatabaseProvider
     extends $FunctionalProvider<AppDatabase, AppDatabase, AppDatabase>
     with $Provider<AppDatabase> {
   AppDatabaseProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'appDatabaseProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'appDatabaseProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$appDatabaseHash();
@@ -57,15 +57,15 @@ final class CycleDaoProvider
     extends $FunctionalProvider<CycleDao, CycleDao, CycleDao>
     with $Provider<CycleDao> {
   CycleDaoProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'cycleDaoProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'cycleDaoProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$cycleDaoHash();
@@ -98,15 +98,15 @@ final class RoutineDaoProvider
     extends $FunctionalProvider<RoutineDao, RoutineDao, RoutineDao>
     with $Provider<RoutineDao> {
   RoutineDaoProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'routineDaoProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'routineDaoProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$routineDaoHash();
@@ -139,15 +139,15 @@ final class ReportDaoProvider
     extends $FunctionalProvider<ReportDao, ReportDao, ReportDao>
     with $Provider<ReportDao> {
   ReportDaoProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'reportDaoProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'reportDaoProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
   @override
   String debugGetCreateSourceHash() => _$reportDaoHash();
