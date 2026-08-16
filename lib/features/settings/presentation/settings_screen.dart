@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/diagnostics/diagnostics_service.dart';
 import '../../../core/providers/database_provider.dart';
+import '../../today/presentation/today_controller.dart';
+import '../../cycle/presentation/cycle_controller.dart';
+import '../../report/presentation/report_controller.dart';
 import 'widgets/feedback_dialog.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -137,6 +140,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             await db.delete(db.routines).go();
                             await db.delete(db.treatmentInterventions).go();
                           });
+                          ref.invalidate(appDatabaseProvider);
+                          ref.invalidate(todayControllerProvider);
+                          ref.invalidate(cycleControllerProvider);
+                          ref.invalidate(reportControllerProvider);
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('All data has been permanently erased.')),

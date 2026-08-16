@@ -35,7 +35,7 @@ class ReportDao extends DatabaseAccessor<AppDatabase> with _$ReportDaoMixin {
     for (int i = 1; i < trueCycles.length; i++) {
       final prevDate = trueCycles[i - 1].date;
       final currDate = trueCycles[i].date;
-      final diff = currDate.difference(prevDate).inDays;
+      final diff = AppDateUtils.daysBetween(prevDate, currDate);
       if (diff > 14) { // Only count realistic cycle lengths
         cycleLengths.add(diff);
       }
@@ -118,11 +118,11 @@ class ReportDao extends DatabaseAccessor<AppDatabase> with _$ReportDaoMixin {
       
       String phase = 'Mid-Cycle / Ovulatory';
       if (nextCycleDate != null) {
-        final daysToNext = nextCycleDate.difference(event.date).inDays;
+        final daysToNext = AppDateUtils.daysBetween(event.date, nextCycleDate);
         if (daysToNext >= 1 && daysToNext <= 7) phase = 'Luteal Phase (PMDD Indicator)';
       }
       if (currentCycleDate != null && phase == 'Mid-Cycle / Ovulatory') {
-        final daysFromStart = event.date.difference(currentCycleDate).inDays;
+        final daysFromStart = AppDateUtils.daysBetween(currentCycleDate, event.date);
         if (daysFromStart >= 0 && daysFromStart <= 4) phase = 'Menstrual (Dysmenorrhea)';
       }
 
@@ -171,7 +171,7 @@ class ReportDao extends DatabaseAccessor<AppDatabase> with _$ReportDaoMixin {
       if (preCycles.length >= 2) {
         List<int> preLen = [];
         for (int i = 1; i < preCycles.length; i++) {
-          preLen.add(preCycles[i].date.difference(preCycles[i-1].date).inDays);
+          preLen.add(AppDateUtils.daysBetween(preCycles[i-1].date, preCycles[i].date));
         }
         preLen.sort();
         preMedian = preLen[preLen.length ~/ 2];
@@ -181,7 +181,7 @@ class ReportDao extends DatabaseAccessor<AppDatabase> with _$ReportDaoMixin {
       if (postCycles.length >= 2) {
         List<int> postLen = [];
         for (int i = 1; i < postCycles.length; i++) {
-          postLen.add(postCycles[i].date.difference(postCycles[i-1].date).inDays);
+          postLen.add(AppDateUtils.daysBetween(postCycles[i-1].date, postCycles[i].date));
         }
         postLen.sort();
         postMedian = postLen[postLen.length ~/ 2];
@@ -210,11 +210,11 @@ class ReportDao extends DatabaseAccessor<AppDatabase> with _$ReportDaoMixin {
       
       if (chronIndex + 1 < trueCycles.length) {
         final nextCycle = trueCycles[chronIndex + 1];
-        final length = nextCycle.date.difference(c.date).inDays;
+        final length = AppDateUtils.daysBetween(c.date, nextCycle.date);
         endDateStr = formatter.format(nextCycle.date.subtract(const Duration(days: 1)));
         lengthStr = '$length days';
       } else {
-        final length = DateTime.now().difference(c.date).inDays;
+        final length = AppDateUtils.daysBetween(c.date, DateTime.now());
         lengthStr = '$length days (Ongoing)';
       }
 

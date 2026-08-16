@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/providers/database_provider.dart';
 import '../domain/report_payload.dart';
@@ -45,7 +46,9 @@ class ReportController extends _$ReportController {
     state = ReportState(isGenerating: true, previewData: data);
     
     try {
-      await DoctorPdfGenerator.generateAndShare(data);
+      // Offload PDF generation to a background isolate to prevent UI freezing
+      final bytes = await compute(DoctorPdfGenerator.generatePdfBytes, data);
+      await DoctorPdfGenerator.sharePdf(bytes);
     } finally {
       state = ReportState(isGenerating: false, previewData: data);
     }

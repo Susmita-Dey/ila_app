@@ -1,10 +1,12 @@
+import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../domain/report_payload.dart';
 
 class DoctorPdfGenerator {
-  static Future<void> generateAndShare(DoctorReportData data) async {
+  /// Generates the PDF bytes. Safe to run in an Isolate via compute().
+  static Future<Uint8List> generatePdfBytes(DoctorReportData data) async {
     final doc = pw.Document();
 
     doc.addPage(
@@ -104,7 +106,11 @@ class DoctorPdfGenerator {
       ),
     );
 
-    await Printing.sharePdf(bytes: await doc.save(), filename: 'Ila_clinical_summary.pdf');
+    return doc.save();
+  }
+
+  static Future<void> sharePdf(Uint8List bytes) async {
+    await Printing.sharePdf(bytes: bytes, filename: 'Ila_clinical_summary.pdf');
   }
 
   static pw.Widget _buildStatBlock(String label, String value) {

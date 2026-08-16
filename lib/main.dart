@@ -8,6 +8,7 @@ import 'features/onboarding/presentation/onboarding_screen.dart';
 import 'core/notifications/notification_service.dart';
 import 'core/diagnostics/error_logger.dart';
 import 'dart:ui';
+import 'core/widgets/ila_logo.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,8 +41,35 @@ void main() async {
   );
 }
 
-class IlaApp extends StatelessWidget {
+class IlaApp extends StatefulWidget {
   const IlaApp({super.key});
+
+  @override
+  State<IlaApp> createState() => _IlaAppState();
+}
+
+class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
+  bool _obscureUI = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    setState(() {
+      // Obscure the UI when the app is in the background or app switcher
+      _obscureUI = state == AppLifecycleState.inactive || state == AppLifecycleState.paused;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +78,20 @@ class IlaApp extends StatelessWidget {
       theme: AppTheme.light,
       home: const OnboardingScreen(),
       debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            if (child != null) child,
+            if (_obscureUI)
+              Container(
+                color: AppColors.warmIvory,
+                child: const Center(
+                  child: IlaLogo(size: 80),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
