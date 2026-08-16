@@ -1,17 +1,116 @@
-# mira_app
+# Ila 🌸
+**A private, local-first clinical compliance notebook for women.**
 
-A new Flutter project.
+[![Flutter Version](https://img.shields.io/badge/Flutter-3.x-blue.svg)](https://flutter.dev)
+[![Database](https://img.shields.io/badge/Database-Drift_SQLite-green.svg)](https://drift.simonbinder.eu/)
+[![Privacy](https://img.shields.io/badge/Privacy-100%25_Local-F43F5E.svg)](#privacy-manifesto)
 
-## Getting Started
+Ila is not "just another period tracker." Most FemTech apps monetize through fear, predictive vanity, and data extraction. Ila is built for **clinical utility and recall relief**, specifically designed for women managing doctor-directed routines, irregular cycles, and PMDD. 
 
-This project is a starting point for a Flutter application.
+It generates a standardized clinical PDF for a 7-minute doctor consultation while ensuring the user's intimate health data never leaves her physical device.
 
-A few resources to get you started if this is your first Flutter project:
+---
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## ✨ Core Features
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+*   **100% Local-First Architecture:** Zero cloud sync. Zero accounts. Data is stored in an encrypted SQLite database strictly on the device.
+*   **Clinical Report Generator:** A 1-tap engine that condenses 6 months of adherence, PMDD luteal phase clustering, and treatment benchmarks into a standardized, 1-page A4 PDF.
+*   **Smart Disambiguation:** Differentiates between true cycle starts (Day 1) and pre-period spotting for accurate baseline data.
+*   **21/7 Routine Engine:** Custom medication reminders tailored for birth control or cyclical hormone treatments without assuming a standard 28-day cycle.
+*   **Radical Minimalism:** No social feeds, no AI symptom guessing, and no red notification badges. Calm is created by what is left out.
+
+---
+
+## 🎨 Visual Identity & UI
+
+Ila's UI/UX takes inspiration from top-tier productivity utilities (like Cal.com and Todoist) rather than traditional health apps.
+*   **The Canvas:** Stark, crisp Linen White (`#FAFAFA`) and Absolute Onyx (`#111111`).
+*   **The Signature Color:** **Ila Rose (`#F43F5E`)** — a striking, confident pinkish-rose that drives all primary actions.
+*   **The Logo:** A bold geometric 'i' combining the Cycle Dot and the Routine Capsule, providing total lock-screen discretion.
+
+---
+
+## 🏗 Tech Stack
+
+*   **Framework:** [Flutter](https://flutter.dev) (Cross-platform iOS & Android)
+*   **Local Storage:** [Drift](https://drift.simonbinder.eu/) (Type-safe SQLite)
+*   **State Management:** [Riverpod](https://riverpod.dev/) (Reactive caching and dependency injection)
+*   **PDF Generation:** `pdf` and `printing` packages
+*   **Testing:** `flutter_test` (Unit) and `integration_test` (E2E)
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+*   Flutter SDK (v3.x or higher)
+*   Dart SDK
+*   Xcode (for iOS builds) / Android Studio (for Android builds)
+
+### 1. Install Dependencies
+```bash
+flutter pub get
+
+```
+
+### 2. Run Code Generation
+
+Because Ila uses Drift for SQLite and Riverpod for state management, you must run the build runner to generate the data classes:
+
+```bash
+dart run build_runner build --delete-conflicting-outputs
+
+```
+
+### 3. Generate Branding Assets
+
+Generate the high-resolution Ila Rose icons and native splash screens:
+
+```bash
+flutter test lib/core/utils/generate_icon_assets.dart
+dart run flutter_launcher_icons
+dart run flutter_native_splash:create
+
+```
+
+### 4. Run the App
+
+```bash
+flutter run
+
+```
+
+---
+
+## 🧪 Quality Assurance & Testing
+
+Before deploying any release build, the QA suite must pass. This guarantees clinical date math (like PMDD luteal clustering) is perfectly accurate.
+
+**Run Unit & Database Integrity Tests:**
+
+```bash
+flutter test
+
+```
+
+**Run End-to-End (E2E) Smoke Test:**
+(Ensure a physical device or emulator is running)
+
+```bash
+flutter test integration_test/app_flow_test.dart
+
+```
+
+---
+
+## 🔒 Privacy Manifesto (The "Ila Promise")
+
+1. **No Tracking:** No analytics SDKs (no Firebase Analytics, no Mixpanel, no Meta Pixel).
+2. **No Ads:** The UI will never push sponsored wellness content.
+3. **Instant Purge:** The Settings menu contains a 1-tap "Erase All Data" button that executes a complete SQL `DROP` on all tables instantly.
+
+---
+
+*Built for women, memory, and peace of mind.*
+
+---
