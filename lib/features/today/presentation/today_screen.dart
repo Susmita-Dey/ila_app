@@ -230,7 +230,23 @@ class TodayScreen extends ConsumerWidget {
                         child: const Text('Missed', style: TextStyle(color: AppColors.mutedSage)),
                       ),
                       ElevatedButton(
-                        onPressed: () => ref.read(todayControllerProvider.notifier).markTaken(log.scheduledDate),
+                        onPressed: () async {
+                          final TimeOfDay? time = await showTimePicker(
+                            context: context,
+                            initialTime: const TimeOfDay(hour: 8, minute: 0),
+                            helpText: 'When did you take this?',
+                          );
+                          if (time != null) {
+                            final customDate = DateTime(
+                              log.scheduledDate.year,
+                              log.scheduledDate.month,
+                              log.scheduledDate.day,
+                              time.hour,
+                              time.minute,
+                            );
+                            ref.read(todayControllerProvider.notifier).markTaken(log.scheduledDate, completedAt: customDate);
+                          }
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.brandAction,
                           foregroundColor: Colors.white,

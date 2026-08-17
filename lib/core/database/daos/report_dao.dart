@@ -194,11 +194,11 @@ DoctorReportData _aggregateClinicalData(Map<String, dynamic> payload) {
       
       String clusterLabel = dominantPhase;
       if (ratio >= 0.70 && dominantPhase == 'Luteal Phase (PMDD Indicator)') {
-        clusterLabel = '! Luteal Clustering (PMDD)';
+        clusterLabel = 'Luteal Alignment (PMDD Pattern)';
       } else if (ratio >= 0.70 && dominantPhase == 'Menstrual (Dysmenorrhea)') {
-        clusterLabel = '* Menstrual Clustering';
+        clusterLabel = 'Menstrual Alignment';
       } else if (ratio < 0.50) {
-        clusterLabel = 'Scattered / No Pattern';
+        clusterLabel = 'Distributed Pattern';
       }
       
       symptomPhaseClusters.add([symp, total.toString(), clusterLabel]);

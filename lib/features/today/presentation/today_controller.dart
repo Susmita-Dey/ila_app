@@ -121,7 +121,7 @@ class TodayController extends _$TodayController {
     return controller.stream;
   }
 
-  Future<void> markTaken(DateTime date) async {
+  Future<void> markTaken(DateTime date, {DateTime? completedAt}) async {
     final routine = state.value?.activeRoutine;
     if (routine == null) return;
     
@@ -129,7 +129,7 @@ class TodayController extends _$TodayController {
       routineId: routine.id,
       scheduledDate: date,
       status: 'Taken',
-      completedAt: DateTime.now(),
+      completedAt: completedAt ?? DateTime.now(),
     );
     // Note: Stream will auto-update state
   }

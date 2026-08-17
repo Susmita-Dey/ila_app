@@ -177,11 +177,11 @@ class DoctorPdfGenerator {
         pw.Text(label, style: const pw.TextStyle(fontSize: 7.5, color: PdfColors.grey800)),
         pw.SizedBox(height: 2),
         pw.Text(
-          isPresent ? 'YES / FLAGGED' : 'Not Indicated',
+          isPresent ? 'Observed Pattern' : 'Standard Baseline',
           style: pw.TextStyle(
             fontSize: 9, 
             fontWeight: pw.FontWeight.bold, 
-            color: isPresent ? PdfColors.red900 : PdfColors.grey600,
+            color: isPresent ? PdfColors.deepPurple700 : PdfColors.grey600,
           ),
         ),
       ],

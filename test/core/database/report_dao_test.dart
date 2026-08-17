@@ -102,6 +102,6 @@ void main() {
     );
 
     expect(report.symptomPhaseClusters.isNotEmpty, true);
-    expect(report.symptomPhaseClusters.first[2].contains('Scattered') || report.symptomPhaseClusters.first[2].contains('Mid-Cycle'), true);
+    expect(report.symptomPhaseClusters.first[2].contains('Distributed') || report.symptomPhaseClusters.first[2].contains('Mid-Cycle'), true);
   });
 }
