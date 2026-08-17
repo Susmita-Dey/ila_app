@@ -105,29 +105,105 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                                 ],
                               ),
                             )
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  data.dateRange,
-                                  style: const TextStyle(
-                                    color: AppColors.mutedSage,
-                                    fontSize: 14,
+                          : SingleChildScrollView(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    data.dateRange,
+                                    style: const TextStyle(
+                                      color: AppColors.mutedSage,
+                                      fontSize: 14,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 24),
+                                  const SizedBox(height: 24),
                                 _buildMetricRow('Cycles Recorded', '${data.totalCycles}'),
-                                const Divider(height: 32, color: AppColors.lightBorder),
+                                const Divider(height: 16, color: AppColors.lightBorder),
                                 _buildMetricRow('Median Cycle Length', '${data.medianCycleLength} days'),
-                                const Divider(height: 32, color: AppColors.lightBorder),
+                                const Divider(height: 16, color: AppColors.lightBorder),
                                 _buildMetricRow('Cycle Variation', '${data.cycleRangeMin} – ${data.cycleRangeMax} days'),
-                                const Divider(height: 32, color: AppColors.lightBorder),
+                                const Divider(height: 16, color: AppColors.lightBorder),
                                 _buildMetricRow('Medication Adherence', '${data.adherencePercentage}%'),
-                              ],
+                                const SizedBox(height: 24),
+                                
+                                // Cycle Timeline (last 3)
+                                if (data.cycleRows.isNotEmpty) ...[
+                                  const Text(
+                                    'Recent Cycles',
+                                    style: TextStyle(
+                                      color: AppColors.deepInk,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  ...data.cycleRows.take(3).map((row) => Padding(
+                                        padding: const EdgeInsets.only(bottom: 12.0),
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.softLavender.withValues(alpha: 0.1),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Text(
+                                                row[3], // length
+                                                style: const TextStyle(color: AppColors.deepInk, fontWeight: FontWeight.bold, fontSize: 12),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    '${row[1]} – ${row[2]}',
+                                                    style: const TextStyle(color: AppColors.deepInk, fontSize: 14, fontWeight: FontWeight.w600),
+                                                  ),
+                                                  if (row[4] != 'Unknown')
+                                                    Text('Flow: ${row[4]}', style: const TextStyle(color: AppColors.mutedSage, fontSize: 13)),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )),
+                                ],
+                                
+                                // Symptom Frequency
+                                if (data.symptomPhaseClusters.isNotEmpty) ...[
+                                  const SizedBox(height: 12),
+                                  const Text(
+                                    'Top Symptoms',
+                                    style: TextStyle(
+                                      color: AppColors.deepInk,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: data.symptomPhaseClusters.take(5).map((cluster) {
+                                      return Chip(
+                                        label: Text('${cluster[0]} (${cluster[1]}x)', style: const TextStyle(fontSize: 12)),
+                                        backgroundColor: AppColors.brandLight,
+                                        labelStyle: const TextStyle(color: AppColors.brandAction),
+                                        side: BorderSide.none,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ],
+                                ],
+                              ),
                             ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
               // Export Button
               ElevatedButton.icon(
@@ -163,8 +239,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
         Text(
           label,
           style: const TextStyle(
-            color: AppColors.deepInk,
-            fontSize: 16,
+            color: AppColors.mutedSage,
+            fontSize: 15,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -172,7 +248,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
           value,
           style: const TextStyle(
             color: AppColors.deepInk,
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.bold,
           ),
         ),

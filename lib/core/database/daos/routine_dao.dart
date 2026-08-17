@@ -17,6 +17,8 @@ class RoutineDao extends DatabaseAccessor<AppDatabase> with _$RoutineDaoMixin {
     int breakDays = 7,
     required DateTime startDate,
     required String reminderTime,
+    String? dose,
+    String? notes,
   }) {
     return into(routines).insert(
       RoutinesCompanion.insert(
@@ -26,6 +28,8 @@ class RoutineDao extends DatabaseAccessor<AppDatabase> with _$RoutineDaoMixin {
         breakDays: Value(breakDays),
         startDate: AppDateUtils.stripTime(startDate),
         reminderTime: reminderTime,
+        dose: Value(dose),
+        notes: Value(notes),
       ),
     );
   }

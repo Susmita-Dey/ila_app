@@ -5,6 +5,7 @@ import 'features/today/presentation/today_screen.dart';
 import 'features/report/presentation/report_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
 import 'features/onboarding/presentation/onboarding_screen.dart';
+import 'features/splash/presentation/splash_screen.dart';
 import 'core/notifications/notification_service.dart';
 import 'core/diagnostics/error_logger.dart';
 import 'dart:ui';
@@ -17,9 +18,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
 
 void main() async {
+  // Preserve the native splash until SplashScreen.initState() explicitly removes it,
+  // preventing the white-flash gap between the OS splash and Flutter rendering.
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  
+
   // 1. Flutter Framework Errors (Render/Widget build errors)
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
@@ -36,39 +39,30 @@ void main() async {
     return true;
   };
 
-  bool hasOnboarded = false;
-
   try {
     debugPrint('[INIT] Starting Initialization Sequence...');
-    
+
     debugPrint('[INIT] Initializing Notifications...');
     await NotificationService.init();
     debugPrint('[INIT] Notifications Initialized successfully.');
-
-    debugPrint('[INIT] Fetching SharedPreferences...');
-    final prefs = await SharedPreferences.getInstance();
-    hasOnboarded = prefs.getBool('has_onboarded') ?? false;
-    debugPrint('[INIT] SharedPreferences fetched successfully.');
 
     ErrorLogger.info('App Initialized');
   } catch (e, stack) {
     debugPrint('[INIT ERROR] Initialization failed: $e');
     ErrorLogger.error('Initialization Error', e, stack);
-  } finally {
-    debugPrint('[INIT] Removing FlutterNativeSplash...');
-    FlutterNativeSplash.remove();
   }
+  // NOTE: FlutterNativeSplash.remove() is intentionally NOT called here.
+  // It is called inside SplashScreen.initState() so the handoff is seamless.
 
   runApp(
-    ProviderScope(
-      child: IlaApp(hasOnboarded: hasOnboarded),
+    const ProviderScope(
+      child: IlaApp(),
     ),
   );
 }
 
 class IlaApp extends StatefulWidget {
-  final bool hasOnboarded;
-  const IlaApp({super.key, required this.hasOnboarded});
+  const IlaApp({super.key});
 
   @override
   State<IlaApp> createState() => _IlaAppState();
@@ -80,6 +74,8 @@ class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
   bool _isAuthenticated = false;
   DateTime? _backgroundedTime;
   bool _appLockEnabled = false;
+  // Tracks whether onboarding is done so we don't trigger biometrics mid-flow.
+  bool _hasOnboarded = false;
 
   @override
   void initState() {
@@ -91,11 +87,15 @@ class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
   Future<void> _loadAppLockSetting() async {
     final prefs = await SharedPreferences.getInstance();
     final isLocked = prefs.getBool('app_lock_enabled') ?? false;
+    final hasOnboarded = prefs.getBool('has_onboarded') ?? false;
+    if (!mounted) return;
     setState(() {
       _appLockEnabled = isLocked;
+      _hasOnboarded = hasOnboarded;
     });
 
-    if (isLocked && widget.hasOnboarded) {
+    // Only prompt biometrics if onboarding is complete; never lock mid-onboarding.
+    if (isLocked && hasOnboarded) {
       setState(() => _obscureUI = true);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _authenticate();
@@ -104,15 +104,15 @@ class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
   }
 
   Future<void> _authenticate() async {
-    if (_isAuthenticating || !_appLockEnabled || !widget.hasOnboarded) return;
-    
+    if (_isAuthenticating || !_appLockEnabled || !_hasOnboarded) return;
+
     setState(() {
       _isAuthenticating = true;
       _obscureUI = true;
     });
 
     final success = await AuthService.authenticate();
-    
+
     if (mounted) {
       setState(() {
         _isAuthenticated = success;
@@ -130,7 +130,7 @@ class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!_appLockEnabled || !widget.hasOnboarded) return;
+    if (!_appLockEnabled || !_hasOnboarded) return;
 
     if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
       if (!_isAuthenticating) {
@@ -167,7 +167,9 @@ class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
       theme: AppTheme.light,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: widget.hasOnboarded ? const MainNavigation() : const OnboardingScreen(),
+      // SplashScreen is always the entry point; it reads SharedPreferences
+      // and routes to OnboardingScreen or MainNavigation after the 2-second hold.
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
       builder: (context, child) {
         return Stack(

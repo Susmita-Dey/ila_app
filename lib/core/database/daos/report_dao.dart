@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 
 part 'report_dao.g.dart';
 
-@DriftAccessor(tables: [CycleEvents, Routines, RoutineLogs, TreatmentInterventions])
+@DriftAccessor(tables: [CycleEvents, Routines, RoutineLogs, TreatmentInterventions, LabResults, ClinicalProfile, MetabolicLogs])
 class ReportDao extends DatabaseAccessor<AppDatabase> with _$ReportDaoMixin {
   ReportDao(AppDatabase db) : super(db);
 
@@ -38,11 +38,27 @@ class ReportDao extends DatabaseAccessor<AppDatabase> with _$ReportDaoMixin {
     // 3. Fetch Treatment Benchmark
     final intervention = await (select(treatmentInterventions)..orderBy([(t) => OrderingTerm(expression: t.startDate, mode: OrderingMode.desc)])..limit(1)).getSingleOrNull();
 
-    // 4. Offload heavy clinical math to background Isolate
+    // 4. Fetch Lab Results
+    final labs = await (select(labResults)
+          ..where((t) => t.date.isBetweenValues(startBound, endBound))
+          ..orderBy([(t) => OrderingTerm(expression: t.date, mode: OrderingMode.asc)]))
+        .get();
+
+    // 5. Fetch Tier 4 (Clinical Profile & Metabolic Logs)
+    final profile = await select(clinicalProfile).getSingleOrNull();
+    final metabolic = await (select(metabolicLogs)
+          ..where((t) => t.date.isBetweenValues(startBound, endBound))
+          ..orderBy([(t) => OrderingTerm(expression: t.date, mode: OrderingMode.asc)]))
+        .get();
+
+    // 6. Offload heavy clinical math to background Isolate
     final payload = {
       'cycles': cycles.map((e) => e.toJson()).toList(),
       'logs': logs.map((e) => e.toJson()).toList(),
+      'labs': labs.map((e) => e.toJson()).toList(),
       'intervention': intervention?.toJson(),
+      'profile': profile?.toJson(),
+      'metabolic': metabolic.map((e) => e.toJson()).toList(),
       'rangeLabel': rangeLabel,
       'startIso': start.toIso8601String(),
     };
@@ -55,14 +71,20 @@ class ReportDao extends DatabaseAccessor<AppDatabase> with _$ReportDaoMixin {
 DoctorReportData _aggregateClinicalData(Map<String, dynamic> payload) {
   final cyclesRaw = payload['cycles'] as List<dynamic>;
   final logsRaw = payload['logs'] as List<dynamic>;
+  final labsRaw = payload['labs'] as List<dynamic>;
   final interventionRaw = payload['intervention'] as Map<String, dynamic>?;
+  final profileRaw = payload['profile'] as Map<String, dynamic>?;
+  final metabolicRaw = payload['metabolic'] as List<dynamic>;
   final rangeLabel = payload['rangeLabel'] as String;
   final start = DateTime.parse(payload['startIso']);
 
   // Convert JSON maps back to Drift data classes or similar structures for logic
   final cycles = cyclesRaw.map((e) => CycleEvent.fromJson(e as Map<String, dynamic>)).toList();
   final logs = logsRaw.map((e) => RoutineLog.fromJson(e as Map<String, dynamic>)).toList();
+  final labs = labsRaw.map((e) => LabResult.fromJson(e as Map<String, dynamic>)).toList();
   final intervention = interventionRaw != null ? TreatmentIntervention.fromJson(interventionRaw) : null;
+  final profilePCOM = profileRaw != null ? (profileRaw['hasPCOM'] as bool) : false;
+  final metabolic = metabolicRaw.map((e) => MetabolicLog.fromJson(e as Map<String, dynamic>)).toList();
 
   // 2. Calculate Cycle Statistics based on True Cycle Starts
   final trueCycles = cycles.where((c) => c.isTrueCycleStart).toList();
@@ -126,10 +148,12 @@ DoctorReportData _aggregateClinicalData(Map<String, dynamic> payload) {
     adherencePercentage = (takenCount / logs.length * 100).round();
   }
 
-  // 5. PMDD Clustering
-  Map<String, Map<String, int>> symptomPhases = {}; 
+  // 5. PMDD Clustering — exclude anovulatory events (flowType == 'Anovulatory')
+  //    so 'Anovulatory / Missed Cycle' doesn't pollute the symptom phase table.
+  final bleedingCycles = cycles.where((c) => c.flowType != 'Anovulatory').toList();
+  Map<String, Map<String, int>> symptomPhases = {};
 
-  for (var event in cycles) {
+  for (var event in bleedingCycles) {
     if (event.symptoms == null || event.symptoms!.isEmpty) continue;
     
     DateTime? currentCycleDate;
@@ -182,6 +206,45 @@ DoctorReportData _aggregateClinicalData(Map<String, dynamic> payload) {
   });
 
   symptomPhaseClusters.sort((a, b) => int.parse(b[1]).compareTo(int.parse(a[1])));
+
+  // 5b. Pain Analytics (NRS 0–10)
+  // Only consider events where painIntensity was assessed (non-null, i.e., v3+ data).
+  final painEvents = cycles.where((c) => c.painIntensity != null).toList();
+  double averagePainScore = 0.0;
+  int peakPainScore = 0;
+  double lutealAveragePainScore = 0.0;
+
+  if (painEvents.isNotEmpty) {
+    final total = painEvents.map((c) => c.painIntensity!).reduce((a, b) => a + b);
+    averagePainScore = double.parse((total / painEvents.length).toStringAsFixed(1));
+    peakPainScore = painEvents.map((c) => c.painIntensity!).reduce((a, b) => a > b ? a : b);
+
+    // Compute average pain specifically in the luteal phase
+    final lutealPainEvents = <int>[];
+    for (var event in painEvents) {
+      DateTime? nextCycleDate;
+      for (var tc in trueCycles) {
+        if (tc.date.isAfter(event.date) && nextCycleDate == null) {
+          nextCycleDate = tc.date;
+        }
+      }
+      if (nextCycleDate != null) {
+        final daysToNext = AppDateUtils.daysBetween(event.date, nextCycleDate);
+        if (daysToNext >= 1 && daysToNext <= 7) {
+          lutealPainEvents.add(event.painIntensity!);
+        }
+      }
+    }
+    if (lutealPainEvents.isNotEmpty) {
+      final lutealTotal = lutealPainEvents.reduce((a, b) => a + b);
+      lutealAveragePainScore = double.parse(
+        (lutealTotal / lutealPainEvents.length).toStringAsFixed(1),
+      );
+    }
+  }
+
+  // 5c. Anovulatory month count
+  final anovulatoryMonthsLogged = cycles.where((c) => c.flowType == 'Anovulatory').length;
 
   // 6. Treatment Benchmark
   Map<String, String>? treatmentBenchmark;
@@ -268,6 +331,42 @@ DoctorReportData _aggregateClinicalData(Map<String, dynamic> payload) {
     ]);
   }
 
+  // 8. Generate Lab Results Rows
+  List<List<String>> labResultsRows = [];
+  for (var lab in labs) {
+    labResultsRows.add([
+      formatter.format(lab.date),
+      lab.testName,
+      lab.value,
+      lab.notes ?? '',
+    ]);
+  }
+
+  // 9. Tier 4 Rotterdam & Metabolic Engine
+  bool ovulatoryDysfunction = medianCycleLength > 35 || medianCycleLength < 21 || anovulatoryMonthsLogged > 0;
+  bool hyperandrogenism = false;
+  
+  for (var cluster in symptomPhaseClusters) {
+    String symp = cluster[0].toLowerCase();
+    int count = int.parse(cluster[1]);
+    if ((symp.contains('acne') || symp.contains('hair') || symp.contains('hirsutism') || symp.contains('skin')) && count > 2) {
+      hyperandrogenism = true;
+      break;
+    }
+  }
+
+  List<List<String>> metabolicRows = [];
+  for (var m in metabolic) {
+    metabolicRows.add([
+      formatter.format(m.date),
+      m.weight != null ? '${m.weight} kg' : '-',
+      m.waistCircumference != null && m.hipCircumference != null 
+          ? '${(m.waistCircumference! / m.hipCircumference!).toStringAsFixed(2)} W/H' 
+          : '-',
+      m.signs ?? 'None',
+    ]);
+  }
+
   return DoctorReportData(
     dateRange: rangeLabel,
     totalCycles: totalCycles,
@@ -280,6 +379,15 @@ DoctorReportData _aggregateClinicalData(Map<String, dynamic> payload) {
     spottingColorProfile: spottingColorProfile,
     cycleRows: cycleRows,
     symptomPhaseClusters: symptomPhaseClusters,
+    labResultsRows: labResultsRows,
     treatmentBenchmark: treatmentBenchmark,
+    anovulatoryMonthsLogged: anovulatoryMonthsLogged,
+    averagePainScore: averagePainScore,
+    peakPainScore: peakPainScore,
+    lutealAveragePainScore: lutealAveragePainScore,
+    rotterdamOvulatoryDysfunction: ovulatoryDysfunction,
+    rotterdamHyperandrogenism: hyperandrogenism,
+    rotterdamPCOM: profilePCOM,
+    metabolicRows: metabolicRows,
   );
 }

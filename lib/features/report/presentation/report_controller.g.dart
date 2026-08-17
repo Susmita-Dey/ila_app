@@ -41,7 +41,7 @@ final class ReportControllerProvider
   }
 }
 
-String _$reportControllerHash() => r'66b8b955b1e0dd00ef27e98e6ec92a7bb6fa1668';
+String _$reportControllerHash() => r'17bf7734516eb433eb0cdda519a25ba4b7bd6f7a';
 
 abstract class _$ReportController extends $Notifier<ReportState> {
   ReportState build();

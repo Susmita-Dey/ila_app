@@ -13,9 +13,20 @@ class RoutineSetupSheet extends ConsumerStatefulWidget {
 }
 
 class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _doseController = TextEditingController();
+  final TextEditingController _notesController = TextEditingController();
   String _selectedRegimen = 'Cyclic_21_7';
   TimeOfDay _reminderTime = const TimeOfDay(hour: 20, minute: 0); // 8:00 PM default
   DateTime _startDate = DateTime.now();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _doseController.dispose();
+    _notesController.dispose();
+    super.dispose();
+  }
 
   Future<void> _selectTime(BuildContext context) async {
     final picked = await showTimePicker(
@@ -84,12 +95,43 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'Medication Routine',
+              'Medication or Supplement Routine',
               style: TextStyle(
                 color: AppColors.deepInk,
-                fontSize: 24,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
+            ),
+            const SizedBox(height: 24),
+            
+            // Name
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                labelText: 'Name (e.g. Metformin, Inositol)',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            // Dose
+            TextField(
+              controller: _doseController,
+              decoration: InputDecoration(
+                labelText: 'Dose (e.g. 500mg, 1 cup)',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            // Notes
+            TextField(
+              controller: _notesController,
+              decoration: InputDecoration(
+                labelText: 'Notes (optional)',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              maxLines: 2,
             ),
             const SizedBox(height: 24),
 
@@ -138,16 +180,19 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
             // Save Button
             ElevatedButton(
               onPressed: () async {
+                final name = _nameController.text.trim().isEmpty ? 'My Routine' : _nameController.text.trim();
                 final timeStr = '${_reminderTime.hour.toString().padLeft(2, '0')}:${_reminderTime.minute.toString().padLeft(2, '0')}';
                 final routineId = await ref.read(routineDaoProvider).insertRoutine(
-                  name: 'My Routine',
+                  name: name,
                   regimenType: _selectedRegimen,
                   startDate: _startDate,
                   reminderTime: timeStr,
+                  dose: _doseController.text.trim().isEmpty ? null : _doseController.text.trim(),
+                  notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
                 );
                 
                 // Schedule local notification
-                await NotificationService.scheduleRoutineReminder(routineId, 'My Routine', _reminderTime.hour, _reminderTime.minute);
+                await NotificationService.scheduleRoutineReminder(routineId, name, _reminderTime.hour, _reminderTime.minute);
                 
                 // The provider will automatically update due to the stream
                 if (context.mounted) Navigator.of(context).pop();

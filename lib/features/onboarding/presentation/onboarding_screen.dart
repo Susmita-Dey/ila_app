@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart' as flutter_local_notifications;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart' as fln;
 import '../../../core/theme/app_theme.dart';
+import '../../../core/notifications/notification_service.dart';
 import '../../../main.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -17,6 +18,36 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _currentPage = 0;
 
   bool _enableAppLock = false;
+  bool _notificationGranted = false;
+  bool _checkingNotification = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkInitialNotificationStatus();
+  }
+
+  /// Reads the current OS permission state so the button reflects reality
+  /// even if the user already granted permission before onboarding
+  /// (e.g., re-running onboarding after a reinstall on a device that remembers).
+  Future<void> _checkInitialNotificationStatus() async {
+    final granted = await NotificationService.areNotificationsEnabled();
+    if (mounted) setState(() => _notificationGranted = granted);
+  }
+
+  Future<void> _requestNotificationPermission() async {
+    if (_notificationGranted) return; // already granted — no-op
+    setState(() => _checkingNotification = true);
+
+    final granted = await NotificationService.requestPermission();
+
+    if (mounted) {
+      setState(() {
+        _notificationGranted = granted;
+        _checkingNotification = false;
+      });
+    }
+  }
 
   void _completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
@@ -28,16 +59,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => const MainNavigation()),
     );
-  }
-
-  Future<void> _requestNotificationPermission() async {
-    // Calling NotificationService.init or the specific request function
-    // For iOS, DarwinSettings handles it. For Android 13+, use flutter_local_notifications.
-    if (Theme.of(context).platform == TargetPlatform.android) {
-      final plugin = flutter_local_notifications.FlutterLocalNotificationsPlugin();
-      await plugin.resolvePlatformSpecificImplementation<
-          flutter_local_notifications.AndroidFlutterLocalNotificationsPlugin>()?.requestNotificationsPermission();
-    }
   }
 
   @override
@@ -62,29 +83,28 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   _buildPage(
                     title: 'Your health.\nYour space.',
-                    description: 'Ila stores all your records securely on this device. Zero cloud sync. Zero ads. Just you and your data.',
+                    description:
+                        'Ila stores all your records securely on this device. '
+                        'Zero cloud sync. Zero ads. Just you and your data.',
                     icon: Icons.shield_outlined,
                   ),
                   _buildPage(
                     title: 'Track With\nPrecision.',
-                    description: 'Log your symptoms, flow, and treatments effortlessly. Built for complex cycles and PCOS.',
+                    description:
+                        'Log your symptoms, flow, and treatments effortlessly. '
+                        'Built for complex cycles and PCOS.',
                     icon: Icons.water_drop_outlined,
                     actionWidget: Padding(
                       padding: const EdgeInsets.only(top: 24.0),
-                      child: OutlinedButton.icon(
-                        onPressed: _requestNotificationPermission,
-                        icon: const Icon(Icons.notifications_active_outlined),
-                        label: const Text('Enable Daily Reminders'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.charcoalInk,
-                          iconColor: AppColors.charcoalInk,
-                        ),
-                      ),
+                      child: _buildNotificationWidget(),
                     ),
                   ),
                   _buildPage(
                     title: 'Secured by\nBiometrics.',
-                    description: 'Your clinical data is protected by FaceID and unbreakable AES-256 encrypted backups.',
+                    // Platform-neutral copy — no Apple-specific branding
+                    description:
+                        'Protected by biometric authentication (Face ID, '
+                        'fingerprint, or PIN) and AES-256 encrypted backups.',
                     icon: Icons.fingerprint,
                     actionWidget: Padding(
                       padding: const EdgeInsets.only(top: 24.0),
@@ -95,14 +115,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           border: Border.all(color: AppColors.cardBorder),
                         ),
                         child: SwitchListTile(
-                          title: const Text('Enable Biometric / PIN Lock', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.charcoalInk)),
-                          subtitle: const Text('Require authentication to open the app', style: TextStyle(color: AppColors.mutedSage, fontSize: 12)),
+                          title: const Text(
+                            'Enable Biometric / PIN Lock',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.charcoalInk,
+                            ),
+                          ),
+                          subtitle: const Text(
+                            'Require authentication to open the app',
+                            style: TextStyle(
+                              color: AppColors.mutedSage,
+                              fontSize: 12,
+                            ),
+                          ),
                           value: _enableAppLock,
                           activeColor: AppColors.brandAction,
                           onChanged: (val) {
-                            setState(() {
-                              _enableAppLock = val;
-                            });
+                            setState(() => _enableAppLock = val);
                           },
                         ),
                       ),
@@ -111,39 +141,82 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ],
               ),
             ),
+
+            // ── Page dots — always visible ────────────────────────────────
             Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: List.generate(3, (index) {
-                      return AnimatedContainer(
-                        duration: 300.ms,
-                        margin: const EdgeInsets.only(right: 8),
-                        height: 8,
-                        width: _currentPage == index ? 24 : 8,
-                        decoration: BoxDecoration(
-                          color: _currentPage == index ? AppColors.brandAction : AppColors.lightBorder,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      );
-                    }),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_currentPage < 2) {
-                        _pageController.nextPage(duration: 400.ms, curve: Curves.easeOutCubic);
-                      } else {
-                        _completeOnboarding();
-                      }
-                    },
-                    child: Text(
-                      _currentPage == 2 ? 'Get Started' : 'Next',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(3, (index) {
+                  return AnimatedContainer(
+                    duration: 300.ms,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    height: 8,
+                    width: _currentPage == index ? 24 : 8,
+                    decoration: BoxDecoration(
+                      color: _currentPage == index
+                          ? AppColors.brandAction
+                          : AppColors.lightBorder,
+                      borderRadius: BorderRadius.circular(4),
                     ),
+                  );
+                }),
+              ),
+            ),
+
+            // ── Footer button — full-width "Get Started" on last page ─────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 280),
+                switchInCurve: Curves.easeOut,
+                switchOutCurve: Curves.easeIn,
+                transitionBuilder: (child, animation) => FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, 0.12),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
                   ),
-                ],
+                ),
+                child: _currentPage == 2
+                    ? ElevatedButton(
+                        key: const ValueKey('get_started'),
+                        onPressed: _completeOnboarding,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 54),
+                        ),
+                        child: const Text(
+                          'Get Started',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      )
+                    : Row(
+                        key: const ValueKey('next_row'),
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          SizedBox(
+                            height: 54,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                _pageController.nextPage(
+                                  duration: 400.ms,
+                                  curve: Curves.easeOutCubic,
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(120, 54),
+                              ),
+                              child: const Text(
+                                'Next',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
               ),
             ),
           ],
@@ -152,7 +225,76 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildPage({required String title, required String description, required IconData icon, Widget? actionWidget}) {
+  /// Notification button widget — shows granted/pending state with animation.
+  Widget _buildNotificationWidget() {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 350),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (child, animation) => FadeTransition(
+        opacity: animation,
+        child: ScaleTransition(scale: animation, child: child),
+      ),
+      child: _notificationGranted
+          ? _buildGrantedBadge()
+          : _buildRequestButton(),
+    );
+  }
+
+  Widget _buildGrantedBadge() {
+    return Container(
+      key: const ValueKey('granted'),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0FDF4), // green-50
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFBBF7D0)), // green-200
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.check_circle_rounded,
+              color: Color(0xFF16A34A), size: 20), // green-600
+          const SizedBox(width: 10),
+          Text(
+            'Reminders Enabled',
+            style: TextStyle(
+              color: const Color(0xFF15803D), // green-700
+              fontWeight: FontWeight.w600,
+              fontSize: 15,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRequestButton() {
+    return OutlinedButton.icon(
+      key: const ValueKey('request'),
+      onPressed: _checkingNotification ? null : _requestNotificationPermission,
+      icon: _checkingNotification
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.notifications_active_outlined),
+      label: const Text('Enable Daily Reminders'),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.charcoalInk,
+        iconColor: AppColors.charcoalInk,
+        minimumSize: const Size(0, 54),
+      ),
+    );
+  }
+
+  Widget _buildPage({
+    required String title,
+    required String description,
+    required IconData icon,
+    Widget? actionWidget,
+  }) {
     return Padding(
       padding: const EdgeInsets.all(32.0),
       child: Column(
@@ -166,7 +308,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               borderRadius: BorderRadius.circular(24),
             ),
             child: Icon(icon, size: 64, color: AppColors.brandAction),
-          ).animate().scale(delay: 200.ms, duration: 400.ms, curve: Curves.easeOutBack),
+          ).animate().scale(
+              delay: 200.ms,
+              duration: 400.ms,
+              curve: Curves.easeOutBack),
           const SizedBox(height: 48),
           Text(
             title,
@@ -176,7 +321,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               fontWeight: FontWeight.bold,
               height: 1.1,
             ),
-          ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2, end: 0, duration: 400.ms, curve: Curves.easeOut),
+          )
+              .animate()
+              .fadeIn(delay: 400.ms)
+              .slideY(begin: 0.2, end: 0, duration: 400.ms, curve: Curves.easeOut),
           const SizedBox(height: 24),
           Text(
             description,
@@ -185,8 +333,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               fontSize: 18,
               height: 1.5,
             ),
-          ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOut),
-          if (actionWidget != null) actionWidget.animate().fadeIn(delay: 800.ms).slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOut),
+          )
+              .animate()
+              .fadeIn(delay: 600.ms)
+              .slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOut),
+          if (actionWidget != null)
+            actionWidget
+                .animate()
+                .fadeIn(delay: 800.ms)
+                .slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOut),
         ],
       ),
     );

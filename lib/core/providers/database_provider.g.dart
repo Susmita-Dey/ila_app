@@ -172,3 +172,44 @@ final class ReportDaoProvider
 }
 
 String _$reportDaoHash() => r'8571697dddfbd65740c81b4243acd080894d8483';
+
+@ProviderFor(labResultDao)
+final labResultDaoProvider = LabResultDaoProvider._();
+
+final class LabResultDaoProvider
+    extends $FunctionalProvider<LabResultDao, LabResultDao, LabResultDao>
+    with $Provider<LabResultDao> {
+  LabResultDaoProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'labResultDaoProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$labResultDaoHash();
+
+  @$internal
+  @override
+  $ProviderElement<LabResultDao> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  LabResultDao create(Ref ref) {
+    return labResultDao(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(LabResultDao value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<LabResultDao>(value),
+    );
+  }
+}
+
+String _$labResultDaoHash() => r'd29173d2ca99aacbb40a6727a32d30d1a55e775e';

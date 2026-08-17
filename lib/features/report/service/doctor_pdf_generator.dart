@@ -40,10 +40,32 @@ class DoctorPdfGenerator {
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     _buildStatBlock('Total Cycles', '${data.totalCycles} Recorded'),
-                    _buildStatBlock('Cycle Range', '${data.cycleRangeMin} - ${data.cycleRangeMax} Days'),
-                    _buildStatBlock('Median Length', '${data.medianCycleLength} Days'),
+                    _buildStatBlock('Median Length', '${data.medianCycleLength > 0 ? '${data.medianCycleLength} Days' : 'N/A'}'),
+                    _buildStatBlock('Avg Pain', '${data.averagePainScore}/10'),
+                    _buildStatBlock('Luteal Pain', '${data.lutealAveragePainScore}/10'),
                     _buildStatBlock('Med Adherence', '${data.adherencePercentage}%'),
-                    _buildStatBlock('Large Clots / Flooding', '${data.totalHeavyWithClotsDays + data.floodingEventsCount} Days'),
+                    _buildStatBlock('Flooding/Clots', '${data.totalHeavyWithClotsDays + data.floodingEventsCount} Days'),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 12),
+
+              // Tier 4: Rotterdam Phenotype Screening
+              pw.Text('Rotterdam Diagnostic Indicators (PCOS/PMOS)', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.deepPurple900)),
+              pw.SizedBox(height: 4),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(8),
+                decoration: pw.BoxDecoration(
+                  color: PdfColors.purple50,
+                  border: pw.Border.all(color: PdfColors.purple200),
+                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+                ),
+                child: pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildRotterdamFlag('1. Ovulatory Dysfunction', data.rotterdamOvulatoryDysfunction),
+                    _buildRotterdamFlag('2. Hyperandrogenism (Clinical)', data.rotterdamHyperandrogenism),
+                    _buildRotterdamFlag('3. Polycystic Ovaries (PCOM)', data.rotterdamPCOM),
                   ],
                 ),
               ),
@@ -67,6 +89,30 @@ class DoctorPdfGenerator {
                   cellStyle: const pw.TextStyle(fontSize: 7.5),
                   headers: ['Symptom', 'Frequency', 'Clinical Pattern'],
                   data: data.symptomPhaseClusters,
+                ),
+              ],
+
+              if (data.labResultsRows.isNotEmpty) ...[
+                pw.SizedBox(height: 12),
+                pw.Text('Laboratory Results', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: 4),
+                pw.TableHelper.fromTextArray(
+                  headerStyle: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
+                  cellStyle: const pw.TextStyle(fontSize: 7.5),
+                  headers: ['Date', 'Test Name', 'Value', 'Notes'],
+                  data: data.labResultsRows,
+                ),
+              ],
+
+              if (data.metabolicRows.isNotEmpty) ...[
+                pw.SizedBox(height: 12),
+                pw.Text('Metabolic & Anthropometric Trends', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: 4),
+                pw.TableHelper.fromTextArray(
+                  headerStyle: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
+                  cellStyle: const pw.TextStyle(fontSize: 7.5),
+                  headers: ['Date', 'Weight', 'W/H Ratio', 'Clinical Signs (Insulin Resistance)'],
+                  data: data.metabolicRows,
                 ),
               ],
 
@@ -120,6 +166,24 @@ class DoctorPdfGenerator {
         pw.Text(label, style: const pw.TextStyle(fontSize: 6.5, color: PdfColors.grey600)),
         pw.SizedBox(height: 2),
         pw.Text(value, style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+      ],
+    );
+  }
+
+  static pw.Widget _buildRotterdamFlag(String label, bool isPresent) {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text(label, style: const pw.TextStyle(fontSize: 7.5, color: PdfColors.grey800)),
+        pw.SizedBox(height: 2),
+        pw.Text(
+          isPresent ? 'YES / FLAGGED' : 'Not Indicated',
+          style: pw.TextStyle(
+            fontSize: 9, 
+            fontWeight: pw.FontWeight.bold, 
+            color: isPresent ? PdfColors.red900 : PdfColors.grey600,
+          ),
+        ),
       ],
     );
   }

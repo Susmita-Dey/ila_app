@@ -10,7 +10,30 @@ class DoctorReportData {
   final String spottingColorProfile;
   final List<List<String>> cycleRows;
   final List<List<String>> symptomPhaseClusters; // [Symptom, Frequency, Cluster]
+  final List<List<String>> labResultsRows; // [Date, Test Name, Value, Notes]
   final Map<String, String>? treatmentBenchmark; // Pre- vs Post- stats
+
+  // ── Tier 1 Clinical Fields ─────────────────────────────────────────────────
+  /// Number of months where the user explicitly logged an anovulatory/no-bleed event.
+  final int anovulatoryMonthsLogged;
+
+  /// Average NRS pain score (0.0–10.0) across all events where pain was assessed.
+  /// Excludes events where painIntensity is null (pre-v3 data or unassessed days).
+  final double averagePainScore;
+
+  /// Highest single-day NRS pain score recorded in the period.
+  final int peakPainScore;
+
+  /// Average NRS pain score specifically within the luteal phase (PMDD indicator).
+  final double lutealAveragePainScore;
+
+  // Tier 4: Rotterdam Criteria Screening
+  final bool rotterdamOvulatoryDysfunction;
+  final bool rotterdamHyperandrogenism;
+  final bool rotterdamPCOM;
+
+  // Tier 4: Metabolic Trends (Date, Weight, Waist, Signs)
+  final List<List<String>> metabolicRows;
 
   DoctorReportData({
     required this.dateRange,
@@ -24,7 +47,16 @@ class DoctorReportData {
     required this.spottingColorProfile,
     required this.cycleRows,
     required this.symptomPhaseClusters,
+    this.labResultsRows = const [],
     this.treatmentBenchmark,
+    this.anovulatoryMonthsLogged = 0,
+    this.averagePainScore = 0.0,
+    this.peakPainScore = 0,
+    this.lutealAveragePainScore = 0.0,
+    this.rotterdamOvulatoryDysfunction = false,
+    this.rotterdamHyperandrogenism = false,
+    this.rotterdamPCOM = false,
+    this.metabolicRows = const [],
   });
 
   /// Fallback empty state for reports
@@ -41,7 +73,12 @@ class DoctorReportData {
       spottingColorProfile: 'N/A',
       cycleRows: [],
       symptomPhaseClusters: [],
+      labResultsRows: [],
       treatmentBenchmark: null,
+      anovulatoryMonthsLogged: 0,
+      averagePainScore: 0.0,
+      peakPainScore: 0,
+      lutealAveragePainScore: 0.0,
     );
   }
 }

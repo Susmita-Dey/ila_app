@@ -9,6 +9,9 @@ mixin _$ReportDaoMixin on DatabaseAccessor<AppDatabase> {
   $RoutineLogsTable get routineLogs => attachedDatabase.routineLogs;
   $TreatmentInterventionsTable get treatmentInterventions =>
       attachedDatabase.treatmentInterventions;
+  $LabResultsTable get labResults => attachedDatabase.labResults;
+  $ClinicalProfileTable get clinicalProfile => attachedDatabase.clinicalProfile;
+  $MetabolicLogsTable get metabolicLogs => attachedDatabase.metabolicLogs;
   ReportDaoManager get managers => ReportDaoManager(this);
 }
 
@@ -24,4 +27,11 @@ class ReportDaoManager {
   $$TreatmentInterventionsTableTableManager get treatmentInterventions =>
       $$TreatmentInterventionsTableTableManager(
           _db.attachedDatabase, _db.treatmentInterventions);
+  $$LabResultsTableTableManager get labResults =>
+      $$LabResultsTableTableManager(_db.attachedDatabase, _db.labResults);
+  $$ClinicalProfileTableTableManager get clinicalProfile =>
+      $$ClinicalProfileTableTableManager(
+          _db.attachedDatabase, _db.clinicalProfile);
+  $$MetabolicLogsTableTableManager get metabolicLogs =>
+      $$MetabolicLogsTableTableManager(_db.attachedDatabase, _db.metabolicLogs);
 }

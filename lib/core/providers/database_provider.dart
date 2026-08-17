@@ -3,6 +3,7 @@ import '../database/app_database.dart';
 import '../database/daos/cycle_dao.dart';
 import '../database/daos/routine_dao.dart';
 import '../database/daos/report_dao.dart';
+import '../database/daos/lab_result_dao.dart';
 
 part 'database_provider.g.dart';
 
@@ -26,4 +27,9 @@ RoutineDao routineDao(Ref ref) {
 @Riverpod(keepAlive: true)
 ReportDao reportDao(Ref ref) {
   return ref.watch(appDatabaseProvider).reportDao;
+}
+
+@Riverpod(keepAlive: true)
+LabResultDao labResultDao(Ref ref) {
+  return ref.watch(appDatabaseProvider).labResultDao;
 }
