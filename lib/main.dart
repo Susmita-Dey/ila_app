@@ -162,6 +162,8 @@ class _ImyraAppState extends ConsumerState<ImyraApp> with WidgetsBindingObserver
 
       if (_backgroundedTime != null) {
         final diff = DateTime.now().difference(_backgroundedTime!);
+        _backgroundedTime = null; // Clear it so we don't trigger again when the prompt closes
+        
         // Only lock if backgrounded for more than 10 seconds
         if (diff.inSeconds > 10) {
           _authenticate();
@@ -170,8 +172,6 @@ class _ImyraAppState extends ConsumerState<ImyraApp> with WidgetsBindingObserver
             _obscureUI = false;
           });
         }
-      } else {
-        _authenticate();
       }
     }
   }
