@@ -100,7 +100,21 @@ DoctorReportData _aggregateClinicalData(Map<String, dynamic> payload) {
   }).toList();
 
   // 2. Calculate Cycle Statistics based on True Cycle Starts
-  final trueCycles = cycles.where((c) => c.isTrueCycleStart).toList();
+  // Enforce 10-day buffer rule: consecutive true starts within 10 days are part of the same cycle.
+  final rawTrueCycles = cycles.where((c) => c.isTrueCycleStart).toList();
+  final List<CycleEvent> trueCycles = [];
+  
+  for (var c in rawTrueCycles) {
+    if (trueCycles.isEmpty) {
+      trueCycles.add(c);
+    } else {
+      final diff = AppDateUtils.daysBetween(trueCycles.last.date, c.date);
+      if (diff >= 10) {
+        trueCycles.add(c);
+      }
+    }
+  }
+  
   int totalCycles = trueCycles.length;
   List<int> cycleLengths = [];
   

@@ -20,7 +20,7 @@ class _QuickLogSheetState extends ConsumerState<QuickLogSheet> {
 
   // ── Cycle start disambiguation ──────────────────────────────────────────────
   // Auto-set: Heavy/Medium → true; Spotting → false. User can override.
-  bool _isTrueCycleStart = true;
+  bool _isTrueCycleStart = false;
   bool _cycleStartManuallyOverridden = false;
 
   // ── Pain (NRS) ──────────────────────────────────────────────────────────────
@@ -576,8 +576,8 @@ class _QuickLogSheetState extends ConsumerState<QuickLogSheet> {
       accent = AppColors.brandAction;
       accentBg = AppColors.brandLight;
     } else if (category.contains('Systemic')) {
-      accent = AppColors.softLavender;
-      accentBg = AppColors.softLavender.withValues(alpha: 0.12);
+      accent = AppColors.deepInk; // Use dark color instead of light softLavender
+      accentBg = AppColors.softLavender; // Use the light color for the background
     } else {
       accent = AppColors.mutedSage;
       accentBg = AppColors.mutedSage.withValues(alpha: 0.10);
