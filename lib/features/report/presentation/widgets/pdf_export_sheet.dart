@@ -2,9 +2,9 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:printing/printing.dart';
-import '../../../core/theme/app_theme.dart';
-import '../domain/report_payload.dart';
-import '../presentation/report_controller.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../domain/report_payload.dart';
+import '../report_controller.dart';
 
 class PdfExportConfigSheet extends StatefulWidget {
   const PdfExportConfigSheet({super.key});
@@ -209,13 +209,11 @@ class PdfSuccessSheet extends StatelessWidget {
           ),
           const SizedBox(height: 32),
           
-          ElevatedButton.icon(
+          ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
               Printing.layoutPdf(onLayout: (format) async => pdfBytes);
             },
-            icon: const Icon(Icons.remove_red_eye_outlined),
-            label: const Text('View PDF', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.cardBg,
               foregroundColor: AppColors.deepInk,
@@ -223,19 +221,24 @@ class PdfSuccessSheet extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               side: const BorderSide(color: AppColors.lightBorder),
               elevation: 0,
+              alignment: Alignment.center,
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.remove_red_eye_outlined),
+                SizedBox(width: 8),
+                Text('View PDF', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ],
             ),
           ),
           const SizedBox(height: 12),
           
-          ElevatedButton.icon(
+          ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              // Saving via layoutPdf acts as a download mechanism on mobile.
-              // Alternatively, the native share sheet also has "Save to Files".
               Printing.layoutPdf(onLayout: (format) async => pdfBytes, name: 'Imyra_clinical_summary.pdf');
             },
-            icon: const Icon(Icons.download_outlined),
-            label: const Text('Save / Download', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.cardBg,
               foregroundColor: AppColors.deepInk,
@@ -243,23 +246,39 @@ class PdfSuccessSheet extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               side: const BorderSide(color: AppColors.lightBorder),
               elevation: 0,
+              alignment: Alignment.center,
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.download_outlined),
+                SizedBox(width: 8),
+                Text('Save / Download', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ],
             ),
           ),
           const SizedBox(height: 12),
           
-          ElevatedButton.icon(
+          ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
               Printing.sharePdf(bytes: pdfBytes, filename: 'Imyra_clinical_summary.pdf');
             },
-            icon: const Icon(Icons.ios_share_outlined),
-            label: const Text('Share PDF', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.brandAction,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               elevation: 0,
+              alignment: Alignment.center,
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.ios_share_outlined),
+                SizedBox(width: 8),
+                Text('Share PDF', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ],
             ),
           ),
         ],

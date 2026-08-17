@@ -43,6 +43,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
             children: [
               // Range Selector
               SegmentedButton<int>(
+                emptySelectionAllowed: true,
                 segments: const [
                   ButtonSegment(value: 3, label: Text('3 Months')),
                   ButtonSegment(value: 6, label: Text('6 Months')),
@@ -50,7 +51,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                 ],
                 selected: {_selectedMonths},
                 onSelectionChanged: (Set<int> newSelection) async {
-                  final selection = newSelection.first;
+                  // If user taps the already selected segment, it returns empty.
+                  final selection = newSelection.isEmpty ? _selectedMonths : newSelection.first;
 
                   if (selection == 0) {
                     final now = DateTime.now();
@@ -93,8 +95,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                   ),
                   child: state.isGenerating
                       ? const Center(child: CircularProgressIndicator())
-                      : (data == null || data.totalCycles == 0)
-                          ? _buildEmptyState()
+                      : (data == null || data.isEmptyData)
+                          ? _buildEmptyState(isCustomRange: _selectedMonths == 0)
                           : _buildDataView(data),
                 ),
               ),
@@ -115,7 +117,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     ElevatedButton.icon(
-                      onPressed: state.isGenerating || data == null || data.totalCycles == 0
+                      onPressed: state.isGenerating || data == null
                           ? null
                           : () {
                               showModalBottomSheet(
@@ -156,29 +158,31 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
 
   // ── Empty State ──────────────────────────────────────────────────────────────
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState({bool isCustomRange = false}) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const IllustrationReport(size: 140),
           const SizedBox(height: 20),
-          const Text(
-            'Your health story, visualised.',
+          Text(
+            isCustomRange ? 'No data for this date range' : 'Your health story, visualised.',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               color: AppColors.deepInk,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 10),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              'Log your period and medication for a cycle or two — then your cycle lengths, adherence, and symptom patterns will appear here.',
+              isCustomRange 
+                ? 'We couldn\'t find any logged cycles, symptoms, or medications between the dates you selected. Try picking a wider date range.'
+                : 'Log your period and medication for a cycle or two — then your cycle lengths, adherence, and symptom patterns will appear here.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.mutedSage, fontSize: 13, height: 1.5),
+              style: const TextStyle(color: AppColors.mutedSage, fontSize: 13, height: 1.5),
             ),
           ),
         ],
@@ -422,7 +426,15 @@ class _CycleLengthBars extends StatelessWidget {
     }).where((v) => v > 0).toList();
 
     if (lengths.isEmpty) {
-      return const SizedBox(height: 110);
+      return const SizedBox(
+        height: 110,
+        child: Center(
+          child: Text(
+            'No cycles recorded in this range.',
+            style: TextStyle(color: AppColors.mutedSage, fontSize: 13),
+          ),
+        ),
+      );
     }
 
     final maxVal = lengths.reduce(math.max);

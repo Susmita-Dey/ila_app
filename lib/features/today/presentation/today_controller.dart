@@ -47,28 +47,18 @@ class TodayController extends _$TodayController {
 
     final controller = StreamController<TodayState>();
     StreamSubscription? routinesSub;
-    final Map<int, StreamSubscription> logSubs = {};
+    StreamSubscription? logsSub;
 
     ref.onDispose(() {
       routinesSub?.cancel();
-      for (final sub in logSubs.values) {
-        sub.cancel();
-      }
+      logsSub?.cancel();
       controller.close();
     });
 
     // Watch all active routines
-    routinesSub = dao.watchActiveRoutines().listen((routines) async {
-      // Cancel stale log subscriptions for removed routines
-      final activeIds = routines.map((r) => r.id).toSet();
-      for (final id in logSubs.keys.toList()) {
-        if (!activeIds.contains(id)) {
-          await logSubs[id]?.cancel();
-          logSubs.remove(id);
-        }
-      }
-
+    routinesSub = dao.watchActiveRoutines().listen((routines) {
       if (routines.isEmpty) {
+        logsSub?.cancel();
         controller.add(const TodayState());
         return;
       }
@@ -80,79 +70,68 @@ class TodayController extends _$TodayController {
       }).toList();
 
       if (validRoutines.isEmpty) {
+        logsSub?.cancel();
         controller.add(const TodayState());
         return;
       }
 
-      // Compute phase + missed logs per routine
-      final List<RoutineCardState> cards = [];
-      final List<RoutineLog> allMissed = [];
+      final activeIds = validRoutines.map((r) => r.id).toList();
+      final threeDaysAgo = now.subtract(const Duration(days: 3));
 
-      for (final routine in validRoutines) {
-        PhaseState phaseState;
-        if (routine.regimenType == 'Cyclic_21_7') {
-          phaseState = PhaseState.calculate(
-            startDate: routine.startDate,
-            targetDate: now,
-            activeDays: routine.activeDays,
-            breakDays: routine.breakDays,
-          );
-        } else {
-          phaseState = PhaseState(
-            currentPhase: 1,
-            dayInPhase: now.difference(routine.startDate).inDays + 1,
-            totalPhaseDays: null,
-            isBreakPeriod: false,
-          );
-        }
+      logsSub?.cancel();
+      logsSub = dao.watchRecentLogsForRoutines(activeIds, threeDaysAgo, now).listen((allRecentLogs) {
+        final List<RoutineCardState> cards = [];
+        final List<RoutineLog> allMissed = [];
 
-        // Missed logs past 72 h
-        final threeDaysAgo = now.subtract(const Duration(days: 3));
-        final recentLogs =
-            await dao.getLogsInRange(routine.id, threeDaysAgo, now.subtract(const Duration(days: 1)));
+        for (final routine in validRoutines) {
+          PhaseState phaseState;
+          if (routine.regimenType == 'Cyclic_21_7') {
+            phaseState = PhaseState.calculate(
+              startDate: routine.startDate,
+              targetDate: now,
+              activeDays: routine.activeDays,
+              breakDays: routine.breakDays,
+            );
+          } else {
+            phaseState = PhaseState(
+              currentPhase: 1,
+              dayInPhase: now.difference(routine.startDate).inDays + 1,
+              totalPhaseDays: null,
+              isBreakPeriod: false,
+            );
+          }
 
-        for (int i = 1; i <= 3; i++) {
-          final d = now.subtract(Duration(days: i));
-          final pastPhase = PhaseState.calculate(
-            startDate: routine.startDate,
-            targetDate: d,
-            activeDays: routine.activeDays,
-            breakDays: routine.breakDays,
-          );
-          if (!pastPhase.isBreakPeriod) {
-            final logForD =
-                recentLogs.where((l) => AppDateUtils.isSameDay(l.scheduledDate, d)).firstOrNull;
-            if (logForD == null || logForD.status == 'Missed') {
-              allMissed.add(RoutineLog(
-                id: logForD?.id ?? 0,
-                routineId: routine.id,
-                scheduledDate: AppDateUtils.stripTime(d),
-                status: 'Missed',
-                completedAt: logForD?.completedAt,
-              ));
+          final routineLogs = allRecentLogs.where((l) => l.routineId == routine.id).toList();
+
+          // Calculate missed logs for past 3 days (excluding today)
+          for (int i = 1; i <= 3; i++) {
+            final d = now.subtract(Duration(days: i));
+            final pastPhase = PhaseState.calculate(
+              startDate: routine.startDate,
+              targetDate: d,
+              activeDays: routine.activeDays,
+              breakDays: routine.breakDays,
+            );
+            if (!pastPhase.isBreakPeriod) {
+              final logForD = routineLogs.where((l) => AppDateUtils.isSameDay(l.scheduledDate, d)).firstOrNull;
+              if (logForD == null || logForD.status == 'Missed') {
+                allMissed.add(RoutineLog(
+                  id: logForD?.id ?? 0,
+                  routineId: routine.id,
+                  scheduledDate: AppDateUtils.stripTime(d),
+                  status: 'Missed',
+                  completedAt: logForD?.completedAt,
+                ));
+              }
             }
           }
+
+          final todayLog = routineLogs.where((l) => AppDateUtils.isSameDay(l.scheduledDate, now)).firstOrNull;
+          cards.add(RoutineCardState(routine: routine, phaseState: phaseState, todayLog: todayLog));
         }
 
-        // Subscribe to today's log for this routine
-        logSubs[routine.id]?.cancel();
-        logSubs[routine.id] = dao.watchLogForDate(routine.id, now).listen((todayLog) {
-          // Rebuild card list with updated log for this routine
-          final updatedCards = validRoutines.map((r) {
-            if (r.id == routine.id) {
-              return RoutineCardState(routine: r, phaseState: phaseState, todayLog: todayLog);
-            }
-            final existing = cards.where((c) => c.routine.id == r.id).firstOrNull;
-            return existing ??
-                RoutineCardState(routine: r, phaseState: phaseState, todayLog: null);
-          }).toList();
-          controller.add(TodayState(routineCards: updatedCards, missedRecentLogs: allMissed));
-        });
-
-        cards.add(RoutineCardState(routine: routine, phaseState: phaseState));
-      }
-
-      controller.add(TodayState(routineCards: cards, missedRecentLogs: allMissed));
+        controller.add(TodayState(routineCards: cards, missedRecentLogs: allMissed));
+      });
     });
 
     return controller.stream;

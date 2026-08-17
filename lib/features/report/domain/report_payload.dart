@@ -84,6 +84,15 @@ class DoctorReportData {
       lutealAveragePainScore: 0.0,
     );
   }
+
+  /// Checks if there is absolutely no clinical data in this report
+  bool get isEmptyData =>
+      totalCycles == 0 &&
+      cycleRows.isEmpty &&
+      symptomPhaseClusters.isEmpty &&
+      labResultsRows.isEmpty &&
+      metabolicRows.isEmpty &&
+      anovulatoryMonthsLogged == 0;
 }
 
 class PdfExportOptions {

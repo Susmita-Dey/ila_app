@@ -110,7 +110,11 @@ class _ImyraAppState extends ConsumerState<ImyraApp> with WidgetsBindingObserver
   }
 
   Future<void> _authenticate() async {
-    if (_isAuthenticating || !_appLockEnabled || !_hasOnboarded) return;
+    final prefs = ref.read(sharedPreferencesProvider);
+    final appLockEnabled = prefs.getBool('app_lock_enabled') ?? false;
+    final hasOnboarded = prefs.getBool('has_onboarded') ?? false;
+
+    if (_isAuthenticating || !appLockEnabled || !hasOnboarded) return;
 
     setState(() {
       _isAuthenticating = true;
@@ -135,7 +139,11 @@ class _ImyraAppState extends ConsumerState<ImyraApp> with WidgetsBindingObserver
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!_appLockEnabled || !_hasOnboarded) return;
+    final prefs = ref.read(sharedPreferencesProvider);
+    final appLockEnabled = prefs.getBool('app_lock_enabled') ?? false;
+    final hasOnboarded = prefs.getBool('has_onboarded') ?? false;
+
+    if (!appLockEnabled || !hasOnboarded) return;
 
     if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
       if (!_isAuthenticating) {
@@ -171,11 +179,11 @@ class _ImyraAppState extends ConsumerState<ImyraApp> with WidgetsBindingObserver
   @override
   Widget build(BuildContext context) {
     ref.listen(splashScreenDoneProvider, (previous, current) {
-      if (current == true && _appLockEnabled && _hasOnboarded) {
-        // Set authenticating to true immediately so we don't flash "Tap to unlock"
-        setState(() {
-          _isAuthenticating = true;
-        });
+      final prefs = ref.read(sharedPreferencesProvider);
+      final appLockEnabled = prefs.getBool('app_lock_enabled') ?? false;
+      final hasOnboarded = prefs.getBool('has_onboarded') ?? false;
+      
+      if (current == true && appLockEnabled && hasOnboarded) {
         // Wait for the pushReplacement animation (500ms) to finish before showing prompt.
         // Android cancels BiometricPrompt if launched during a window transition!
         Future.delayed(const Duration(milliseconds: 600), () {

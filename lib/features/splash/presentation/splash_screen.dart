@@ -64,44 +64,46 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.warmIvory,
-      extendBody: true,
-      extendBodyBehindAppBar: true,
-      resizeToAvoidBottomInset: false,
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
-          // ── Imyra geometric logo (Static to perfectly match Native OS Splash) ──
-          const ImyraLogo(size: 72),
+        backgroundColor: AppColors.warmIvory,
+        extendBody: true,
+        extendBodyBehindAppBar: true,
+        resizeToAvoidBottomInset: false,
+        body: Stack(
+          children: [
+            // ── Imyra geometric logo (Static to perfectly match Native OS Splash) ──
+            const Center(
+              child: ImyraLogo(size: 72),
+            ),
 
-          // ── "Imyra" wordmark in elegant italic serif ─────────────────────
-          Positioned(
-            top: MediaQuery.of(context).size.height / 2 + 56, // 36 (half logo) + 20 padding
-            child: const Text(
-              'imyra health',
-              style: TextStyle(
-                fontFamily: 'FleurDeLeah',
-                fontSize: 56,
-                fontWeight: FontWeight.w600,
-                color: AppColors.brandAction,
-                height: 1.0,
-              ),
-            )
-                .animate()
-                .fadeIn(
-                  delay: const Duration(milliseconds: 300),
-                  duration: const Duration(milliseconds: 600),
+            // ── "Imyra" wordmark in elegant italic serif ─────────────────────
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 110), // Offset from center
+                child: const Text(
+                  'imyra health',
+                  style: TextStyle(
+                    fontFamily: 'FleurDeLeah',
+                    fontSize: 56,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.brandAction,
+                    height: 1.0,
+                  ),
                 )
-                .slideY(
-                  begin: 0.3,
-                  end: 0,
-                  delay: const Duration(milliseconds: 300),
-                  duration: const Duration(milliseconds: 600),
-                  curve: Curves.easeOut,
-                ),
-          ),
-        ],
-      ),
-    );
+                    .animate()
+                    .fadeIn(
+                      delay: const Duration(milliseconds: 300),
+                      duration: const Duration(milliseconds: 600),
+                    )
+                    .slideY(
+                      begin: 0.3,
+                      end: 0,
+                      delay: const Duration(milliseconds: 300),
+                      duration: const Duration(milliseconds: 600),
+                      curve: Curves.easeOut,
+                    ),
+              ),
+            ),
+          ],
+        ));
   }
 }

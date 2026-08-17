@@ -114,6 +114,16 @@ class RoutineDao extends DatabaseAccessor<AppDatabase> with _$RoutineDaoMixin {
         .get();
   }
 
+  /// Watch all logs for multiple routines within a date range
+  Stream<List<RoutineLog>> watchRecentLogsForRoutines(List<int> routineIds, DateTime startDate, DateTime endDate) {
+    return (select(routineLogs)
+          ..where((t) =>
+              t.routineId.isIn(routineIds) &
+              t.scheduledDate.isBetweenValues(AppDateUtils.stripTime(startDate), AppDateUtils.stripTime(endDate)))
+          ..orderBy([(t) => OrderingTerm(expression: t.scheduledDate, mode: OrderingMode.asc)]))
+        .watch();
+  }
+
   /// Delete a routine and all its logs
   Future<void> deleteRoutine(int routineId) async {
     await (delete(routineLogs)..where((t) => t.routineId.equals(routineId))).go();
