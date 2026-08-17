@@ -122,7 +122,7 @@ class _PhenotypeSetupSheetState extends ConsumerState<PhenotypeSetupSheet> {
               subtitle: const Text('Confirmed via ultrasound', style: TextStyle(fontSize: 13, color: AppColors.mutedSage)),
               value: _hasPCOM,
               onChanged: (val) => setState(() => _hasPCOM = val),
-              activeColor: AppColors.brandAction,
+              activeThumbColor: AppColors.brandAction,
             ),
             const SizedBox(height: 32),
             ElevatedButton(

@@ -1,4 +1,4 @@
-name: mira_app
+name: imyra_app
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -60,6 +60,7 @@ dependencies:
   google_fonts: ^8.2.1
   flutter_native_splash: ^2.4.8
 
+  pointycastle: ^3.7.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -80,16 +81,16 @@ dev_dependencies:
 flutter_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/branding/ila_icon.png"
+  image_path: "assets/branding/imyra_icon.png"
   adaptive_icon_background: "#FBF9F5"
-  adaptive_icon_foreground: "assets/branding/ila_icon_foreground.png"
+  adaptive_icon_foreground: "assets/branding/imyra_icon_foreground.png"
 
 flutter_native_splash:
   color: "#FBF9F5"
-  image: "assets/branding/ila_splash.png"
+  image: "assets/branding/imyra_splash.png"
   android_12:
     color: "#FBF9F5"
-    image: "assets/branding/ila_splash.png"
+    image: "assets/branding/imyra_splash.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

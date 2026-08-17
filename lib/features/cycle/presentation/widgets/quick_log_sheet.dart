@@ -474,7 +474,7 @@ class _QuickLogSheetState extends ConsumerState<QuickLogSheet> {
           ),
         ),
         value: _isTrueCycleStart,
-        activeColor: AppColors.brandAction,
+        activeThumbColor: AppColors.brandAction,
         onChanged: (val) {
           setState(() {
             _isTrueCycleStart = val;

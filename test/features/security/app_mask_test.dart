@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mira_app/main.dart';
-import 'package:mira_app/core/widgets/ila_logo.dart';
-import 'package:mira_app/core/theme/app_theme.dart';
-import 'package:mira_app/core/providers/database_provider.dart';
-import 'package:mira_app/core/database/app_database.dart';
+import 'package:imyra_app/main.dart';
+import 'package:imyra_app/core/widgets/imyra_logo.dart';
+import 'package:imyra_app/core/providers/database_provider.dart';
+import 'package:imyra_app/core/database/app_database.dart';
 import 'package:drift/native.dart';
 
 void main() {
@@ -20,14 +19,14 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const IlaApp(),
+        child: const ImyraApp(),
       ),
     );
     
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     await tester.pump(const Duration(seconds: 1));
     
-    expect(find.descendant(of: find.byType(Stack), matching: find.byType(IlaLogo)).last, findsOneWidget);
+    expect(find.descendant(of: find.byType(Stack), matching: find.byType(ImyraLogo)).last, findsOneWidget);
     
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump(const Duration(seconds: 1));

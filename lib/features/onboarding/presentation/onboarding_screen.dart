@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart' as fln;
 import '../../../core/theme/app_theme.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../../main.dart';
@@ -84,7 +83,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   _buildPage(
                     title: 'Your health.\nYour space.',
                     description:
-                        'Ila stores all your records securely on this device. '
+                        'Imyra stores all your records securely on this device. '
                         'Zero cloud sync. Zero ads. Just you and your data.',
                     icon: Icons.shield_outlined,
                   ),
@@ -130,7 +129,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             ),
                           ),
                           value: _enableAppLock,
-                          activeColor: AppColors.brandAction,
+                          activeThumbColor: AppColors.brandAction,
                           onChanged: (val) {
                             setState(() => _enableAppLock = val);
                           },

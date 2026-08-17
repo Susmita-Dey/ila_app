@@ -96,7 +96,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         const SnackBar(content: Text('Encrypting backup...')),
                       );
                       final db = ref.read(appDatabaseProvider);
-                      await BackupService.exportEncryptedBackup(db, passphrase!);
+                      await BackupService.exportEncryptedBackup(db, passphrase);
                     }
                   },
                 ),
@@ -213,7 +213,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 32),
           Center(
             child: Text(
-              'Ila Local-First Compliance App\n$_appVersion',
+              'Imyra Local-First Compliance App\n$_appVersion',
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: AppColors.mutedSage,

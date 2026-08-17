@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mira_app/core/utils/date_utils.dart';
+import 'package:imyra_app/core/utils/date_utils.dart';
 
 void main() {
   group('Date Math Loophole Tests', () {

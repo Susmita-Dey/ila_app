@@ -94,7 +94,7 @@ class NotificationService {
 
     await _notificationsPlugin.zonedSchedule(
       id: routineId,
-      title: 'Ila',
+      title: 'Imyra',
       body: 'Time for your $routineName routine.',
       scheduledDate: scheduledDate,
       notificationDetails: platformDetails,

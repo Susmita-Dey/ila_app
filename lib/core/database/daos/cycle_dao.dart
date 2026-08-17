@@ -7,7 +7,7 @@ part 'cycle_dao.g.dart';
 
 @DriftAccessor(tables: [CycleEvents])
 class CycleDao extends DatabaseAccessor<AppDatabase> with _$CycleDaoMixin {
-  CycleDao(AppDatabase db) : super(db);
+  CycleDao(super.db);
 
   /// Get recent cycle events (all types, ordered DESC).
   Stream<List<CycleEvent>> watchRecentEvents({int limit = 100}) {

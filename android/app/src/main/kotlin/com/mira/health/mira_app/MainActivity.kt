@@ -1,4 +1,4 @@
-package com.ila.health.mira_app
+package com.imyra.health.imyra_app
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 import android.os.Bundle

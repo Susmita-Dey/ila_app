@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mira_app/features/routines/domain/phase_state_machine.dart';
+import 'package:imyra_app/features/routines/domain/phase_state_machine.dart';
 
 void main() {
   group('PhaseStateMachine Deterministic 21/7 Logic', () {

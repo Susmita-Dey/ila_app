@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/widgets/ila_logo.dart';
+import '../../../core/widgets/imyra_logo.dart';
 import '../../../main.dart';
 import '../../onboarding/presentation/onboarding_screen.dart';
 
@@ -69,8 +69,8 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // ── Ila geometric logo ────────────────────────────────────────
-            const IlaLogo(size: 72)
+            // ── Imyra geometric logo ────────────────────────────────────────
+            const ImyraLogo(size: 72)
                 .animate()
                 .scale(
                   begin: const Offset(0.7, 0.7),
@@ -82,9 +82,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
             const SizedBox(height: 20),
 
-            // ── "Ila" wordmark in elegant italic serif ─────────────────────
+            // ── "Imyra" wordmark in elegant italic serif ─────────────────────
             Text(
-              'Ila Health',
+              'Imyra Health',
               style: GoogleFonts.fleurDeLeah(
                 fontSize: 56, // Fleur De Leah is quite delicate, so bumping the size up slightly helps legibility
                 fontWeight: FontWeight.w600,

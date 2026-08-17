@@ -4,17 +4,15 @@ import 'core/theme/app_theme.dart';
 import 'features/today/presentation/today_screen.dart';
 import 'features/report/presentation/report_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
-import 'features/onboarding/presentation/onboarding_screen.dart';
 import 'features/splash/presentation/splash_screen.dart';
 import 'core/notifications/notification_service.dart';
 import 'core/diagnostics/error_logger.dart';
 import 'dart:ui';
-import 'core/widgets/ila_logo.dart';
+import 'core/widgets/imyra_logo.dart';
 import 'core/services/auth_service.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
 
 void main() async {
@@ -56,22 +54,22 @@ void main() async {
 
   runApp(
     const ProviderScope(
-      child: IlaApp(),
+      child: ImyraApp(),
     ),
   );
 }
 
-class IlaApp extends StatefulWidget {
-  const IlaApp({super.key});
+class ImyraApp extends StatefulWidget {
+  const ImyraApp({super.key});
 
   @override
-  State<IlaApp> createState() => _IlaAppState();
+  State<ImyraApp> createState() => _ImyraAppState();
 }
 
-class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
+class _ImyraAppState extends State<ImyraApp> with WidgetsBindingObserver {
   bool _obscureUI = false; // Default to false until we know app lock is enabled
   bool _isAuthenticating = false;
-  bool _isAuthenticated = false;
+
   DateTime? _backgroundedTime;
   bool _appLockEnabled = false;
   // Tracks whether onboarding is done so we don't trigger biometrics mid-flow.
@@ -115,7 +113,6 @@ class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
 
     if (mounted) {
       setState(() {
-        _isAuthenticated = success;
         _obscureUI = !success;
         _isAuthenticating = false;
       });
@@ -137,7 +134,6 @@ class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
         _backgroundedTime = DateTime.now();
         setState(() {
           _obscureUI = true;
-          _isAuthenticated = false;
         });
       }
     } else if (state == AppLifecycleState.resumed) {
@@ -151,7 +147,6 @@ class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
         } else {
           setState(() {
             _obscureUI = false;
-            _isAuthenticated = true;
           });
         }
       } else {
@@ -163,7 +158,7 @@ class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Ila',
+      title: 'Imyra',
       theme: AppTheme.light,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -188,7 +183,7 @@ class _IlaAppState extends State<IlaApp> with WidgetsBindingObserver {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const IlaLogo(size: 80),
+                        const ImyraLogo(size: 80),
                         if (!_isAuthenticating) ...[
                           const SizedBox(height: 24),
                           const Text(

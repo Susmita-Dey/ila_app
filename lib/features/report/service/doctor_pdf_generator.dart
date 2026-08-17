@@ -23,7 +23,7 @@ class DoctorPdfGenerator {
               ),
               pw.SizedBox(height: 4),
               pw.Text(
-                'Observation Window: ${data.dateRange}  |  Source: Ila Local-First Log',
+                'Observation Window: ${data.dateRange}  |  Source: Imyra Local-First Log',
                 style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
               ),
               pw.Divider(thickness: 1.5, color: PdfColors.black),
@@ -40,7 +40,7 @@ class DoctorPdfGenerator {
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     _buildStatBlock('Total Cycles', '${data.totalCycles} Recorded'),
-                    _buildStatBlock('Median Length', '${data.medianCycleLength > 0 ? '${data.medianCycleLength} Days' : 'N/A'}'),
+                    _buildStatBlock('Median Length', data.medianCycleLength > 0 ? '${data.medianCycleLength} Days' : 'N/A'),
                     _buildStatBlock('Avg Pain', '${data.averagePainScore}/10'),
                     _buildStatBlock('Luteal Pain', '${data.lutealAveragePainScore}/10'),
                     _buildStatBlock('Med Adherence', '${data.adherencePercentage}%'),

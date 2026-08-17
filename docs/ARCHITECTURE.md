@@ -1,6 +1,6 @@
-# Ila Architecture
+# Imyra Architecture
 
-Ila is built on a 100% local-first, offline architecture designed to maximize user privacy and clinical utility.
+Imyra is built on a 100% local-first, offline architecture designed to maximize user privacy and clinical utility.
 
 ## 1. System Architecture Flow
 ```mermaid
@@ -27,7 +27,7 @@ graph TD
 ```
 
 ## 2. Database Schema (Drift / SQLite)
-Ila relies on a relational, type-safe SQLite database powered by `drift`.
+Imyra relies on a relational, type-safe SQLite database powered by `drift`.
 
 ```mermaid
 erDiagram
@@ -68,9 +68,9 @@ erDiagram
 - **`Routines` & `RoutineLogs`**: `Routines` defines the regimen (e.g., `Cyclic_21_7` or `Daily`), while `RoutineLogs` tracks the daily adherence (`Taken`, `Missed`). Uses `@TableIndex` on `scheduledDate`.
 
 ## 3. Security, Privacy & Export
-- **App Masking**: The `IlaApp` lifecycle observer instantly flips an obscuring boolean when the app goes into the `paused` or `inactive` state, hiding clinical data from the iOS/Android app switcher.
+- **App Masking**: The `ImyraApp` lifecycle observer instantly flips an obscuring boolean when the app goes into the `paused` or `inactive` state, hiding clinical data from the iOS/Android app switcher.
 - **Biometric Gate (`local_auth`)**: Every time the app resumes or starts, it triggers `AuthService.authenticate()`, blocking the UI until FaceID or Fingerprint is provided (gracefully failing open to PIN if biometrics fail).
-- **AES-256 Encrypted Backups (`encrypt`, `share_plus`)**: The `BackupService` queries the entire SQLite dataset, serializes it to JSON, encrypts it using AES-256 (hardened with PBKDF2 key derivation and a random 16-byte salt), and writes it to a `.ila_backup` file exported through the native OS share sheet.
+- **AES-256 Encrypted Backups (`encrypt`, `share_plus`)**: The `BackupService` queries the entire SQLite dataset, serializes it to JSON, encrypts it using AES-256 (hardened with PBKDF2 key derivation and a random 16-byte salt), and writes it to a `.imyrabackup` file exported through the native OS share sheet.
 
 ## 4. State Management (Riverpod)
 - **Dependency Injection**: Riverpod provides global access to the `AppDatabase` and its associated DAOs (`CycleDao`, `RoutineDao`, `ReportDao`).
@@ -79,4 +79,4 @@ erDiagram
 
 ## 5. UI & Polish (`flutter_animate`)
 - **Micro-Animations**: All primary components (`CycleGraph`, `QuickLogSheet`, `OnboardingScreen`) are augmented with `flutter_animate` to chain fading, sliding, and scaling animations without the boilerplate of Flutter `AnimationController`s.
-- **PCOS Guardrails**: The `CycleGraph` component dynamically measures the screen width using a `LayoutBuilder` and visually caps anomalous cycles (45-120 days) rather than overflowing, alerting the user with an `Ila Rose` warning badge.
+- **PCOS Guardrails**: The `CycleGraph` component dynamically measures the screen width using a `LayoutBuilder` and visually caps anomalous cycles (45-120 days) rather than overflowing, alerting the user with an `Imyra Rose` warning badge.

@@ -7,7 +7,7 @@ part 'lab_result_dao.g.dart';
 
 @DriftAccessor(tables: [LabResults])
 class LabResultDao extends DatabaseAccessor<AppDatabase> with _$LabResultDaoMixin {
-  LabResultDao(AppDatabase db) : super(db);
+  LabResultDao(super.db);
 
   /// Get all lab results, ordered by date DESC.
   Stream<List<LabResult>> watchLabResults() {

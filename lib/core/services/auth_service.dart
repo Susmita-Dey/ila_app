@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 
 class AuthService {
@@ -12,7 +11,7 @@ class AuthService {
       if (!canAuthenticate) return true; // Fail open if device doesn't support biometrics
 
       return await _auth.authenticate(
-        localizedReason: 'Unlock Ila Health to view your private data',
+        localizedReason: 'Unlock Imyra Health to view your private data',
         persistAcrossBackgrounding: true,
         biometricOnly: false,
       );

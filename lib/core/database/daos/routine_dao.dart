@@ -7,7 +7,7 @@ part 'routine_dao.g.dart';
 
 @DriftAccessor(tables: [Routines, RoutineLogs])
 class RoutineDao extends DatabaseAccessor<AppDatabase> with _$RoutineDaoMixin {
-  RoutineDao(AppDatabase db) : super(db);
+  RoutineDao(super.db);
 
   /// Insert a new routine preset
   Future<int> insertRoutine({

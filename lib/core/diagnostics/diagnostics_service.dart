@@ -9,7 +9,7 @@ import 'error_logger.dart';
 class DiagnosticsService {
   static Future<String> compileReport(String? userFeedback, String? category, bool includeDiagnostics) async {
     final buffer = StringBuffer();
-    buffer.writeln('=== Ila TEST FEEDBACK ===');
+    buffer.writeln('=== Imyra TEST FEEDBACK ===');
     buffer.writeln('Generated: ${DateTime.now().toIso8601String()}');
     buffer.writeln('');
     
@@ -77,13 +77,13 @@ class DiagnosticsService {
       final file = File('${directory.path}/Ila_diagnostic_report.txt');
       await file.writeAsString(reportContent);
 
-      final subject = '[Ila Test Feedback] - ${category ?? 'Diagnostics'}';
+      final subject = '[Imyra Test Feedback] - ${category ?? 'Diagnostics'}';
       
       // ignore: deprecated_member_use
       await Share.shareXFiles(
         [XFile(file.path)],
         subject: subject,
-        text: 'Attached is the Ila test diagnostic report.',
+        text: 'Attached is the Imyra test diagnostic report.',
       );
     } catch (e) {
       ErrorLogger.error('Failed to export diagnostics package', e);

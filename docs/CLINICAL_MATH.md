@@ -1,6 +1,6 @@
 # Clinical Math & Diagnostic Algorithms
 
-Ila distinguishes itself from standard period trackers by employing clinical phase clustering based on established diagnostic criteria. This document outlines the logic used by the `ReportDao` to categorize symptoms.
+Imyra distinguishes itself from standard period trackers by employing clinical phase clustering based on established diagnostic criteria. This document outlines the logic used by the `ReportDao` to categorize symptoms.
 
 ## Phase Visualization Flow
 ```mermaid
@@ -21,7 +21,7 @@ gantt
 ## Premenstrual Dysphoric Disorder (PMDD) Clustering
 According to the DSM-5 criteria for PMDD, symptoms must occur in the final week before the onset of menses and begin to improve within a few days after the onset of menses.
 
-To detect this, Ila's algorithm works backwards from confirmed cycle start dates (`isTrueCycleStart = true`):
+To detect this, Imyra's algorithm works backwards from confirmed cycle start dates (`isTrueCycleStart = true`):
 1. **Luteal Phase (PMDD Indicator):** Any symptom logged between **Days -7 and -1** relative to the *next* cycle start date is clustered into the Luteal Phase.
 2. If a specific symptom (e.g., "Severe Anxiety") occurs in this -7 to -1 window across more than 70% of logged cycles, the algorithm flags it in the PDF Report as `⚠️ Luteal Clustering (PMDD)`.
 
@@ -34,4 +34,4 @@ Symptoms associated with menstruation itself (e.g., severe pelvic pain, heavy bl
 Any symptom that falls outside of the Luteal and Menstrual windows is categorized as `Mid-Cycle / Ovulatory`. If a symptom is evenly distributed across all three phases, the report flags it as `Scattered / No Pattern`, which clinically implies the symptom is chronic or unrelated to hormonal fluctuations.
 
 ## The Importance of `isTrueCycleStart`
-A common failure in standard tracking apps is treating pre-menstrual spotting as Day 1 of a cycle, which ruins average cycle length math. Ila allows users to log spotting without triggering a new cycle (via the `isTrueCycleStart` boolean), ensuring the Luteal math is anchored to the true physiological start of menstruation.
+A common failure in standard tracking apps is treating pre-menstrual spotting as Day 1 of a cycle, which ruins average cycle length math. Imyra allows users to log spotting without triggering a new cycle (via the `isTrueCycleStart` boolean), ensuring the Luteal math is anchored to the true physiological start of menstruation.

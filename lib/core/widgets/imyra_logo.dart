@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
-class IlaLogo extends StatelessWidget {
+class ImyraLogo extends StatelessWidget {
   final double size;
   final bool monochrome;
 
-  const IlaLogo({
+  const ImyraLogo({
     super.key,
     this.size = 32,
     this.monochrome = false,
@@ -17,7 +17,7 @@ class IlaLogo extends StatelessWidget {
       width: size,
       height: size,
       child: CustomPaint(
-        painter: _IlaGeometricPainter(
+        painter: _ImyraGeometricPainter(
           brandColor: monochrome ? AppColors.charcoalInk : AppColors.brandAction,
           inkColor: AppColors.charcoalInk,
         ),
@@ -26,11 +26,11 @@ class IlaLogo extends StatelessWidget {
   }
 }
 
-class _IlaGeometricPainter extends CustomPainter {
+class _ImyraGeometricPainter extends CustomPainter {
   final Color brandColor;
   final Color inkColor;
 
-  _IlaGeometricPainter({required this.brandColor, required this.inkColor});
+  _ImyraGeometricPainter({required this.brandColor, required this.inkColor});
 
   @override
   void paint(Canvas canvas, Size size) {

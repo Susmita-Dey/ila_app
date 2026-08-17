@@ -40,9 +40,9 @@ def generate():
     draw.ellipse([392 - r, 732 - r, 392 + r, 732 + r], fill=ink)
     draw.ellipse([632 - r, 732 - r, 632 + r, 732 + r], fill=ink)
 
-    img.save('assets/branding/ila_icon.png')
-    img.save('assets/branding/ila_splash.png')
-    img.save('assets/branding/ila_icon_foreground.png')
+    img.save('assets/branding/imyra_icon.png')
+    img.save('assets/branding/imyra_splash.png')
+    img.save('assets/branding/imyra_icon_foreground.png')
     print('Generated new Editorial Notion-style PNG assets!')
 
 if __name__ == '__main__':

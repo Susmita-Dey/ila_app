@@ -48,9 +48,9 @@ Device Timezone: $timezone
 
     final Uri emailUri = Uri(
       scheme: 'mailto',
-      path: 'ila-support@example.com',
+      path: 'imyra-support@example.com',
       queryParameters: {
-        'subject': '[Ila Feedback] $category - v$appVersion',
+        'subject': '[Imyra Feedback] $category - v$appVersion',
         'body': body,
       },
     );
@@ -63,6 +63,7 @@ Device Timezone: $timezone
     } catch (e) {
       if (context.mounted) {
         await Clipboard.setData(ClipboardData(text: body));
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Could not open email client. Feedback copied to clipboard.'),

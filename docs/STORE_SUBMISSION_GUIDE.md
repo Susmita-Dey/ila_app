@@ -1,21 +1,21 @@
 # Store Submission & Privacy Guide
 
-Because Ila is a strict local-first application designed for clinical compliance and absolute privacy, answering App Store and Google Play privacy questionnaires is incredibly straightforward.
+Because Imyra is a strict local-first application designed for clinical compliance and absolute privacy, answering App Store and Google Play privacy questionnaires is incredibly straightforward.
 
 ## Data Flow Diagram
 ```mermaid
 sequenceDiagram
     participant User
-    participant Ila App
+    participant Imyra App
     participant OS Share Sheet
     participant Doctor
     
-    User->>Ila App: Log Health Data (Symptoms, Cycles)
-    Ila App->>Ila App: Encrypt & Store in Local SQLite
-    Note over Ila App: Data never leaves the device
-    User->>Ila App: Tap "Generate PDF"
-    Ila App->>Ila App: Compile Local Data to PDF
-    Ila App->>OS Share Sheet: Pass PDF File securely via OS
+    User->>Imyra App: Log Health Data (Symptoms, Cycles)
+    Imyra App->>Imyra App: Encrypt & Store in Local SQLite
+    Note over Imyra App: Data never leaves the device
+    User->>Imyra App: Tap "Generate PDF"
+    Imyra App->>Imyra App: Compile Local Data to PDF
+    Imyra App->>OS Share Sheet: Pass PDF File securely via OS
     OS Share Sheet->>Doctor: User Manually Emails/Messages PDF
 ```
 
@@ -24,7 +24,7 @@ sequenceDiagram
 When submitting to App Store Connect, under **App Privacy**:
 1. **Data Collection:** Does your app collect data from this app?
    - **Answer:** **No.**
-2. **Explanation:** Since Ila uses an encrypted SQLite database stored securely within the app's local sandbox, and does not sync to iCloud, Firebase, or any external servers, you technically do not "collect" data off the device. All data remains with the user.
+2. **Explanation:** Since Imyra uses an encrypted SQLite database stored securely within the app's local sandbox, and does not sync to iCloud, Firebase, or any external servers, you technically do not "collect" data off the device. All data remains with the user.
 3. **Resulting Label:** "Data Not Collected". This is a massive selling point for the app.
 
 ## Google Play Console: Data Safety Form

@@ -1,11 +1,11 @@
-# Ila 🌸
+# Imyra 🌸
 **A private, local-first clinical compliance notebook for women.**
 
 [![Flutter Version](https://img.shields.io/badge/Flutter-3.x-blue.svg)](https://flutter.dev)
 [![Database](https://img.shields.io/badge/Database-Drift_SQLite-green.svg)](https://drift.simonbinder.eu/)
 [![Privacy](https://img.shields.io/badge/Privacy-100%25_Local-F43F5E.svg)](#privacy-manifesto)
 
-Ila is not "just another period tracker." Most FemTech apps monetize through fear, predictive vanity, and data extraction. Ila is built for **clinical utility and recall relief**, specifically designed for women managing doctor-directed routines, irregular cycles, and PMDD. 
+Imyra is not "just another period tracker." Most FemTech apps monetize through fear, predictive vanity, and data extraction. Imyra is built for **clinical utility and recall relief**, specifically designed for women managing doctor-directed routines, irregular cycles, and PMDD. 
 
 It generates a standardized clinical PDF for a 7-minute doctor consultation while ensuring the user's intimate health data never leaves her physical device.
 
@@ -25,9 +25,9 @@ It generates a standardized clinical PDF for a 7-minute doctor consultation whil
 
 ## 🎨 Visual Identity & UI
 
-Ila's UI/UX takes inspiration from top-tier productivity utilities (like Cal.com and Todoist) rather than traditional health apps.
+Imyra's UI/UX takes inspiration from top-tier productivity utilities (like Cal.com and Todoist) rather than traditional health apps.
 *   **The Canvas:** Stark, crisp Linen White (`#FAFAFA`) and Absolute Onyx (`#111111`).
-*   **The Signature Color:** **Ila Rose (`#F43F5E`)** — a striking, confident pinkish-rose that drives all primary actions.
+*   **The Signature Color:** **Imyra Rose (`#F43F5E`)** — a striking, confident pinkish-rose that drives all primary actions.
 *   **The Logo:** A bold geometric 'i' combining the Cycle Dot and the Routine Capsule, providing total lock-screen discretion.
 
 ---
@@ -58,7 +58,7 @@ flutter pub get
 
 ### 2. Run Code Generation
 
-Because Ila uses Drift for SQLite and Riverpod for state management, you must run the build runner to generate the data classes:
+Because Imyra uses Drift for SQLite and Riverpod for state management, you must run the build runner to generate the data classes:
 
 ```bash
 dart run build_runner build --delete-conflicting-outputs
@@ -67,7 +67,7 @@ dart run build_runner build --delete-conflicting-outputs
 
 ### 3. Generate Branding Assets
 
-Generate the high-resolution Ila Rose icons and native splash screens:
+Generate the high-resolution Imyra Rose icons and native splash screens:
 
 ```bash
 flutter test lib/core/utils/generate_icon_assets.dart
@@ -106,14 +106,13 @@ flutter test integration_test/app_flow_test.dart
 
 ---
 
-## 🔒 Privacy Manifesto (The "Ila Promise")
+## 🔒 Privacy Manifesto (The "Imyra Promise")
 
 1. **No Tracking:** No analytics SDKs (no Firebase Analytics, no Mixpanel, no Meta Pixel).
 2. **No Ads:** The UI will never push sponsored wellness content.
 3. **Instant Purge:** The Settings menu contains a 1-tap "Erase All Data" button that executes a complete SQL `DROP` on all tables instantly.
 
 ---
-
+<p align="center">
 *Built for women, memory, and peace of mind.*
-
----
+</p>

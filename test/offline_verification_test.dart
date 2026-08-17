@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mira_app/features/report/service/doctor_pdf_generator.dart';
-import 'package:mira_app/features/report/domain/report_payload.dart';
+import 'package:imyra_app/features/report/service/doctor_pdf_generator.dart';
+import 'package:imyra_app/features/report/domain/report_payload.dart';
 
 class OfflineHttpOverrides extends HttpOverrides {
   @override
@@ -49,7 +49,7 @@ void main() {
           // Wait, printing package might attempt to download fonts if not cached?
           // Actually, DoctorPdfGenerator uses GoogleFonts? Let's hope it uses bundled fonts or standard pw.Font.
           // To make the test resilient, we just verify the network wasn't hit.
-          throw e;
+          rethrow;
         }
       }
     });

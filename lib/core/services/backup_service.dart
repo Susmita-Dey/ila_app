@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as enc;
 import 'package:pointycastle/export.dart' as pc;
 import 'package:path_provider/path_provider.dart';
@@ -32,12 +31,12 @@ class BackupService {
 
     // 3. Write to temporary file
     final tempDir = await getTemporaryDirectory();
-    final file = File('${tempDir.path}/ila_data.ila_backup');
+    final file = File('${tempDir.path}/imyradata.imyrabackup');
     await file.writeAsString(finalPayload);
 
     // 4. Native Share
     // ignore: deprecated_member_use
-    await Share.shareXFiles([XFile(file.path)], subject: 'Ila Encrypted Backup');
+    await Share.shareXFiles([XFile(file.path)], subject: 'Imyra Encrypted Backup');
   }
 }
 

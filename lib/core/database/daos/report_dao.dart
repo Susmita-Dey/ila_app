@@ -11,7 +11,7 @@ part 'report_dao.g.dart';
 
 @DriftAccessor(tables: [CycleEvents, Routines, RoutineLogs, TreatmentInterventions, LabResults, ClinicalProfile, MetabolicLogs])
 class ReportDao extends DatabaseAccessor<AppDatabase> with _$ReportDaoMixin {
-  ReportDao(AppDatabase db) : super(db);
+  ReportDao(super.db);
 
   /// Compile raw database entries into the DoctorReportData domain model across any user-selected date range.
   Future<DoctorReportData> generateReport({
@@ -76,7 +76,7 @@ DoctorReportData _aggregateClinicalData(Map<String, dynamic> payload) {
   final profileRaw = payload['profile'] as Map<String, dynamic>?;
   final metabolicRaw = payload['metabolic'] as List<dynamic>;
   final rangeLabel = payload['rangeLabel'] as String;
-  final start = DateTime.parse(payload['startIso']);
+
 
   // Convert JSON maps back to Drift data classes or similar structures for logic
   final cycles = cyclesRaw.map((e) => CycleEvent.fromJson(e as Map<String, dynamic>)).toList();

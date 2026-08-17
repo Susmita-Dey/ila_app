@@ -11,7 +11,7 @@ Fixes # (issue)
 - [ ] UI/UX Polish
 
 ## Privacy & Security Checklist
-<!-- Ila Health is a zero-cloud application. You must verify these constraints before merging. -->
+<!-- Imyra Health is a zero-cloud application. You must verify these constraints before merging. -->
 - [ ] I have not added any third-party telemetry, analytics, or cloud trackers.
 - [ ] This change does not log sensitive clinical data to the console.
 - [ ] If I modified the Drift database schema, I have incremented the schema version and written a migration script.

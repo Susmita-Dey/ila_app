@@ -141,19 +141,23 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
               style: TextStyle(color: AppColors.deepInk, fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
-            _buildRadioTile(
-              title: 'Standard 21/7 Regimen',
-              subtitle: '21 active days followed by 7 break days',
-              value: 'Cyclic_21_7',
+            RadioGroup<String>(
               groupValue: _selectedRegimen,
               onChanged: (val) => setState(() => _selectedRegimen = val!),
-            ),
-            _buildRadioTile(
-              title: 'Continuous Daily',
-              subtitle: 'Daily medication without breaks',
-              value: 'Daily',
-              groupValue: _selectedRegimen,
-              onChanged: (val) => setState(() => _selectedRegimen = val!),
+              child: Column(
+                children: [
+                  _buildRadioTile(
+                    title: 'Standard 21/7 Regimen',
+                    subtitle: '21 active days followed by 7 break days',
+                    value: 'Cyclic_21_7',
+                  ),
+                  _buildRadioTile(
+                    title: 'Continuous Daily',
+                    subtitle: 'Daily medication without breaks',
+                    value: 'Daily',
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 24),
 
@@ -216,8 +220,6 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
     required String title,
     required String subtitle,
     required String value,
-    required String groupValue,
-    required ValueChanged<String?> onChanged,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -225,16 +227,14 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
         color: AppColors.cardBg,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: groupValue == value ? AppColors.deepInk : AppColors.lightBorder,
-          width: groupValue == value ? 2 : 1,
+          color: _selectedRegimen == value ? AppColors.deepInk : AppColors.lightBorder,
+          width: _selectedRegimen == value ? 2 : 1,
         ),
       ),
       child: RadioListTile<String>(
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.deepInk)),
         subtitle: Text(subtitle, style: const TextStyle(color: AppColors.mutedSage, fontSize: 12)),
         value: value,
-        groupValue: groupValue,
-        onChanged: onChanged,
         activeColor: AppColors.deepInk,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),

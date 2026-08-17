@@ -15,7 +15,7 @@ import 'widgets/metabolic_log_sheet.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_provider.dart';
 import '../../../core/utils/dev_seed_data.dart';
-import '../../../core/widgets/ila_logo.dart';
+import '../../../core/widgets/imyra_logo.dart';
 import '../../../core/widgets/illustrations/illustration_caught_up.dart';
 import '../../../core/widgets/illustrations/illustration_routine.dart';
 
@@ -44,10 +44,10 @@ class TodayScreen extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const IlaLogo(size: 26),
+                    const ImyraLogo(size: 26),
                     const SizedBox(width: 8),
                     Text(
-                      'Ila',
+                      'Imyra',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.5,

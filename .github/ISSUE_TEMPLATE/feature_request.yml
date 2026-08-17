@@ -1,12 +1,12 @@
 name: Feature Request
-description: Suggest an idea for Ila Health
+description: Suggest an idea for Imyra Health
 title: "[FEATURE] "
 labels: ["enhancement", "triage"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thank you for suggesting a feature for Ila Health!
+        Thank you for suggesting a feature for Imyra Health!
         *Reminder: We operate under a strict local-first privacy manifesto. Features requesting cloud-sync or third-party analytics will be rejected.*
 
   - type: textarea

@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the **Ila Health** project will be documented in this file.
+All notable changes to the **Imyra Health** project will be documented in this file.
 
 ## [1.2.0] - 2026-08-17
 
@@ -13,7 +13,7 @@ All notable changes to the **Ila Health** project will be documented in this fil
 ## [1.1.0] - 2026-08-16
 
 ### Security
-- **Hardened Local Backups:** Replaced the legacy single-iteration hash with a cryptographically secure **PBKDF2** key derivation function (`pointycastle` 100,000 iterations). Added unique salt prepending to prevent dictionary/brute-force attacks on exported `.ila` backups.
+- **Hardened Local Backups:** Replaced the legacy single-iteration hash with a cryptographically secure **PBKDF2** key derivation function (`pointycastle` 100,000 iterations). Added unique salt prepending to prevent dictionary/brute-force attacks on exported `.imyra` backups.
 
 ### Stability & Performance
 - **Report Generation Optimization:** Offloaded heavy clinical mathematics and adherence aggregation to a background Isolate (`compute`) during PDF generation, preventing UI frame drops when parsing large multi-year date ranges.
@@ -29,13 +29,13 @@ All notable changes to the **Ila Health** project will be documented in this fil
 
 ## [1.0.0] - Launch Release
 
-Welcome to the first official release of **Ila Health**! Built with a relentless focus on absolute privacy, venture-backed utility aesthetics, and clinical accuracy, Ila is designed to be the ultimate safe haven for women's health tracking.
+Welcome to the first official release of **Imyra Health**! Built with a relentless focus on absolute privacy, venture-backed utility aesthetics, and clinical accuracy, Imyra is designed to be the ultimate safe haven for women's health tracking.
 
 ### Added
 - **Zero-Cloud Architecture**: Complete offline implementation using `drift` SQLite.
 - **Biometric Security Gate (`local_auth`)**: App enforces FaceID / TouchID / Fingerprint unlocking automatically upon startup and when resuming from the background.
-- **AES-256 Encrypted Backups**: Introduced a `BackupService` using the `encrypt` package to serialize all clinical data into a single AES-encrypted `ila_data.ila_backup` payload, exported completely offline via `share_plus`.
-- **Dynamic PCOS Cycle Graph**: Added a visual dashboard anchor (`CycleGraph`) to render cycle timelines with strict 45-day PCOS anomaly guardrails and distinct `Ila Rose` warning badges.
+- **AES-256 Encrypted Backups**: Introduced a `BackupService` using the `encrypt` package to serialize all clinical data into a single AES-encrypted `imyradata.imyrabackup` payload, exported completely offline via `share_plus`.
+- **Dynamic PCOS Cycle Graph**: Added a visual dashboard anchor (`CycleGraph`) to render cycle timelines with strict 45-day PCOS anomaly guardrails and distinct `Imyra Rose` warning badges.
 - **Clinical Math & PMDD Clustering**: DSM-5 compliant phase analysis and PDF generation via isolates.
 - **Dynamic Routine Engine**: 21/7 cyclic tracking and daily adherence math, with automated local push reminders scheduled natively via `flutter_local_notifications`.
 - **App Switcher Privacy Mask**: Obscures the UI in the iOS/Android app switcher to prevent accidental data leakage via background screenshots.
