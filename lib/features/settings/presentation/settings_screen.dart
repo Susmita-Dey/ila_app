@@ -80,6 +80,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: Column(
               children: [
                 SwitchListTile(
+                  title: const Text('Medication & Supplements', style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Show medication tracking and daily pill reminders.', style: TextStyle(fontSize: 12)),
+                  value: ref.watch(isRoutineGoalProvider),
+                  activeThumbColor: AppColors.brandAction,
+                  onChanged: (val) async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setBool('is_routine_goal', val);
+                    ref.read(isRoutineGoalProvider.notifier).state = val;
+                  },
+                ),
+                const Divider(height: 1, color: AppColors.lightBorder),
+                SwitchListTile(
                   title: const Text('Advanced Clinical Tracking', style: TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: const Text('Show Metabolic Tracking and Rotterdam Phenotype Config on the home screen.', style: TextStyle(fontSize: 12)),
                   value: ref.watch(advancedClinicalTrackingProvider),
