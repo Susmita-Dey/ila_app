@@ -5,15 +5,16 @@ import 'package:printing/printing.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/report_payload.dart';
 import '../report_controller.dart';
+import '../../../../core/providers/preferences_provider.dart';
 
-class PdfExportConfigSheet extends StatefulWidget {
+class PdfExportConfigSheet extends ConsumerStatefulWidget {
   const PdfExportConfigSheet({super.key});
 
   @override
-  State<PdfExportConfigSheet> createState() => _PdfExportConfigSheetState();
+  ConsumerState<PdfExportConfigSheet> createState() => _PdfExportConfigSheetState();
 }
 
-class _PdfExportConfigSheetState extends State<PdfExportConfigSheet> {
+class _PdfExportConfigSheetState extends ConsumerState<PdfExportConfigSheet> {
   bool _includeVitals = true;
   bool _includeSymptoms = true;
   bool _includeMedications = true;
@@ -48,6 +49,10 @@ class _PdfExportConfigSheetState extends State<PdfExportConfigSheet> {
 
   @override
   Widget build(BuildContext context) {
+    // Read preferences to conditionally show toggles
+    final isRoutineGoal = ref.watch(isRoutineGoalProvider);
+    final isAdvancedClinical = ref.watch(advancedClinicalTrackingProvider);
+
     return Container(
       padding: EdgeInsets.only(
         left: 24,
@@ -105,40 +110,40 @@ class _PdfExportConfigSheetState extends State<PdfExportConfigSheet> {
             value: _includeSymptoms,
             onChanged: (val) => setState(() => _includeSymptoms = val),
           ),
-          const Divider(color: AppColors.lightBorder),
           
-          _buildToggle(
-            title: 'Medications',
-            subtitle: 'Current active medications and adherence rates.',
-            value: _includeMedications,
-            onChanged: (val) => setState(() => _includeMedications = val),
-          ),
-          const Divider(color: AppColors.lightBorder),
+          if (isRoutineGoal) ...[
+            const Divider(color: AppColors.lightBorder),
+            _buildToggle(
+              title: 'Medications',
+              subtitle: 'Current active medications and adherence rates.',
+              value: _includeMedications,
+              onChanged: (val) => setState(() => _includeMedications = val),
+            ),
+          ],
           
-          _buildToggle(
-            title: 'Metabolic Trends',
-            subtitle: 'Weight, waist-to-hip ratio, and insulin resistance signs.',
-            value: _includeMetabolic,
-            onChanged: (val) => setState(() => _includeMetabolic = val),
-          ),
+          if (isAdvancedClinical) ...[
+            const Divider(color: AppColors.lightBorder),
+            _buildToggle(
+              title: 'Metabolic Trends',
+              subtitle: 'Weight, waist-to-hip ratio, and insulin resistance signs.',
+              value: _includeMetabolic,
+              onChanged: (val) => setState(() => _includeMetabolic = val),
+            ),
+          ],
           
           const SizedBox(height: 32),
-          Consumer(
-            builder: (context, ref, child) {
-              return ElevatedButton(
-                onPressed: _isGenerating ? null : () => _generate(ref),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.brandAction,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
-                ),
-                child: _isGenerating 
-                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                  : const Text('Generate PDF', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              );
-            }
+          ElevatedButton(
+            onPressed: _isGenerating ? null : () => _generate(ref),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.brandAction,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              elevation: 0,
+            ),
+            child: _isGenerating 
+              ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+              : const Text('Generate PDF', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

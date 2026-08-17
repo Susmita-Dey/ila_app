@@ -128,7 +128,7 @@ class _PhenotypeSetupSheetState extends ConsumerState<PhenotypeSetupSheet> {
             ElevatedButton(
               onPressed: _save,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.deepInk,
+                backgroundColor: AppColors.brandAction,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

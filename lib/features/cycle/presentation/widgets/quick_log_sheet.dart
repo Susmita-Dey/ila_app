@@ -177,7 +177,7 @@ class _QuickLogSheetState extends ConsumerState<QuickLogSheet> {
                     }
                   });
                 },
-                selectedColor: AppColors.deepInk,
+                selectedColor: AppColors.brandAction,
                 checkmarkColor: AppColors.warmIvory,
                 labelStyle: TextStyle(
                   color: _selectedFlow == flow
@@ -243,7 +243,7 @@ class _QuickLogSheetState extends ConsumerState<QuickLogSheet> {
                 label: Text(clot),
                 selected: _selectedClots == clot,
                 onSelected: (_) => setState(() => _selectedClots = clot),
-                selectedColor: AppColors.deepInk,
+                selectedColor: AppColors.brandAction,
                 checkmarkColor: AppColors.warmIvory,
                 labelStyle: TextStyle(
                   color: _selectedClots == clot

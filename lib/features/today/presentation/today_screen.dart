@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/services/quote_service.dart';
 import 'today_controller.dart';
@@ -84,19 +85,20 @@ class TodayScreen extends ConsumerWidget {
                       }
                     },
                   ),
-                IconButton(
-                  icon: const Icon(Icons.add_circle_outline,
-                      color: AppColors.deepInk, size: 22),
-                  tooltip: 'Add Medication',
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (_) => const RoutineSetupSheet(),
-                    );
-                  },
-                ),
+                if (isRoutineGoal)
+                  IconButton(
+                    icon: const Icon(Icons.add_circle_outline,
+                        color: AppColors.deepInk, size: 22),
+                    tooltip: 'Add Medication',
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (_) => const RoutineSetupSheet(),
+                      );
+                    },
+                  ),
                 IconButton(
                   icon: const Icon(Icons.settings_outlined,
                       color: AppColors.deepInk, size: 22),
@@ -133,14 +135,14 @@ class TodayScreen extends ConsumerWidget {
                                 .fadeIn(duration: 400.ms)
                                 .slideY(begin: 0.1, end: 0, duration: 400.ms),
                             const SizedBox(height: 12),
-                            
-                            // Clinical & Metabolic Cards (Progressive Disclosure)
-                            if (isAdvancedClinical) ...[
-                              _buildMetabolicCard(context),
-                              const SizedBox(height: 12),
-                              _buildPhenotypeCard(context),
-                              const SizedBox(height: 24),
-                            ],
+                          ],
+                          
+                          // Clinical & Metabolic Cards
+                          if (isAdvancedClinical) ...[
+                            _buildMetabolicCard(context),
+                            const SizedBox(height: 12),
+                            _buildPhenotypeCard(context),
+                            const SizedBox(height: 24),
                           ],
 
                           // Catch-up drawer
@@ -148,33 +150,34 @@ class TodayScreen extends ConsumerWidget {
                             _buildCatchUpDrawer(context, ref, state.missedRecentLogs),
 
                           // Medication cards (one per active routine)
-                          if (state.routineCards.isEmpty && isRoutineGoal)
-                            _buildEmptyRoutineCard(context)
-                          else if (state.routineCards.isNotEmpty)
-                            ...state.routineCards.map((card) =>
-                                _MedicationCard(
-                                  key: ValueKey(card.routine.id),
-                                  cardState: card,
-                                  onMarkTaken: () =>
-                                      ref.read(todayControllerProvider.notifier)
-                                          .markTaken(DateTime.now(),
-                                              routineId: card.routine.id),
-                                  onEdit: () => showModalBottomSheet(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    backgroundColor: Colors.transparent,
-                                    builder: (_) => RoutineSetupSheet(
-                                        routine: card.routine),
-                                  ),
-                                  onDelete: () => _confirmDelete(
-                                      context, ref, card.routine),
-                                )),
+                          if (isRoutineGoal) ...[
+                            if (state.routineCards.isEmpty)
+                              _buildEmptyRoutineCard(context)
+                            else
+                              ...state.routineCards.map((card) =>
+                                  _MedicationCard(
+                                    key: ValueKey(card.routine.id),
+                                    cardState: card,
+                                    onMarkTaken: () =>
+                                        ref.read(todayControllerProvider.notifier)
+                                            .markTaken(DateTime.now(),
+                                                routineId: card.routine.id),
+                                    onEdit: () => showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      backgroundColor: Colors.transparent,
+                                      builder: (_) => RoutineSetupSheet(
+                                          routine: card.routine),
+                                    ),
+                                    onDelete: () => _confirmDelete(
+                                        context, ref, card.routine),
+                                  )),
 
-                          // Add another medicine button (when at least one exists)
-                          if (state.routineCards.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 12.0),
-                              child: OutlinedButton.icon(
+                            // Add another medicine button (when at least one exists)
+                            if (state.routineCards.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 12.0),
+                                child: OutlinedButton.icon(
                                 onPressed: () => showModalBottomSheet(
                                   context: context,
                                   isScrollControlled: true,
@@ -195,6 +198,7 @@ class TodayScreen extends ConsumerWidget {
                                 ),
                               ),
                             ),
+                          ],
                         ],
                       ).animate().fade(duration: 400.ms).slideY(begin: 0.05),
                       loading: () =>
@@ -654,7 +658,7 @@ class _GreetingBlock extends ConsumerWidget {
         const SizedBox(height: 14),
         // ── Daily quote ──────────────────────────────────────────────────────
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
           decoration: BoxDecoration(
             color: AppColors.brandAction.withValues(alpha: 0.04),
             borderRadius: BorderRadius.circular(14),
@@ -663,22 +667,42 @@ class _GreetingBlock extends ConsumerWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('✨', style: TextStyle(fontSize: 14)),
+              Text(
+                '“', 
+                style: GoogleFonts.alice(
+                  fontSize: 28, 
+                  color: AppColors.brandAction, 
+                  height: 1.0, 
+                  fontWeight: FontWeight.bold
+                )
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: quoteAsync.when(
-                  data: (service) => Text(
-                    service.getTodaysQuote(),
-                    style: const TextStyle(
-                      color: AppColors.charcoalInk,
-                      fontSize: 13,
-                      fontStyle: FontStyle.italic,
-                      height: 1.5,
-                      letterSpacing: -0.1,
+                  data: (service) => Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(
+                      '${service.getTodaysQuote()}”',
+                      style: GoogleFonts.playfairDisplay(
+                        color: const Color.fromARGB(192, 127, 3, 3),
+                        fontSize: 14,
+                        fontStyle: FontStyle.italic,
+                        height: 1.5,
+                        letterSpacing: 0.2,
+                      ),
                     ),
                   ),
-                  loading: () => const Text('...', style: TextStyle(color: AppColors.mutedSage)),
-                  error: (_, __) => const Text('Have a wonderful day.', style: TextStyle(color: AppColors.charcoalInk, fontStyle: FontStyle.italic)),
+                  loading: () => Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text('...”', style: GoogleFonts.playfairDisplay(color: AppColors.mutedSage, fontStyle: FontStyle.italic)),
+                  ),
+                  error: (_, __) => Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(
+                      'Have a wonderful day.”', 
+                      style: GoogleFonts.playfairDisplay(color: AppColors.charcoalInk, fontStyle: FontStyle.italic, fontSize: 14)
+                    ),
+                  ),
                 ),
               ),
             ],

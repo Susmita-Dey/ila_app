@@ -404,7 +404,7 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: _selectedRegimen == value ? AppColors.deepInk : AppColors.lightBorder,
+            color: _selectedRegimen == value ? AppColors.brandAction : AppColors.lightBorder,
             width: _selectedRegimen == value ? 2 : 1,
           ),
         ),
@@ -421,7 +421,7 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
                   _selectedRegimen == value
                       ? Icons.radio_button_checked
                       : Icons.radio_button_unchecked,
-                  color: _selectedRegimen == value ? AppColors.deepInk : AppColors.mutedSage,
+                  color: _selectedRegimen == value ? AppColors.brandAction : AppColors.mutedSage,
                 ),
                 const SizedBox(width: 16),
                 Expanded(

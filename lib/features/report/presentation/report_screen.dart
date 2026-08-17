@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import 'report_controller.dart';
 import '../domain/report_payload.dart';
 import '../../../core/widgets/illustrations/illustration_report.dart';
+import '../../../core/providers/preferences_provider.dart';
 import 'widgets/pdf_export_sheet.dart';
 
 class ReportScreen extends ConsumerStatefulWidget {
@@ -29,6 +30,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(reportControllerProvider);
     final data = state.previewData;
+    final isRoutineGoal = ref.watch(isRoutineGoalProvider);
 
     return Scaffold(
       backgroundColor: AppColors.warmIvory,
@@ -97,7 +99,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       ? const Center(child: CircularProgressIndicator())
                       : (data == null || data.isEmptyData)
                           ? _buildEmptyState(isCustomRange: _selectedMonths == 0)
-                          : _buildDataView(data),
+                          : _buildDataView(data, isRoutineGoal),
                 ),
               ),
               const SizedBox(height: 16),
@@ -192,7 +194,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
 
   // ── Data View ────────────────────────────────────────────────────────────────
 
-  Widget _buildDataView(DoctorReportData data) {
+  Widget _buildDataView(DoctorReportData data, bool isRoutineGoal) {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,11 +209,13 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
           Row(
             children: [
               // Adherence donut
-              Expanded(
-                flex: 4,
-                child: _AdherenceDonut(percentage: data.adherencePercentage),
-              ),
-              const SizedBox(width: 16),
+              if (isRoutineGoal) ...[
+                Expanded(
+                  flex: 4,
+                  child: _AdherenceDonut(percentage: data.adherencePercentage),
+                ),
+                const SizedBox(width: 16),
+              ],
               // Cycle length bars
               Expanded(
                 flex: 6,
@@ -229,8 +233,10 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
           _buildMetricRow('Median Cycle Length', '${data.medianCycleLength} days'),
           const Divider(height: 16, color: AppColors.lightBorder),
           _buildMetricRow('Cycle Variation', '${data.cycleRangeMin} – ${data.cycleRangeMax} days'),
-          const Divider(height: 16, color: AppColors.lightBorder),
-          _buildMetricRow('Medication Adherence', '${data.adherencePercentage}%'),
+          if (isRoutineGoal) ...[
+            const Divider(height: 16, color: AppColors.lightBorder),
+            _buildMetricRow('Medication Adherence', '${data.adherencePercentage}%'),
+          ],
           const SizedBox(height: 20),
 
           // ── Recent Cycles ──────────────────────────────────────────────────

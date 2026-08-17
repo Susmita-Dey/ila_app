@@ -163,7 +163,7 @@ class _MetabolicLogSheetState extends ConsumerState<MetabolicLogSheet> {
             ElevatedButton(
               onPressed: _save,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.deepInk,
+                backgroundColor: AppColors.brandAction,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
