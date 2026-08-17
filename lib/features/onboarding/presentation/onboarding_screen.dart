@@ -118,18 +118,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                       builder: (context) => const BackupPassphraseDialog(isRestore: true),
                                     );
                                     if (passphrase != null && context.mounted) {
-                                      SnackbarUtils.show(
+                                      showDialog(
                                         context: context,
-                                        title: 'Restoring...',
-                                        message: 'Decrypting and importing data.',
-                                        contentType: ContentType.help,
+                                        barrierDismissible: false,
+                                        builder: (context) => const Center(child: CircularProgressIndicator()),
                                       );
-                                      final db = ref.read(appDatabaseProvider);
-                                      await BackupService.restoreEncryptedBackup(db, file, passphrase);
-                                      if (context.mounted) {
-                                        Navigator.of(context).pushReplacement(
-                                          MaterialPageRoute(builder: (context) => const MainNavigation()),
-                                        );
+                                      try {
+                                        final db = ref.read(appDatabaseProvider);
+                                        await BackupService.restoreEncryptedBackup(db, file, passphrase);
+                                        if (context.mounted) {
+                                          Navigator.of(context).pushReplacement(
+                                            MaterialPageRoute(builder: (context) => const MainNavigation()),
+                                          );
+                                        }
+                                      } finally {
+                                        if (context.mounted) Navigator.of(context).pop();
                                       }
                                     }
                                   }

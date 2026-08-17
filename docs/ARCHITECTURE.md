@@ -33,6 +33,8 @@ Imyra relies on a relational, type-safe SQLite database powered by `drift`.
 erDiagram
     ROUTINES ||--|{ ROUTINE_LOGS : "tracks adherence"
     CYCLE_EVENTS ||--o| TREATMENT_INTERVENTIONS : "benchmarked against"
+    CLINICAL_PROFILE ||--|{ LAB_RESULTS : "monitors biomarkers"
+    CLINICAL_PROFILE ||--|{ METABOLIC_LOGS : "tracks vitals"
 
     CYCLE_EVENTS {
         int id PK
@@ -60,17 +62,38 @@ erDiagram
         DateTime scheduledDate
         String status
     }
+
+    CLINICAL_PROFILE {
+        int id PK
+        String phenotype
+        bool isDiagnosed
+    }
+
+    LAB_RESULTS {
+        int id PK
+        String testName
+        real value
+        DateTime date
+    }
+
+    METABOLIC_LOGS {
+        int id PK
+        real weight
+        real bloodPressure
+        DateTime date
+    }
 ```
 
 ### Core Tables & Relationships:
 - **`CycleEvents`**: The central table for logging flows, symptoms, and pain. The `isTrueCycleStart` flag differentiates between actual menstrual phase starts (Day 1) and mid-cycle spotting, ensuring median cycle lengths and PMDD predictions are mathematically sound. Uses `@TableIndex` on `date` for 10-year query optimization.
 - **`TreatmentInterventions`**: Logs medical interventions (e.g., "Started Metformin"). This table is cross-referenced against `CycleEvents` to calculate "Pre-Treatment" vs "Post-Treatment" benchmarks (median cycle length, heavy bleeding days).
 - **`Routines` & `RoutineLogs`**: `Routines` defines the regimen (e.g., `Cyclic_21_7` or `Daily`), while `RoutineLogs` tracks the daily adherence (`Taken`, `Missed`). Uses `@TableIndex` on `scheduledDate`.
+- **`ClinicalProfile`, `LabResults`, `MetabolicLogs`**: Phenotype-centric tables specifically designed to support long-term PCOS management and metabolic tracking.
 
 ## 3. Security, Privacy & Export
 - **App Masking**: The `ImyraApp` lifecycle observer instantly flips an obscuring boolean when the app goes into the `paused` or `inactive` state, hiding clinical data from the iOS/Android app switcher.
 - **Biometric Gate (`local_auth`)**: Every time the app resumes or starts, it triggers `AuthService.authenticate()`, blocking the UI until FaceID or Fingerprint is provided (gracefully failing open to PIN if biometrics fail).
-- **AES-256 Encrypted Backups (`encrypt`, `share_plus`)**: The `BackupService` queries the entire SQLite dataset, serializes it to JSON, encrypts it using AES-256 (hardened with PBKDF2 key derivation and a random 16-byte salt), and writes it to a `.imyrabackup` file exported through the native OS share sheet.
+- **AES-256 Encrypted Backups (`encrypt`, `share_plus`)**: The `BackupService` utilizes `compute` Isolates to query the entire SQLite dataset, serialize it to JSON, and encrypt it. The encryption engine employs a strict **PBKDF2 key derivation** algorithm (100,000 SHA-256 iterations) with a secure random 16-byte salt to derive the 32-byte key from the user's passphrase. The data is then encrypted via AES-256 and written to a `.imyrabackup` file exported through the native OS share sheet.
 
 ## 4. State Management (Riverpod)
 - **Dependency Injection**: Riverpod provides global access to the `AppDatabase` and its associated DAOs (`CycleDao`, `RoutineDao`, `ReportDao`).

@@ -32,7 +32,7 @@ class BackupService {
     };
 
     // 2. Offload heavy serialization and encryption to a background Isolate
-    final finalPayload = await compute(_performHeavyEncryption, {
+    final finalPayload = await compute(performHeavyEncryption, {
       'data': dataMaps,
       'passphrase': passphrase,
     });
@@ -51,7 +51,7 @@ class BackupService {
     String fileContents = await File(file.path!).readAsString();
 
     // 1. Offload heavy decryption and JSON parsing to a background Isolate
-    final parsedData = await compute(_performHeavyDecryption, {
+    final parsedData = await compute(performHeavyDecryption, {
       'content': fileContents,
       'passphrase': passphrase,
     });
@@ -111,8 +111,9 @@ class BackupService {
   }
 }
 
+@visibleForTesting
 /// Runs in a background Isolate to prevent UI freezing
-String _performHeavyEncryption(Map<String, dynamic> args) {
+String performHeavyEncryption(Map<String, dynamic> args) {
   final dataMaps = args['data'] as Map<String, dynamic>;
   final passphrase = args['passphrase'] as String;
 
@@ -145,8 +146,9 @@ String _performHeavyEncryption(Map<String, dynamic> args) {
   return '${salt.base64}:${iv.base64}:${encrypted.base64}';
 }
 
+@visibleForTesting
 /// Runs in a background Isolate
-Map<String, dynamic> _performHeavyDecryption(Map<String, dynamic> args) {
+Map<String, dynamic> performHeavyDecryption(Map<String, dynamic> args) {
   final content = args['content'] as String;
   final passphrase = args['passphrase'] as String;
 

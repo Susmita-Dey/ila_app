@@ -2,6 +2,15 @@
 
 All notable changes to the **Imyra Health** project will be documented in this file.
 
+## [1.0.0-beta.2] - 2026-08-17
+
+### Phase: Final V2 Polish & Security
+- **Strict UI Loading Guards:** Implemented strict, non-dismissible loading overlays (`CircularProgressIndicator`) wrapped in foolproof `try/finally` execution blocks to completely prevent user interaction during heavy AES-256 cryptographic computations (Backup Export/Restore).
+- **FutureBuilder Anti-Pattern Removal:** Re-architected the "Biometric App Lock" settings toggle to stream directly from `ref.watch(sharedPreferencesProvider)`. This instantly killed unnecessary memory allocations and UI frame jank during full-page rebuilds.
+- **Onboarding Bypass (Restore Flow):** Overhauled the new user flow. The initial welcome screen now features a dedicated "Restore your data" entry point. Returning users can now inject their PBKDF2-derived encrypted backup immediately, bypassing all onboarding surveys.
+- **Expanded SQLite Backups:** The JSON serialization engine now successfully exports and deserializes the newly injected tables: `LabResults`, `ClinicalProfile`, and `MetabolicLogs`.
+- **File Picker Refactor:** Upgraded the `file_picker` dependency to version `12.0.0` to resolve transient dependency collisions with the `device_info_plus` package, refactoring the `PlatformFile` picking API to conform to the new standard.
+
 ## [1.2.0] - 2026-08-17
 
 ### Clinical & Phenotype Engine

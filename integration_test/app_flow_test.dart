@@ -11,6 +11,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // 1. Onboarding
+    expect(find.text('Already have a backup? Restore your data'), findsOneWidget);
     expect(find.text('Continue'), findsOneWidget);
     await tester.tap(find.text('Continue'));
     await tester.pumpAndSettle();

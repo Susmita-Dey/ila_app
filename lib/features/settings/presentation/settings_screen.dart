@@ -69,17 +69,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               borderRadius: BorderRadius.circular(16),
               side: const BorderSide(color: AppColors.lightBorder),
             ),
-            child: FutureBuilder<SharedPreferences>(
-              future: SharedPreferences.getInstance(),
-              builder: (context, snapshot) {
-                final prefs = snapshot.data;
-                final isLocked = prefs?.getBool('app_lock_enabled') ?? false;
+            child: Builder(
+              builder: (context) {
+                final prefs = ref.watch(sharedPreferencesProvider);
+                final isLocked = prefs.getBool('app_lock_enabled') ?? false;
                 return SwitchListTile(
                   title: const Text('Biometric App Lock', style: TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: const Text('Require Face ID / Touch ID to open the app', style: TextStyle(fontSize: 12)),
                   value: isLocked,
                   activeThumbColor: AppColors.brandAction,
-                  onChanged: prefs == null ? null : (val) async {
+                  onChanged: (val) async {
                     await prefs.setBool('app_lock_enabled', val);
                     setState(() {});
                   },
@@ -116,14 +115,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       builder: (context) => const BackupPassphraseDialog(),
                     );
                     if (passphrase != null && context.mounted) {
-                      SnackbarUtils.show(
+                      showDialog(
                         context: context,
-                        title: 'Backup Started',
-                        message: 'Encrypting backup...',
-                        contentType: ContentType.success,
+                        barrierDismissible: false,
+                        builder: (context) => const Center(child: CircularProgressIndicator()),
                       );
-                      final db = ref.read(appDatabaseProvider);
-                      await BackupService.exportEncryptedBackup(db, passphrase);
+                      try {
+                        final db = ref.read(appDatabaseProvider);
+                        await BackupService.exportEncryptedBackup(db, passphrase);
+                        if (context.mounted) {
+                          SnackbarUtils.show(
+                            context: context,
+                            title: 'Backup Complete',
+                            message: 'Encrypted backup generated.',
+                            contentType: ContentType.success,
+                          );
+                        }
+                      } finally {
+                        if (context.mounted) Navigator.of(context).pop();
+                      }
                     }
                   },
                 ),
@@ -147,28 +157,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           );
 
                           if (passphrase != null && context.mounted) {
-                            SnackbarUtils.show(
+                            showDialog(
                               context: context,
-                              title: 'Restoring...',
-                              message: 'Decrypting and importing data.',
-                              contentType: ContentType.help,
+                              barrierDismissible: false,
+                              builder: (context) => const Center(child: CircularProgressIndicator()),
                             );
 
-                            final db = ref.read(appDatabaseProvider);
-                            await BackupService.restoreEncryptedBackup(db, file, passphrase);
+                            try {
+                              final db = ref.read(appDatabaseProvider);
+                              await BackupService.restoreEncryptedBackup(db, file, passphrase);
 
-                            if (context.mounted) {
-                              SnackbarUtils.show(
-                                context: context,
-                                title: 'Restore Complete',
-                                message: 'Data imported successfully.',
-                                contentType: ContentType.success,
-                              );
-                              
-                              ref.invalidate(appDatabaseProvider);
-                              ref.invalidate(todayControllerProvider);
-                              ref.invalidate(cycleControllerProvider);
-                              ref.invalidate(reportControllerProvider);
+                              if (context.mounted) {
+                                SnackbarUtils.show(
+                                  context: context,
+                                  title: 'Restore Complete',
+                                  message: 'Data imported successfully.',
+                                  contentType: ContentType.success,
+                                );
+                                
+                                ref.invalidate(appDatabaseProvider);
+                                ref.invalidate(todayControllerProvider);
+                                ref.invalidate(cycleControllerProvider);
+                                ref.invalidate(reportControllerProvider);
+                              }
+                            } finally {
+                              if (context.mounted) Navigator.of(context).pop();
                             }
                           }
                         }
