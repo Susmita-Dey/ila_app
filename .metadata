@@ -15,9 +15,7 @@ migration:
     - platform: root
       create_revision: 90402df3eb344d178180c31489d8e4facab3a36d
       base_revision: 90402df3eb344d178180c31489d8e4facab3a36d
-    - platform: windows
-      create_revision: 90402df3eb344d178180c31489d8e4facab3a36d
-      base_revision: 90402df3eb344d178180c31489d8e4facab3a36d
+
 
   # User provided section
 
