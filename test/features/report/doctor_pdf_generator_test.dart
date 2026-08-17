@@ -26,8 +26,8 @@ void main() {
         rotterdamHyperandrogenism: true,
         rotterdamPCOM: true,
       );
-
-      final pdfBytes = await DoctorPdfGenerator.generatePdfBytes(payload);
+      final args = PdfExportArgs(payload, const PdfExportOptions());
+      final pdfBytes = await DoctorPdfGenerator.generatePdfBytes(args);
       
       expect(pdfBytes, isNotNull);
       expect(pdfBytes.isNotEmpty, isTrue);

@@ -409,19 +409,41 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
           ),
         ),
         clipBehavior: Clip.antiAlias,
-        child: RadioListTile<String>(
-        title: Text(title,
-            style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.deepInk)),
-        subtitle: Text(subtitle,
-            style: const TextStyle(color: AppColors.mutedSage, fontSize: 12)),
-        value: value,
-        groupValue: _selectedRegimen,
-        onChanged: (val) {
-          if (val != null) setState(() => _selectedRegimen = val);
-        },
-        activeColor: AppColors.deepInk,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      ),
+        child: InkWell(
+          onTap: () {
+            setState(() => _selectedRegimen = value);
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Row(
+              children: [
+                Icon(
+                  _selectedRegimen == value
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked,
+                  color: _selectedRegimen == value ? AppColors.deepInk : AppColors.mutedSage,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.deepInk),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(color: AppColors.mutedSage, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

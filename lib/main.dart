@@ -80,9 +80,6 @@ class _ImyraAppState extends ConsumerState<ImyraApp> with WidgetsBindingObserver
   bool _isAuthenticating = false;
 
   DateTime? _backgroundedTime;
-  bool _appLockEnabled = false;
-  // Tracks whether onboarding is done so we don't trigger biometrics mid-flow.
-  bool _hasOnboarded = false;
 
   @override
   void initState() {
@@ -96,10 +93,6 @@ class _ImyraAppState extends ConsumerState<ImyraApp> with WidgetsBindingObserver
     final isLocked = prefs.getBool('app_lock_enabled') ?? false;
     final hasOnboarded = prefs.getBool('has_onboarded') ?? false;
     if (!mounted) return;
-    setState(() {
-      _appLockEnabled = isLocked;
-      _hasOnboarded = hasOnboarded;
-    });
 
     // Only prompt biometrics if onboarding is complete; never lock mid-onboarding.
     if (isLocked && hasOnboarded) {
@@ -126,7 +119,18 @@ class _ImyraAppState extends ConsumerState<ImyraApp> with WidgetsBindingObserver
     if (mounted) {
       setState(() {
         _obscureUI = !success;
-        _isAuthenticating = false;
+      });
+      
+      // Delay resetting the authenticating flag by 500ms.
+      // This absorbs any rogue AppLifecycleState.inactive events that the OS 
+      // might fire while dismissing the native biometric prompt window, 
+      // preventing the app from instantly locking itself again.
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          setState(() {
+            _isAuthenticating = false;
+          });
+        }
       });
     }
   }

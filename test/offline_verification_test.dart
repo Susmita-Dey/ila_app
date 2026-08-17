@@ -35,9 +35,9 @@ void main() {
         symptomPhaseClusters: [],
         treatmentBenchmark: null,
       );
-
       try {
-        final pdfBytes = await DoctorPdfGenerator.generatePdfBytes(payload);
+        final args = PdfExportArgs(payload, const PdfExportOptions());
+        final pdfBytes = await DoctorPdfGenerator.generatePdfBytes(args);
         
         expect(pdfBytes, isNotNull);
         expect(pdfBytes.isNotEmpty, isTrue);
