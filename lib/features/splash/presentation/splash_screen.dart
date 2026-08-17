@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -85,7 +85,8 @@ class _SplashScreenState extends State<SplashScreen> {
             // ── "Imyra" wordmark in elegant italic serif ─────────────────────
             Text(
               'Imyra Health',
-              style: GoogleFonts.fleurDeLeah(
+              style: const TextStyle(
+                fontFamily: 'FleurDeLeah',
                 fontSize: 56, // Fleur De Leah is quite delicate, so bumping the size up slightly helps legibility
                 fontWeight: FontWeight.w600,
                 color: AppColors.charcoalInk,

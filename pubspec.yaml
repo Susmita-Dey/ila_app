@@ -61,6 +61,7 @@ dependencies:
   flutter_native_splash: ^2.4.8
 
   pointycastle: ^3.7.3
+  awesome_snackbar_content: ^0.1.8
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -135,5 +136,7 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
 
-
-
+  fonts:
+    - family: FleurDeLeah
+      fonts:
+        - asset: assets/fonts/FleurDeLeah-Regular.ttf

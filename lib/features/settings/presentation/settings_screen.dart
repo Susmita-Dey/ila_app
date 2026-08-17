@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/diagnostics/diagnostics_service.dart';
+
 import '../../../core/providers/database_provider.dart';
 import '../../today/presentation/today_controller.dart';
 import '../../cycle/presentation/cycle_controller.dart';
@@ -11,6 +11,8 @@ import '../../../core/services/backup_service.dart';
 import 'widgets/feedback_dialog.dart';
 import 'widgets/backup_passphrase_dialog.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/utils/snackbar_utils.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -92,8 +94,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     );
 
                     if (passphrase != null && context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Encrypting backup...')),
+                      SnackbarUtils.show(
+                        context: context,
+                        title: 'Backup Started',
+                        message: 'Encrypting backup...',
+                        contentType: ContentType.success,
                       );
                       final db = ref.read(appDatabaseProvider);
                       await BackupService.exportEncryptedBackup(db, passphrase);
@@ -135,26 +140,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     );
                   },
                 ),
-                const Divider(height: 1, color: AppColors.lightBorder),
-                ListTile(
-                  leading: const Icon(Icons.bug_report_outlined, color: AppColors.deepInk),
-                  title: const Text('Export Anonymous Diagnostics'),
-                  trailing: const Icon(Icons.file_download_outlined, color: AppColors.mutedSage),
-                  onTap: () async {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Compiling diagnostic report...')),
-                    );
-                    await DiagnosticsService.exportDiagnosticsPackage();
-                  },
-                ),
-                const Divider(height: 1, color: AppColors.lightBorder),
-                ListTile(
-                  leading: const Icon(Icons.warning_amber_rounded, color: Colors.red),
-                  title: const Text('Trigger Test Crash', style: TextStyle(color: Colors.red)),
-                  onTap: () {
-                    throw Exception('Simulated test exception to verify ErrorLogger');
-                  },
-                ),
+
               ],
             ),
           ),
@@ -197,8 +183,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ref.invalidate(cycleControllerProvider);
                           ref.invalidate(reportControllerProvider);
                           if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('All data has been permanently erased.')),
+                            SnackbarUtils.show(
+                              context: context,
+                              title: 'Data Erased',
+                              message: 'All data has been permanently erased.',
+                              contentType: ContentType.failure,
                             );
                           }
                         },

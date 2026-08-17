@@ -32,6 +32,8 @@ class Routines extends Table {
   // V4 fields
   TextColumn get dose => text().nullable()(); // e.g. "500mg"
   TextColumn get notes => text().nullable()();
+  // V6 fields
+  DateTimeColumn get endDate => dateTime().nullable()();
 }
 
 @TableIndex(name: 'idx_routine_logs_date', columns: {#scheduledDate})

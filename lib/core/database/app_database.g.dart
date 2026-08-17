@@ -687,6 +687,12 @@ class $RoutinesTable extends Routines with TableInfo<$RoutinesTable, Routine> {
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
       'notes', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _endDateMeta =
+      const VerificationMeta('endDate');
+  @override
+  late final GeneratedColumn<DateTime> endDate = GeneratedColumn<DateTime>(
+      'end_date', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -698,7 +704,8 @@ class $RoutinesTable extends Routines with TableInfo<$RoutinesTable, Routine> {
         reminderTime,
         isActive,
         dose,
-        notes
+        notes,
+        endDate
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -763,6 +770,10 @@ class $RoutinesTable extends Routines with TableInfo<$RoutinesTable, Routine> {
       context.handle(
           _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
     }
+    if (data.containsKey('end_date')) {
+      context.handle(_endDateMeta,
+          endDate.isAcceptableOrUnknown(data['end_date']!, _endDateMeta));
+    }
     return context;
   }
 
@@ -792,6 +803,8 @@ class $RoutinesTable extends Routines with TableInfo<$RoutinesTable, Routine> {
           .read(DriftSqlType.string, data['${effectivePrefix}dose']),
       notes: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}notes']),
+      endDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}end_date']),
     );
   }
 
@@ -812,6 +825,7 @@ class Routine extends DataClass implements Insertable<Routine> {
   final bool isActive;
   final String? dose;
   final String? notes;
+  final DateTime? endDate;
   const Routine(
       {required this.id,
       required this.name,
@@ -822,7 +836,8 @@ class Routine extends DataClass implements Insertable<Routine> {
       required this.reminderTime,
       required this.isActive,
       this.dose,
-      this.notes});
+      this.notes,
+      this.endDate});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -840,6 +855,9 @@ class Routine extends DataClass implements Insertable<Routine> {
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
     }
+    if (!nullToAbsent || endDate != null) {
+      map['end_date'] = Variable<DateTime>(endDate);
+    }
     return map;
   }
 
@@ -856,6 +874,9 @@ class Routine extends DataClass implements Insertable<Routine> {
       dose: dose == null && nullToAbsent ? const Value.absent() : Value(dose),
       notes:
           notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      endDate: endDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endDate),
     );
   }
 
@@ -873,6 +894,7 @@ class Routine extends DataClass implements Insertable<Routine> {
       isActive: serializer.fromJson<bool>(json['isActive']),
       dose: serializer.fromJson<String?>(json['dose']),
       notes: serializer.fromJson<String?>(json['notes']),
+      endDate: serializer.fromJson<DateTime?>(json['endDate']),
     );
   }
   @override
@@ -889,6 +911,7 @@ class Routine extends DataClass implements Insertable<Routine> {
       'isActive': serializer.toJson<bool>(isActive),
       'dose': serializer.toJson<String?>(dose),
       'notes': serializer.toJson<String?>(notes),
+      'endDate': serializer.toJson<DateTime?>(endDate),
     };
   }
 
@@ -902,7 +925,8 @@ class Routine extends DataClass implements Insertable<Routine> {
           String? reminderTime,
           bool? isActive,
           Value<String?> dose = const Value.absent(),
-          Value<String?> notes = const Value.absent()}) =>
+          Value<String?> notes = const Value.absent(),
+          Value<DateTime?> endDate = const Value.absent()}) =>
       Routine(
         id: id ?? this.id,
         name: name ?? this.name,
@@ -914,6 +938,7 @@ class Routine extends DataClass implements Insertable<Routine> {
         isActive: isActive ?? this.isActive,
         dose: dose.present ? dose.value : this.dose,
         notes: notes.present ? notes.value : this.notes,
+        endDate: endDate.present ? endDate.value : this.endDate,
       );
   Routine copyWithCompanion(RoutinesCompanion data) {
     return Routine(
@@ -931,6 +956,7 @@ class Routine extends DataClass implements Insertable<Routine> {
       isActive: data.isActive.present ? data.isActive.value : this.isActive,
       dose: data.dose.present ? data.dose.value : this.dose,
       notes: data.notes.present ? data.notes.value : this.notes,
+      endDate: data.endDate.present ? data.endDate.value : this.endDate,
     );
   }
 
@@ -946,14 +972,15 @@ class Routine extends DataClass implements Insertable<Routine> {
           ..write('reminderTime: $reminderTime, ')
           ..write('isActive: $isActive, ')
           ..write('dose: $dose, ')
-          ..write('notes: $notes')
+          ..write('notes: $notes, ')
+          ..write('endDate: $endDate')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(id, name, regimenType, activeDays, breakDays,
-      startDate, reminderTime, isActive, dose, notes);
+      startDate, reminderTime, isActive, dose, notes, endDate);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -967,7 +994,8 @@ class Routine extends DataClass implements Insertable<Routine> {
           other.reminderTime == this.reminderTime &&
           other.isActive == this.isActive &&
           other.dose == this.dose &&
-          other.notes == this.notes);
+          other.notes == this.notes &&
+          other.endDate == this.endDate);
 }
 
 class RoutinesCompanion extends UpdateCompanion<Routine> {
@@ -981,6 +1009,7 @@ class RoutinesCompanion extends UpdateCompanion<Routine> {
   final Value<bool> isActive;
   final Value<String?> dose;
   final Value<String?> notes;
+  final Value<DateTime?> endDate;
   const RoutinesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -992,6 +1021,7 @@ class RoutinesCompanion extends UpdateCompanion<Routine> {
     this.isActive = const Value.absent(),
     this.dose = const Value.absent(),
     this.notes = const Value.absent(),
+    this.endDate = const Value.absent(),
   });
   RoutinesCompanion.insert({
     this.id = const Value.absent(),
@@ -1004,6 +1034,7 @@ class RoutinesCompanion extends UpdateCompanion<Routine> {
     this.isActive = const Value.absent(),
     this.dose = const Value.absent(),
     this.notes = const Value.absent(),
+    this.endDate = const Value.absent(),
   })  : name = Value(name),
         regimenType = Value(regimenType),
         startDate = Value(startDate),
@@ -1019,6 +1050,7 @@ class RoutinesCompanion extends UpdateCompanion<Routine> {
     Expression<bool>? isActive,
     Expression<String>? dose,
     Expression<String>? notes,
+    Expression<DateTime>? endDate,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1031,6 +1063,7 @@ class RoutinesCompanion extends UpdateCompanion<Routine> {
       if (isActive != null) 'is_active': isActive,
       if (dose != null) 'dose': dose,
       if (notes != null) 'notes': notes,
+      if (endDate != null) 'end_date': endDate,
     });
   }
 
@@ -1044,7 +1077,8 @@ class RoutinesCompanion extends UpdateCompanion<Routine> {
       Value<String>? reminderTime,
       Value<bool>? isActive,
       Value<String?>? dose,
-      Value<String?>? notes}) {
+      Value<String?>? notes,
+      Value<DateTime?>? endDate}) {
     return RoutinesCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -1056,6 +1090,7 @@ class RoutinesCompanion extends UpdateCompanion<Routine> {
       isActive: isActive ?? this.isActive,
       dose: dose ?? this.dose,
       notes: notes ?? this.notes,
+      endDate: endDate ?? this.endDate,
     );
   }
 
@@ -1092,6 +1127,9 @@ class RoutinesCompanion extends UpdateCompanion<Routine> {
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
+    if (endDate.present) {
+      map['end_date'] = Variable<DateTime>(endDate.value);
+    }
     return map;
   }
 
@@ -1107,7 +1145,8 @@ class RoutinesCompanion extends UpdateCompanion<Routine> {
           ..write('reminderTime: $reminderTime, ')
           ..write('isActive: $isActive, ')
           ..write('dose: $dose, ')
-          ..write('notes: $notes')
+          ..write('notes: $notes, ')
+          ..write('endDate: $endDate')
           ..write(')'))
         .toString();
   }
@@ -2886,6 +2925,7 @@ typedef $$RoutinesTableCreateCompanionBuilder = RoutinesCompanion Function({
   Value<bool> isActive,
   Value<String?> dose,
   Value<String?> notes,
+  Value<DateTime?> endDate,
 });
 typedef $$RoutinesTableUpdateCompanionBuilder = RoutinesCompanion Function({
   Value<int> id,
@@ -2898,6 +2938,7 @@ typedef $$RoutinesTableUpdateCompanionBuilder = RoutinesCompanion Function({
   Value<bool> isActive,
   Value<String?> dose,
   Value<String?> notes,
+  Value<DateTime?> endDate,
 });
 
 final class $$RoutinesTableReferences
@@ -2957,6 +2998,9 @@ class $$RoutinesTableFilterComposer
 
   ColumnFilters<String> get notes => $composableBuilder(
       column: $table.notes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get endDate => $composableBuilder(
+      column: $table.endDate, builder: (column) => ColumnFilters(column));
 
   Expression<bool> routineLogsRefs(
       Expression<bool> Function($$RoutineLogsTableFilterComposer f) f) {
@@ -3019,6 +3063,9 @@ class $$RoutinesTableOrderingComposer
 
   ColumnOrderings<String> get notes => $composableBuilder(
       column: $table.notes, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get endDate => $composableBuilder(
+      column: $table.endDate, builder: (column) => ColumnOrderings(column));
 }
 
 class $$RoutinesTableAnnotationComposer
@@ -3059,6 +3106,9 @@ class $$RoutinesTableAnnotationComposer
 
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get endDate =>
+      $composableBuilder(column: $table.endDate, builder: (column) => column);
 
   Expression<T> routineLogsRefs<T extends Object>(
       Expression<T> Function($$RoutineLogsTableAnnotationComposer a) f) {
@@ -3115,6 +3165,7 @@ class $$RoutinesTableTableManager extends RootTableManager<
             Value<bool> isActive = const Value.absent(),
             Value<String?> dose = const Value.absent(),
             Value<String?> notes = const Value.absent(),
+            Value<DateTime?> endDate = const Value.absent(),
           }) =>
               RoutinesCompanion(
             id: id,
@@ -3127,6 +3178,7 @@ class $$RoutinesTableTableManager extends RootTableManager<
             isActive: isActive,
             dose: dose,
             notes: notes,
+            endDate: endDate,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
@@ -3139,6 +3191,7 @@ class $$RoutinesTableTableManager extends RootTableManager<
             Value<bool> isActive = const Value.absent(),
             Value<String?> dose = const Value.absent(),
             Value<String?> notes = const Value.absent(),
+            Value<DateTime?> endDate = const Value.absent(),
           }) =>
               RoutinesCompanion.insert(
             id: id,
@@ -3151,6 +3204,7 @@ class $$RoutinesTableTableManager extends RootTableManager<
             isActive: isActive,
             dose: dose,
             notes: notes,
+            endDate: endDate,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) =>

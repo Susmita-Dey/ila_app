@@ -19,6 +19,8 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
   String _selectedRegimen = 'Cyclic_21_7';
   TimeOfDay _reminderTime = const TimeOfDay(hour: 20, minute: 0); // 8:00 PM default
   DateTime _startDate = DateTime.now();
+  String _selectedDuration = 'Indefinite'; // Indefinite, 1 Month, 3 Months, 6 Months, Custom
+  DateTime? _customEndDate;
 
   @override
   void dispose() {
@@ -73,6 +75,37 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
     );
     if (picked != null) {
       setState(() => _startDate = picked);
+    }
+  }
+
+  Future<void> _selectCustomEndDate(BuildContext context) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _customEndDate ?? _startDate.add(const Duration(days: 30)),
+      firstDate: _startDate,
+      lastDate: DateTime(2101),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.deepInk,
+              onPrimary: AppColors.warmIvory,
+              surface: AppColors.warmIvory,
+              onSurface: AppColors.deepInk,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() {
+        _customEndDate = picked;
+        _selectedDuration = 'Custom';
+      });
+    } else if (_selectedDuration == 'Custom' && _customEndDate == null) {
+      // Revert if cancelled and no date was previously selected
+      setState(() => _selectedDuration = 'Indefinite');
     }
   }
 
@@ -171,6 +204,37 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
             ),
             const Divider(color: AppColors.lightBorder),
 
+            // Duration
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Duration', style: TextStyle(color: AppColors.deepInk, fontWeight: FontWeight.w600)),
+              subtitle: Text(
+                _selectedDuration == 'Custom' && _customEndDate != null
+                  ? 'Until ${DateFormat('MMM d, yyyy').format(_customEndDate!)}'
+                  : _selectedDuration,
+              ),
+              trailing: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.mutedSage),
+                  value: _selectedDuration,
+                  items: ['Indefinite', '1 Month', '3 Months', '6 Months', 'Custom'].map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    if (newValue == 'Custom') {
+                      _selectCustomEndDate(context);
+                    } else if (newValue != null) {
+                      setState(() => _selectedDuration = newValue);
+                    }
+                  },
+                ),
+              ),
+            ),
+            const Divider(color: AppColors.lightBorder),
+
             // Reminder Time
             ListTile(
               contentPadding: EdgeInsets.zero,
@@ -186,6 +250,18 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
               onPressed: () async {
                 final name = _nameController.text.trim().isEmpty ? 'My Routine' : _nameController.text.trim();
                 final timeStr = '${_reminderTime.hour.toString().padLeft(2, '0')}:${_reminderTime.minute.toString().padLeft(2, '0')}';
+                
+                DateTime? calculatedEndDate;
+                if (_selectedDuration == '1 Month') {
+                  calculatedEndDate = _startDate.add(const Duration(days: 30));
+                } else if (_selectedDuration == '3 Months') {
+                  calculatedEndDate = _startDate.add(const Duration(days: 90));
+                } else if (_selectedDuration == '6 Months') {
+                  calculatedEndDate = _startDate.add(const Duration(days: 180));
+                } else if (_selectedDuration == 'Custom') {
+                  calculatedEndDate = _customEndDate;
+                }
+
                 final routineId = await ref.read(routineDaoProvider).insertRoutine(
                   name: name,
                   regimenType: _selectedRegimen,
@@ -193,6 +269,7 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
                   reminderTime: timeStr,
                   dose: _doseController.text.trim().isEmpty ? null : _doseController.text.trim(),
                   notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+                  endDate: calculatedEndDate,
                 );
                 
                 // Schedule local notification

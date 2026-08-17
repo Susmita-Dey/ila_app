@@ -19,6 +19,7 @@ class RoutineDao extends DatabaseAccessor<AppDatabase> with _$RoutineDaoMixin {
     required String reminderTime,
     String? dose,
     String? notes,
+    DateTime? endDate,
   }) {
     return into(routines).insert(
       RoutinesCompanion.insert(
@@ -30,6 +31,7 @@ class RoutineDao extends DatabaseAccessor<AppDatabase> with _$RoutineDaoMixin {
         reminderTime: reminderTime,
         dose: Value(dose),
         notes: Value(notes),
+        endDate: Value(endDate == null ? null : AppDateUtils.stripTime(endDate)),
       ),
     );
   }

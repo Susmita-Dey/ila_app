@@ -1,4 +1,5 @@
 import 'package:local_auth/local_auth.dart';
+import 'package:flutter/services.dart';
 
 class AuthService {
   static final LocalAuthentication _auth = LocalAuthentication();
@@ -15,6 +16,11 @@ class AuthService {
         persistAcrossBackgrounding: true,
         biometricOnly: false,
       );
+    } on PlatformException catch (e) {
+      if (e.code == 'NotEnrolled' || e.code == 'NotAvailable' || e.code == 'PasscodeNotSet') {
+        return true; // Fail open if device cannot authenticate securely
+      }
+      return false; // Fail secure on unexpected errors
     } catch (_) {
       return false; // Fail secure on exception
     }

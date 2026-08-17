@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../utils/snackbar_utils.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 
 class FeedbackService {
   static Future<void> sendFeedback({
@@ -48,7 +50,7 @@ Device Timezone: $timezone
 
     final Uri emailUri = Uri(
       scheme: 'mailto',
-      path: 'imyra-support@example.com',
+      path: 'susmitadeybusiness@gmail.com',
       queryParameters: {
         'subject': '[Imyra Feedback] $category - v$appVersion',
         'body': body,
@@ -64,11 +66,11 @@ Device Timezone: $timezone
       if (context.mounted) {
         await Clipboard.setData(ClipboardData(text: body));
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not open email client. Feedback copied to clipboard.'),
-            duration: Duration(seconds: 4),
-          ),
+        SnackbarUtils.show(
+          context: context,
+          title: 'Feedback Copied',
+          message: 'Could not open email client. Feedback copied to clipboard.',
+          contentType: ContentType.warning,
         );
       }
     }

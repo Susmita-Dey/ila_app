@@ -58,6 +58,12 @@ class TodayController extends _$TodayController {
         return;
       }
 
+      // Check if routine has naturally expired
+      if (routine.endDate != null && now.isAfter(routine.endDate!.add(const Duration(days: 1)))) {
+        controller.add(TodayState());
+        return;
+      }
+
       // Compute PhaseState if it's a cyclic routine
       PhaseState? phaseState;
       if (routine.regimenType == 'Cyclic_21_7') {
@@ -72,7 +78,7 @@ class TodayController extends _$TodayController {
         phaseState = PhaseState(
           currentPhase: 1,
           dayInPhase: now.difference(routine.startDate).inDays + 1,
-          totalPhaseDays: 999, // indefinite
+          totalPhaseDays: null, // indefinite
           isBreakPeriod: false,
         );
       }

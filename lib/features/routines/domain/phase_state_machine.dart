@@ -1,13 +1,13 @@
 class PhaseState {
   final int currentPhase;
   final int dayInPhase;
-  final int totalPhaseDays;
+  final int? totalPhaseDays;
   final bool isBreakPeriod;
 
   PhaseState({
     required this.currentPhase,
     required this.dayInPhase,
-    required this.totalPhaseDays,
+    this.totalPhaseDays,
     required this.isBreakPeriod,
   });
 

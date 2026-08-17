@@ -24,7 +24,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -60,6 +60,11 @@ class AppDatabase extends _$AppDatabase {
           if (from < 5) {
             await m.createTable(clinicalProfile);
             await m.createTable(metabolicLogs);
+          }
+          if (from < 6) {
+            await customStatement(
+              'ALTER TABLE routines ADD COLUMN end_date INTEGER',
+            );
           }
         },
       );

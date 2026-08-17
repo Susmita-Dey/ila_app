@@ -16,6 +16,8 @@ import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_provider.dart';
 import '../../../core/utils/dev_seed_data.dart';
 import '../../../core/widgets/imyra_logo.dart';
+import '../../../core/utils/snackbar_utils.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import '../../../core/widgets/illustrations/illustration_caught_up.dart';
 import '../../../core/widgets/illustrations/illustration_routine.dart';
 
@@ -38,14 +40,14 @@ class TodayScreen extends ConsumerWidget {
               pinned: true,
               backgroundColor: AppColors.warmIvory,
               surfaceTintColor: Colors.transparent,
-              leadingWidth: 100,
+              leadingWidth: 140,
               leading: Padding(
                 padding: const EdgeInsets.only(left: 16.0),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const ImyraLogo(size: 26),
-                    const SizedBox(width: 8),
+                    const ImyraLogo(size: 32),
+                    const SizedBox(width: 12),
                     Text(
                       'Imyra',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -67,8 +69,11 @@ class TodayScreen extends ConsumerWidget {
                       final db = ref.read(appDatabaseProvider);
                       await DevDataSeeder.seedSixMonths(db);
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Seeded 6 months of clinical records.')),
+                        SnackbarUtils.show(
+                          context: context,
+                          title: 'Data Seeded',
+                          message: 'Seeded 6 months of clinical records.',
+                          contentType: ContentType.success,
                         );
                       }
                     },
@@ -88,7 +93,7 @@ class TodayScreen extends ConsumerWidget {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 64.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -319,7 +324,9 @@ class TodayScreen extends ConsumerWidget {
 
     String phaseText = isBreak 
       ? '🌿 Treatment Break · Day ${phase.dayInPhase} / ${phase.totalPhaseDays}'
-      : '💊 $routineName$routineDose · Day ${phase.dayInPhase} / ${phase.totalPhaseDays}';
+      : (phase.totalPhaseDays == null)
+        ? '💊 $routineName$routineDose · Day ${phase.dayInPhase}'
+        : '💊 $routineName$routineDose · Day ${phase.dayInPhase} / ${phase.totalPhaseDays}';
 
     String subText = isBreak 
       ? 'No medication required today.'
@@ -424,7 +431,7 @@ class TodayScreen extends ConsumerWidget {
         decoration: BoxDecoration(
           color: AppColors.softLavender.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.softLavender.withValues(alpha: 0.3)),
+          border: Border.all(color: AppColors.brandAction.withValues(alpha: 0.3), width: 1.5),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -450,14 +457,7 @@ class TodayScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: const BoxDecoration(
-                color: AppColors.cardBg,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.water_drop_outlined, color: AppColors.softLavender),
-            ),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.brandAction),
           ],
         ),
       ),
