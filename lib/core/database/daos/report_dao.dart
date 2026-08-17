@@ -51,7 +51,10 @@ class ReportDao extends DatabaseAccessor<AppDatabase> with _$ReportDaoMixin {
           ..orderBy([(t) => OrderingTerm(expression: t.date, mode: OrderingMode.asc)]))
         .get();
 
-    // 6. Offload heavy clinical math to background Isolate
+    // 6. Fetch Active Routines (Medications)
+    final activeRoutines = await (select(routines)..where((t) => t.isActive.equals(true))).get();
+
+    // 7. Offload heavy clinical math to background Isolate
     final payload = {
       'cycles': cycles.map((e) => e.toJson()).toList(),
       'logs': logs.map((e) => e.toJson()).toList(),
@@ -59,6 +62,7 @@ class ReportDao extends DatabaseAccessor<AppDatabase> with _$ReportDaoMixin {
       'intervention': intervention?.toJson(),
       'profile': profile?.toJson(),
       'metabolic': metabolic.map((e) => e.toJson()).toList(),
+      'activeRoutines': activeRoutines.map((e) => e.toJson()).toList(),
       'rangeLabel': rangeLabel,
       'startIso': start.toIso8601String(),
     };
@@ -75,6 +79,7 @@ DoctorReportData _aggregateClinicalData(Map<String, dynamic> payload) {
   final interventionRaw = payload['intervention'] as Map<String, dynamic>?;
   final profileRaw = payload['profile'] as Map<String, dynamic>?;
   final metabolicRaw = payload['metabolic'] as List<dynamic>;
+  final activeRoutinesRaw = payload['activeRoutines'] as List<dynamic>? ?? [];
   final rangeLabel = payload['rangeLabel'] as String;
 
 
@@ -85,6 +90,14 @@ DoctorReportData _aggregateClinicalData(Map<String, dynamic> payload) {
   final intervention = interventionRaw != null ? TreatmentIntervention.fromJson(interventionRaw) : null;
   final profilePCOM = profileRaw != null ? (profileRaw['hasPCOM'] as bool) : false;
   final metabolic = metabolicRaw.map((e) => MetabolicLog.fromJson(e as Map<String, dynamic>)).toList();
+  final activeRoutinesDb = activeRoutinesRaw.map((e) => Routine.fromJson(e as Map<String, dynamic>)).toList();
+  
+  final activeMedications = activeRoutinesDb.map((r) {
+    if (r.dose != null && r.dose!.isNotEmpty) {
+      return '${r.name} (${r.dose})';
+    }
+    return r.name;
+  }).toList();
 
   // 2. Calculate Cycle Statistics based on True Cycle Starts
   final trueCycles = cycles.where((c) => c.isTrueCycleStart).toList();
@@ -389,5 +402,6 @@ DoctorReportData _aggregateClinicalData(Map<String, dynamic> payload) {
     rotterdamHyperandrogenism: hyperandrogenism,
     rotterdamPCOM: profilePCOM,
     metabolicRows: metabolicRows,
+    activeMedications: activeMedications,
   );
 }

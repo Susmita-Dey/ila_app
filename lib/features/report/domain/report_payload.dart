@@ -12,6 +12,7 @@ class DoctorReportData {
   final List<List<String>> symptomPhaseClusters; // [Symptom, Frequency, Cluster]
   final List<List<String>> labResultsRows; // [Date, Test Name, Value, Notes]
   final Map<String, String>? treatmentBenchmark; // Pre- vs Post- stats
+  final List<String> activeMedications;
 
   // ── Tier 1 Clinical Fields ─────────────────────────────────────────────────
   /// Number of months where the user explicitly logged an anovulatory/no-bleed event.
@@ -49,6 +50,7 @@ class DoctorReportData {
     required this.symptomPhaseClusters,
     this.labResultsRows = const [],
     this.treatmentBenchmark,
+    this.activeMedications = const [],
     this.anovulatoryMonthsLogged = 0,
     this.averagePainScore = 0.0,
     this.peakPainScore = 0,
@@ -75,6 +77,7 @@ class DoctorReportData {
       symptomPhaseClusters: [],
       labResultsRows: [],
       treatmentBenchmark: null,
+      activeMedications: [],
       anovulatoryMonthsLogged: 0,
       averagePainScore: 0.0,
       peakPainScore: 0,
@@ -82,3 +85,18 @@ class DoctorReportData {
     );
   }
 }
+
+class PdfExportOptions {
+  final bool includeVitals;
+  final bool includeSymptoms;
+  final bool includeMedications;
+  final bool includeMetabolic;
+
+  const PdfExportOptions({
+    this.includeVitals = true,
+    this.includeSymptoms = true,
+    this.includeMedications = true,
+    this.includeMetabolic = true,
+  });
+}
+

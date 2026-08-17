@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import 'report_controller.dart';
 import '../domain/report_payload.dart';
 import '../../../core/widgets/illustrations/illustration_report.dart';
+import 'widgets/pdf_export_sheet.dart';
 
 class ReportScreen extends ConsumerStatefulWidget {
   const ReportScreen({super.key});
@@ -117,7 +118,12 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       onPressed: state.isGenerating || data == null || data.totalCycles == 0
                           ? null
                           : () {
-                              ref.read(reportControllerProvider.notifier).exportPdf();
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (_) => const PdfExportConfigSheet(),
+                              );
                             },
                       icon: const Icon(Icons.picture_as_pdf_outlined),
                       label: const Text('Export Clinical PDF for Doctor', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),

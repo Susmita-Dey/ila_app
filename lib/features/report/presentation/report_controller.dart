@@ -49,16 +49,16 @@ class ReportController extends _$ReportController {
     state = ReportState(isGenerating: false, previewData: data);
   }
 
-  Future<void> exportPdf() async {
+  Future<Uint8List?> generatePdf(PdfExportOptions options) async {
     final data = state.previewData;
-    if (data == null) return;
+    if (data == null) return null;
 
     state = ReportState(isGenerating: true, previewData: data);
     
     try {
       // Offload PDF generation to a background isolate to prevent UI freezing
-      final bytes = await compute(DoctorPdfGenerator.generatePdfBytes, data);
-      await DoctorPdfGenerator.sharePdf(bytes);
+      final args = PdfExportArgs(data, options);
+      return await compute(DoctorPdfGenerator.generatePdfBytes, args);
     } finally {
       state = ReportState(isGenerating: false, previewData: data);
     }

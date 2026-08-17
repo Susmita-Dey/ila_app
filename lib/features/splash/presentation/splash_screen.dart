@@ -1,33 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
+// import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/imyra_logo.dart';
 import '../../../main.dart';
 import '../../onboarding/presentation/onboarding_screen.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   // Guard flag — prevents double-navigation if widget rebuilds unexpectedly.
   bool _hasNavigated = false;
 
   @override
   void initState() {
     super.initState();
-
-    // Remove the native splash as soon as our branded Flutter UI is live —
-    // this is the "seamless handoff" that eliminates the white-flash bug.
-    FlutterNativeSplash.remove();
-
     _initAndNavigate();
   }
 
@@ -42,6 +39,9 @@ class _SplashScreenState extends State<SplashScreen> {
     final hasOnboarded = prefs.getBool('has_onboarded') ?? false;
 
     if (!mounted) return;
+
+    // Signal that splash screen is done so ImyraApp can trigger App Lock
+    ref.read(splashScreenDoneProvider.notifier).state = true;
 
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
@@ -65,27 +65,21 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.warmIvory,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // ── Imyra geometric logo ────────────────────────────────────────
-            const ImyraLogo(size: 72)
-                .animate()
-                .scale(
-                  begin: const Offset(0.7, 0.7),
-                  end: const Offset(1.0, 1.0),
-                  duration: const Duration(milliseconds: 600),
-                  curve: Curves.easeOutBack,
-                )
-                .fadeIn(duration: const Duration(milliseconds: 400)),
+      extendBody: true,
+      extendBodyBehindAppBar: true,
+      resizeToAvoidBottomInset: false,
+      body: Stack(
+        alignment: Alignment.center,
+        children: [
+          // ── Imyra geometric logo (Static to perfectly match Native OS Splash) ──
+          const ImyraLogo(size: 72),
 
-            const SizedBox(height: 20),
-
-            // ── "Imyra" wordmark in elegant italic serif ─────────────────────
-            Text(
+          // ── "Imyra" wordmark in elegant italic serif ─────────────────────
+          Positioned(
+            top: MediaQuery.of(context).size.height / 2 + 56, // 36 (half logo) + 20 padding
+            child: const Text(
               'imyra health',
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'FleurDeLeah',
                 fontSize: 56,
                 fontWeight: FontWeight.w600,
@@ -95,18 +89,18 @@ class _SplashScreenState extends State<SplashScreen> {
             )
                 .animate()
                 .fadeIn(
-                  delay: const Duration(milliseconds: 200),
-                  duration: const Duration(milliseconds: 500),
+                  delay: const Duration(milliseconds: 300),
+                  duration: const Duration(milliseconds: 600),
                 )
                 .slideY(
                   begin: 0.3,
                   end: 0,
-                  delay: const Duration(milliseconds: 200),
-                  duration: const Duration(milliseconds: 500),
+                  delay: const Duration(milliseconds: 300),
+                  duration: const Duration(milliseconds: 600),
                   curve: Curves.easeOut,
                 ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

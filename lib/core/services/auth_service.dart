@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter/services.dart';
 
@@ -11,17 +12,21 @@ class AuthService {
 
       if (!canAuthenticate) return true; // Fail open if device doesn't support biometrics
 
-      return await _auth.authenticate(
+      final success = await _auth.authenticate(
         localizedReason: 'Unlock Imyra Health to view your private data',
         persistAcrossBackgrounding: true,
         biometricOnly: false,
       );
+      debugPrint('[AUTH] Authentication result: $success');
+      return success;
     } on PlatformException catch (e) {
+      debugPrint('[AUTH] PlatformException: ${e.code} - ${e.message}');
       if (e.code == 'NotEnrolled' || e.code == 'NotAvailable' || e.code == 'PasscodeNotSet') {
         return true; // Fail open if device cannot authenticate securely
       }
       return false; // Fail secure on unexpected errors
-    } catch (_) {
+    } catch (e) {
+      debugPrint('[AUTH] Exception: $e');
       return false; // Fail secure on exception
     }
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'core/theme/app_theme.dart';
 import 'features/today/presentation/today_screen.dart';
 import 'features/report/presentation/report_screen.dart';
@@ -12,16 +13,14 @@ import 'core/widgets/imyra_logo.dart';
 import 'core/services/auth_service.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
+// import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'l10n/app_localizations.dart';
 import 'core/providers/preferences_provider.dart';
 import 'core/providers/database_provider.dart';
 
 void main() async {
-  // Preserve the native splash until SplashScreen.initState() explicitly removes it,
-  // preventing the white-flash gap between the OS splash and Flutter rendering.
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  // We are removing FlutterNativeSplash.preserve() to fix the deadlock with biometric prompt.
+  WidgetsFlutterBinding.ensureInitialized();
 
   // 1. Flutter Framework Errors (Render/Widget build errors)
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -67,6 +66,8 @@ void main() async {
   );
 }
 
+final splashScreenDoneProvider = StateProvider<bool>((ref) => false);
+
 class ImyraApp extends ConsumerStatefulWidget {
   const ImyraApp({super.key});
 
@@ -103,9 +104,8 @@ class _ImyraAppState extends ConsumerState<ImyraApp> with WidgetsBindingObserver
     // Only prompt biometrics if onboarding is complete; never lock mid-onboarding.
     if (isLocked && hasOnboarded) {
       setState(() => _obscureUI = true);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _authenticate();
-      });
+      // We don't call _authenticate() immediately here.
+      // We wait for the splash screen to finish via splashScreenDoneProvider.
     }
   }
 
@@ -170,6 +170,23 @@ class _ImyraAppState extends ConsumerState<ImyraApp> with WidgetsBindingObserver
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(splashScreenDoneProvider, (previous, current) {
+      if (current == true && _appLockEnabled && _hasOnboarded) {
+        // Set authenticating to true immediately so we don't flash "Tap to unlock"
+        setState(() {
+          _isAuthenticating = true;
+        });
+        // Wait for the pushReplacement animation (500ms) to finish before showing prompt.
+        // Android cancels BiometricPrompt if launched during a window transition!
+        Future.delayed(const Duration(milliseconds: 600), () {
+          if (mounted) _authenticate();
+        });
+      }
+    });
+
+    final isSplashDone = ref.watch(splashScreenDoneProvider);
+    final shouldObscure = _obscureUI && isSplashDone;
+
     return MaterialApp(
       title: 'Imyra',
       theme: AppTheme.light,
@@ -183,7 +200,7 @@ class _ImyraAppState extends ConsumerState<ImyraApp> with WidgetsBindingObserver
         return Stack(
           children: [
             if (child != null) child,
-            if (_obscureUI)
+            if (shouldObscure)
               GestureDetector(
                 onTap: () {
                   if (!_isAuthenticating) {

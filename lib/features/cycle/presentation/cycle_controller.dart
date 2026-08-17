@@ -55,13 +55,13 @@ class CycleController extends _$CycleController {
       final daysSinceLast = AppDateUtils.daysBetween(mostRecent.date, now);
 
       // ── Calculate Historical Median Cycle Length ───────────────
-      final trueCycles = bleedingEvents.where((e) => e.isTrueCycleStart).toList();
+      final bleedingTrueCycles = bleedingEvents.where((e) => e.isTrueCycleStart).toList();
       int estimatedMedian = 28; // Default fallback
       
-      if (trueCycles.length >= 2) {
+      if (bleedingTrueCycles.length >= 2) {
         List<int> lengths = [];
-        for (int i = 0; i < trueCycles.length - 1; i++) {
-          final diff = AppDateUtils.daysBetween(trueCycles[i + 1].date, trueCycles[i].date);
+        for (int i = 0; i < bleedingTrueCycles.length - 1; i++) {
+          final diff = AppDateUtils.daysBetween(bleedingTrueCycles[i + 1].date, bleedingTrueCycles[i].date);
           if (diff > 14) lengths.add(diff);
         }
         if (lengths.isNotEmpty) {
@@ -75,10 +75,12 @@ class CycleController extends _$CycleController {
 
       // ── Guardrail: >10 days since last bleeding log = between periods ───────
       if (daysSinceLast > 10) {
-        // Calculate estimated day based on the last true cycle start
+        // Calculate estimated day based on the last true cycle start (bleeding or anovulatory)
+        final allTrueCycles = events.where((e) => e.isTrueCycleStart).toList();
+        
         int? estimatedDay;
-        if (trueCycles.isNotEmpty) {
-          estimatedDay = AppDateUtils.daysBetween(trueCycles.first.date, now) + 1;
+        if (allTrueCycles.isNotEmpty) {
+          estimatedDay = AppDateUtils.daysBetween(allTrueCycles.first.date, now) + 1;
         }
         
         yield CycleState(
@@ -166,7 +168,7 @@ class CycleController extends _$CycleController {
     await dao.logCycleEvent(
       date: DateTime.now(),
       flowType: 'Anovulatory',
-      isTrueCycleStart: false,
+      isTrueCycleStart: true, // Acts as a reset marker for the new cycle
       symptoms: 'Anovulatory / Missed Cycle',
       notes: notes,
     );

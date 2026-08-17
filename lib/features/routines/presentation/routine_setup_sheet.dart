@@ -205,7 +205,7 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
 
     return Container(
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 24,
+        top: MediaQuery.of(context).padding.top + 48,
         left: 24,
         right: 24,
         bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24,
@@ -397,25 +397,33 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
     required String subtitle,
     required String value,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Material(
         color: AppColors.cardBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: _selectedRegimen == value ? AppColors.deepInk : AppColors.lightBorder,
-          width: _selectedRegimen == value ? 2 : 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: _selectedRegimen == value ? AppColors.deepInk : AppColors.lightBorder,
+            width: _selectedRegimen == value ? 2 : 1,
+          ),
         ),
-      ),
-      child: RadioListTile<String>(
+        clipBehavior: Clip.antiAlias,
+        child: RadioListTile<String>(
         title: Text(title,
             style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.deepInk)),
         subtitle: Text(subtitle,
             style: const TextStyle(color: AppColors.mutedSage, fontSize: 12)),
         value: value,
+        groupValue: _selectedRegimen,
+        onChanged: (val) {
+          if (val != null) setState(() => _selectedRegimen = val);
+        },
         activeColor: AppColors.deepInk,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      ),
       ),
     );
   }
 }
+

@@ -442,10 +442,12 @@ class TodayScreen extends ConsumerWidget {
     String subtitle = 'Tap to log your period';
     if (cycleDay != null) {
       subtitle = 'Currently on Day $cycleDay';
+    } else if (state?.estimatedCycleDay != null) {
+      subtitle = isAnovulatory 
+          ? 'Cycle Day ~${state!.estimatedCycleDay} (Post-Anovulatory)'
+          : 'Cycle Day ~${state!.estimatedCycleDay} (estimated)';
     } else if (isAnovulatory) {
       subtitle = 'Anovulatory cycle logged';
-    } else if (state?.estimatedCycleDay != null) {
-      subtitle = 'Cycle Day ~${state!.estimatedCycleDay} (estimated)';
     }
 
     return GestureDetector(

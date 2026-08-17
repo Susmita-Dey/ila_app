@@ -174,12 +174,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     icon: Icons.fingerprint,
                     actionWidget: Padding(
                       padding: const EdgeInsets.only(top: 24.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.cardSurface,
+                      child: Material(
+                        color: AppColors.cardSurface,
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.cardBorder),
+                          side: const BorderSide(color: AppColors.cardBorder),
                         ),
+                        clipBehavior: Clip.antiAlias,
                         child: SwitchListTile(
                           title: const Text(
                             'Enable Biometric / PIN Lock',

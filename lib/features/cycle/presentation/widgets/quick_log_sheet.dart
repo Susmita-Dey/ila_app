@@ -128,7 +128,7 @@ class _QuickLogSheetState extends ConsumerState<QuickLogSheet> {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 24,
+        top: MediaQuery.of(context).padding.top + 48,
         left: 24,
         right: 24,
         bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24,
@@ -449,12 +449,13 @@ class _QuickLogSheetState extends ConsumerState<QuickLogSheet> {
 
   /// isTrueCycleStart toggle — auto-suggested by flow, user can override.
   Widget _buildCycleStartToggle() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.cardBg,
+    return Material(
+      color: AppColors.cardBg,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
+        side: const BorderSide(color: AppColors.cardBorder),
       ),
+      clipBehavior: Clip.antiAlias,
       child: SwitchListTile(
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -496,7 +497,8 @@ class _QuickLogSheetState extends ConsumerState<QuickLogSheet> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildSectionLabel('Pain Intensity (NRS)'),
+            Expanded(child: _buildSectionLabel('Pain Intensity (NRS)')),
+            const SizedBox(width: 8),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
               child: Text(
