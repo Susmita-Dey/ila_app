@@ -59,17 +59,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Text(
-              'App Features',
-              style: TextStyle(
-                color: AppColors.deepInk,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+          // ── Account & Security ──
+          _buildSectionHeader('Account & Security'),
           Card(
             color: AppColors.cardBg,
             elevation: 0,
@@ -77,46 +68,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               borderRadius: BorderRadius.circular(16),
               side: const BorderSide(color: AppColors.lightBorder),
             ),
-            child: Column(
-              children: [
-                SwitchListTile(
-                  title: const Text('Medication & Supplements', style: TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: const Text('Show medication tracking and daily pill reminders.', style: TextStyle(fontSize: 12)),
-                  value: ref.watch(isRoutineGoalProvider),
+            child: FutureBuilder<SharedPreferences>(
+              future: SharedPreferences.getInstance(),
+              builder: (context, snapshot) {
+                final prefs = snapshot.data;
+                final isLocked = prefs?.getBool('app_lock_enabled') ?? false;
+                return SwitchListTile(
+                  title: const Text('Biometric App Lock', style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Require Face ID / Touch ID to open the app', style: TextStyle(fontSize: 12)),
+                  value: isLocked,
                   activeThumbColor: AppColors.brandAction,
-                  onChanged: (val) async {
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setBool('is_routine_goal', val);
-                    ref.read(isRoutineGoalProvider.notifier).state = val;
+                  onChanged: prefs == null ? null : (val) async {
+                    await prefs.setBool('app_lock_enabled', val);
+                    setState(() {});
                   },
-                ),
-                const Divider(height: 1, color: AppColors.lightBorder),
-                SwitchListTile(
-                  title: const Text('Advanced Clinical Tracking', style: TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: const Text('Show Metabolic Tracking and Rotterdam Phenotype Config on the home screen.', style: TextStyle(fontSize: 12)),
-                  value: ref.watch(advancedClinicalTrackingProvider),
-                  activeThumbColor: AppColors.brandAction,
-                  onChanged: (val) async {
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setBool('advanced_clinical_tracking', val);
-                    ref.read(advancedClinicalTrackingProvider.notifier).state = val;
-                  },
-                ),
-              ],
+                );
+              },
             ),
           ),
           const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Text(
-              AppLocalizations.of(context)!.settingsDataPrivacy,
-              style: const TextStyle(
-                color: AppColors.deepInk,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+
+          // ── Data & Privacy ──
+          _buildSectionHeader('Data & Privacy'),
           Card(
             color: AppColors.cardBg,
             elevation: 0,
@@ -133,7 +106,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const Divider(height: 1, color: AppColors.lightBorder),
                 ListTile(
                   leading: const Icon(Icons.lock_outline, color: AppColors.deepInk),
-                  title: const Text('Export Encrypted Backup'),
+                  title: const Text('Export Encrypted Backup', style: TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: const Text('Save your data locally as an AES-256 encrypted file'),
                   trailing: const Icon(Icons.download_outlined, color: AppColors.mutedSage),
                   onTap: () async {
@@ -141,7 +114,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       context: context,
                       builder: (context) => const BackupPassphraseDialog(),
                     );
-
                     if (passphrase != null && context.mounted) {
                       SnackbarUtils.show(
                         context: context,
@@ -154,21 +126,60 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     }
                   },
                 ),
+                const Divider(height: 1, color: AppColors.lightBorder),
+                ListTile(
+                  leading: const Icon(Icons.delete_forever, color: Colors.red),
+                  title: const Text('Erase All Data on Device', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                  onTap: () {
+                    _showEraseDataDialog(context);
+                  },
+                ),
               ],
             ),
           ),
           const SizedBox(height: 16),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Text(
-              'Help & Testing',
-              style: TextStyle(
-                color: AppColors.deepInk,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+
+          // ── Clinical Profile ──
+          _buildSectionHeader('Clinical Profile'),
+          Card(
+            color: AppColors.cardBg,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: const BorderSide(color: AppColors.lightBorder),
+            ),
+            child: Column(
+              children: [
+                SwitchListTile(
+                  title: const Text('Medication & Supplements', style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Show medication tracking and daily pill reminders', style: TextStyle(fontSize: 12)),
+                  value: ref.watch(isRoutineGoalProvider),
+                  activeThumbColor: AppColors.brandAction,
+                  onChanged: (val) async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setBool('is_routine_goal', val);
+                    ref.read(isRoutineGoalProvider.notifier).state = val;
+                  },
+                ),
+                const Divider(height: 1, color: AppColors.lightBorder),
+                SwitchListTile(
+                  title: const Text('Advanced Clinical Tracking', style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Show Metabolic Tracking and Rotterdam Phenotype Config', style: TextStyle(fontSize: 12)),
+                  value: ref.watch(advancedClinicalTrackingProvider),
+                  activeThumbColor: AppColors.brandAction,
+                  onChanged: (val) async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setBool('advanced_clinical_tracking', val);
+                    ref.read(advancedClinicalTrackingProvider.notifier).state = val;
+                  },
+                ),
+              ],
             ),
           ),
+          const SizedBox(height: 16),
+
+          // ── General ──
+          _buildSectionHeader('General'),
           Card(
             color: AppColors.cardBg,
             elevation: 0,
@@ -180,7 +191,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               children: [
                 ListTile(
                   leading: const Icon(Icons.feedback_outlined, color: AppColors.deepInk),
-                  title: const Text('Send Feedback / Report an Issue'),
+                  title: const Text('Send Feedback / Report an Issue', style: TextStyle(fontWeight: FontWeight.bold)),
                   trailing: const Icon(Icons.chevron_right, color: AppColors.mutedSage),
                   onTap: () {
                     showDialog(
@@ -189,103 +200,102 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     );
                   },
                 ),
-
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          Card(
-            color: AppColors.cardBg,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: const BorderSide(color: Colors.red, width: 1.5),
-            ),
-            child: ListTile(
-              leading: const Icon(Icons.delete_forever, color: Colors.red),
-              title: const Text('Erase All Data on Device', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    backgroundColor: AppColors.warmIvory,
-                    title: const Text('Erase All Data?', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('This immediately wipes all cycle, medication, and symptom records from this phone. This action cannot be undone.'),
-                        const SizedBox(height: 24),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                  side: const BorderSide(color: AppColors.lightBorder),
-                                ),
-                                child: const Text('Cancel', style: TextStyle(color: AppColors.deepInk, fontWeight: FontWeight.bold)),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.brandAction, 
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                  elevation: 0,
-                                ),
-                                onPressed: () async {
-                                  Navigator.of(context).pop();
-                                  final db = ref.read(appDatabaseProvider);
-                                  await db.transaction(() async {
-                                    await db.delete(db.cycleEvents).go();
-                                    await db.delete(db.routineLogs).go();
-                                    await db.delete(db.routines).go();
-                                    await db.delete(db.treatmentInterventions).go();
-                                  });
-                                  ref.invalidate(appDatabaseProvider);
-                                  ref.invalidate(todayControllerProvider);
-                                  ref.invalidate(cycleControllerProvider);
-                                  ref.invalidate(reportControllerProvider);
-                                  if (context.mounted) {
-                                    SnackbarUtils.show(
-                                      context: context,
-                                      title: 'Data Erased',
-                                      message: 'All data has been permanently erased.',
-                                      contentType: ContentType.failure,
-                                    );
-                                  }
-                                },
-                                child: const Text('Erase', style: TextStyle(fontWeight: FontWeight.bold)),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
           const SizedBox(height: 32),
+
+          // Version
           Center(
             child: Text(
-              'Imyra Local-First Compliance App\n$_appVersion',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColors.mutedSage,
-                fontSize: 12,
-              ),
+              _appVersion,
+              style: const TextStyle(color: AppColors.mutedSage, fontSize: 12),
             ),
           ),
+          const SizedBox(height: 48),
         ],
       ),
     );
   }
-}
 
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Text(
+        title,
+        style: const TextStyle(
+          color: AppColors.deepInk,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  void _showEraseDataDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.warmIvory,
+        title: const Text('Erase All Data?', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('This immediately wipes all cycle, medication, and symptom records from this phone. This action cannot be undone.'),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      side: const BorderSide(color: AppColors.lightBorder),
+                    ),
+                    child: const Text('Cancel', style: TextStyle(color: AppColors.deepInk, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.brandAction, 
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                      final db = ref.read(appDatabaseProvider);
+                      await db.transaction(() async {
+                        await db.delete(db.cycleEvents).go();
+                        await db.delete(db.routineLogs).go();
+                        await db.delete(db.routines).go();
+                        await db.delete(db.treatmentInterventions).go();
+                      });
+                      ref.invalidate(appDatabaseProvider);
+                      ref.invalidate(todayControllerProvider);
+                      ref.invalidate(cycleControllerProvider);
+                      ref.invalidate(reportControllerProvider);
+                      if (context.mounted) {
+                        SnackbarUtils.show(
+                          context: context,
+                          title: 'Data Erased',
+                          message: 'All data has been permanently erased.',
+                          contentType: ContentType.failure,
+                        );
+                      }
+                    },
+                    child: const Text('Erase', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

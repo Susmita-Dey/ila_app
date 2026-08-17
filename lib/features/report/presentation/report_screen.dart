@@ -99,24 +99,46 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Export Button
-              ElevatedButton.icon(
-                onPressed: state.isGenerating || data == null || data.totalCycles == 0
-                    ? null
-                    : () {
-                        ref.read(reportControllerProvider.notifier).exportPdf();
-                      },
-                icon: const Icon(Icons.ios_share),
-                label: const Text('Generate Doctor Summary', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.brandAction,
-                  foregroundColor: Colors.white,
-                  iconColor: Colors.white,
-                  disabledBackgroundColor: AppColors.lightBorder,
-                  disabledIconColor: AppColors.mutedSage,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
+              // Premium PDF Export Button
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.cardSurface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.brandAction.withValues(alpha: 0.3)),
+                  boxShadow: [
+                    BoxShadow(color: AppColors.brandAction.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4)),
+                  ],
+                ),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: state.isGenerating || data == null || data.totalCycles == 0
+                          ? null
+                          : () {
+                              ref.read(reportControllerProvider.notifier).exportPdf();
+                            },
+                      icon: const Icon(Icons.picture_as_pdf_outlined),
+                      label: const Text('Export Clinical PDF for Doctor', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.brandAction,
+                        foregroundColor: Colors.white,
+                        iconColor: Colors.white,
+                        disabledBackgroundColor: AppColors.lightBorder,
+                        disabledIconColor: AppColors.mutedSage,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Generates a human-readable PDF summary of your cycle health, symptoms, and medications to share with your healthcare provider. (This is different from the encrypted .imyrabackup data file in Settings).',
+                      style: TextStyle(fontSize: 12, color: AppColors.mutedSage, height: 1.4),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
             ],

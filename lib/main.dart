@@ -15,6 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'l10n/app_localizations.dart';
 import 'core/providers/preferences_provider.dart';
+import 'core/providers/database_provider.dart';
 
 void main() async {
   // Preserve the native splash until SplashScreen.initState() explicitly removes it,
@@ -66,14 +67,14 @@ void main() async {
   );
 }
 
-class ImyraApp extends StatefulWidget {
+class ImyraApp extends ConsumerStatefulWidget {
   const ImyraApp({super.key});
 
   @override
-  State<ImyraApp> createState() => _ImyraAppState();
+  ConsumerState<ImyraApp> createState() => _ImyraAppState();
 }
 
-class _ImyraAppState extends State<ImyraApp> with WidgetsBindingObserver {
+class _ImyraAppState extends ConsumerState<ImyraApp> with WidgetsBindingObserver {
   bool _obscureUI = false; // Default to false until we know app lock is enabled
   bool _isAuthenticating = false;
 
@@ -144,6 +145,11 @@ class _ImyraAppState extends State<ImyraApp> with WidgetsBindingObserver {
         });
       }
     } else if (state == AppLifecycleState.resumed) {
+      // Rehydrate routine notifications (moving window)
+      ref.read(routineDaoProvider).getActiveRoutines().then((routines) {
+        NotificationService.rehydrateRoutineNotifications(routines);
+      });
+
       if (_isAuthenticating) return;
 
       if (_backgroundedTime != null) {

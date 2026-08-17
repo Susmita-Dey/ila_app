@@ -166,7 +166,13 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
         endDate: calculatedEndDate,
       );
       await NotificationService.scheduleRoutineReminder(
-          widget.routine!.id, name, _reminderTime.hour, _reminderTime.minute);
+        routineId: widget.routine!.id,
+        routineName: name,
+        hour: _reminderTime.hour,
+        minute: _reminderTime.minute,
+        regimenType: _selectedRegimen,
+        startDate: _startDate,
+      );
     } else {
       final routineId = await dao.insertRoutine(
         name: name,
@@ -178,7 +184,13 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
         endDate: calculatedEndDate,
       );
       await NotificationService.scheduleRoutineReminder(
-          routineId, name, _reminderTime.hour, _reminderTime.minute);
+        routineId: routineId,
+        routineName: name,
+        hour: _reminderTime.hour,
+        minute: _reminderTime.minute,
+        regimenType: _selectedRegimen,
+        startDate: _startDate,
+      );
     }
 
     if (mounted) Navigator.of(context).pop();
