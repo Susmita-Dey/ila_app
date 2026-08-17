@@ -15,10 +15,10 @@ It generates a standardized clinical PDF for a 7-minute doctor consultation whil
 
 *   **100% Local-First Architecture:** Zero cloud sync. Zero accounts. Data is stored in an encrypted SQLite database strictly on the device.
 *   **Biometric Security & Encrypted Backups:** Protected by FaceID/Fingerprint locks and fully exportable via AES-256 encrypted payloads (hardened by PBKDF2 key derivation).
-*   **Clinical Report Generator:** A 1-tap engine that condenses 6 months of adherence, PMDD luteal phase clustering, and treatment benchmarks into a standardized, 1-page A4 PDF.
+*   **Clinical Report Generator:** A 1-tap engine that condenses 6 months of adherence, symptom alignments (e.g. Luteal Pattern), and treatment benchmarks into a standardized, 1-page A4 PDF. Utilizes compassionate, phenotype-centric framing rather than rigid alerting.
 *   **PCOS & Extreme Cycle Guardrails:** Beautiful, responsive cycle graphs that dynamically handle and visually cap highly irregular cycles (45-120 days).
 *   **Smart Disambiguation:** Differentiates between true cycle starts (Day 1) and pre-period spotting for accurate baseline data.
-*   **21/7 Routine Engine:** Custom medication reminders tailored for birth control or cyclical hormone treatments, complete with local push notifications.
+*   **21/7 Routine Engine:** Custom medication reminders tailored for birth control or cyclical hormone treatments, complete with local push notifications. Includes a "Catch Up" drawer with retroactive time-picker logging for clinical adherence accuracy.
 *   **Premium Animations:** Micro-animations provide buttery smooth transitions that create a venture-backed, native-feeling aesthetic.
 
 ---

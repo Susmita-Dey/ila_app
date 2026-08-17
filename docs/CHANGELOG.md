@@ -2,6 +2,14 @@
 
 All notable changes to the **Ila Health** project will be documented in this file.
 
+## [1.2.0] - 2026-08-17
+
+### Clinical & Phenotype Engine
+- **Compassionate Insight Reframing:** Removed rigid, anxiety-inducing alerts (e.g., "YES / FLAGGED") from the Doctor PDF. Reframed Rotterdam diagnostics and symptom clustering to use objective, phenotype-centric terminology (`Observed Pattern`, `Luteal Alignment`, `Distributed Pattern`).
+
+### UI & UX
+- **Retroactive Routine Logging:** Implemented a native time picker (`showTimePicker`) within the "Catch Up" drawer. Users can now accurately log the exact hour and minute they took a missed medication on a past day, rather than defaulting to the current timestamp.
+
 ## [1.1.0] - 2026-08-16
 
 ### Security
