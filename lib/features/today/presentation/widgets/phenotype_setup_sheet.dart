@@ -52,8 +52,8 @@ class _PhenotypeSetupSheetState extends ConsumerState<PhenotypeSetupSheet> {
       padding: EdgeInsets.only(
         left: 24,
         right: 24,
-        top: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        top: MediaQuery.of(context).padding.top + 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24,
       ),
       decoration: const BoxDecoration(
         color: AppColors.warmIvory,

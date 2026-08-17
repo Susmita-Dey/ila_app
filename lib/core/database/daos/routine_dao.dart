@@ -41,9 +41,19 @@ class RoutineDao extends DatabaseAccessor<AppDatabase> with _$RoutineDaoMixin {
     return (select(routines)..where((t) => t.isActive.equals(true))..limit(1)).getSingleOrNull();
   }
   
-  /// Watch active routine
+  /// Watch active routine (single)
   Stream<Routine?> watchActiveRoutine() {
     return (select(routines)..where((t) => t.isActive.equals(true))..limit(1)).watchSingleOrNull();
+  }
+
+  /// Watch ALL active routines (for multi-medicine support)
+  Stream<List<Routine>> watchActiveRoutines() {
+    return (select(routines)..where((t) => t.isActive.equals(true))).watch();
+  }
+
+  /// Get ALL active routines
+  Future<List<Routine>> getActiveRoutines() {
+    return (select(routines)..where((t) => t.isActive.equals(true))).get();
   }
 
   /// Log daily intake status
@@ -97,10 +107,40 @@ class RoutineDao extends DatabaseAccessor<AppDatabase> with _$RoutineDaoMixin {
   /// Get all logs for a routine within a date range
   Future<List<RoutineLog>> getLogsInRange(int routineId, DateTime startDate, DateTime endDate) {
     return (select(routineLogs)
-          ..where((t) => 
+          ..where((t) =>
               t.routineId.equals(routineId) &
               t.scheduledDate.isBetweenValues(AppDateUtils.stripTime(startDate), AppDateUtils.stripTime(endDate)))
           ..orderBy([(t) => OrderingTerm(expression: t.scheduledDate, mode: OrderingMode.asc)]))
         .get();
+  }
+
+  /// Delete a routine and all its logs
+  Future<void> deleteRoutine(int routineId) async {
+    await (delete(routineLogs)..where((t) => t.routineId.equals(routineId))).go();
+    await (delete(routines)..where((t) => t.id.equals(routineId))).go();
+  }
+
+  /// Update an existing routine
+  Future<void> updateRoutine({
+    required int id,
+    required String name,
+    required String regimenType,
+    required DateTime startDate,
+    required String reminderTime,
+    String? dose,
+    String? notes,
+    DateTime? endDate,
+  }) async {
+    await (update(routines)..where((t) => t.id.equals(id))).write(
+      RoutinesCompanion(
+        name: Value(name),
+        regimenType: Value(regimenType),
+        startDate: Value(AppDateUtils.stripTime(startDate)),
+        reminderTime: Value(reminderTime),
+        dose: Value(dose),
+        notes: Value(notes),
+        endDate: Value(endDate == null ? null : AppDateUtils.stripTime(endDate)),
+      ),
+    );
   }
 }

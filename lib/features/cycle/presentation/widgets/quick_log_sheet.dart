@@ -128,10 +128,10 @@ class _QuickLogSheetState extends ConsumerState<QuickLogSheet> {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(
-        top: 24,
+        top: MediaQuery.of(context).padding.top + 24,
         left: 24,
         right: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24,
       ),
       decoration: const BoxDecoration(
         color: AppColors.warmIvory,
@@ -178,6 +178,7 @@ class _QuickLogSheetState extends ConsumerState<QuickLogSheet> {
                   });
                 },
                 selectedColor: AppColors.deepInk,
+                checkmarkColor: AppColors.warmIvory,
                 labelStyle: TextStyle(
                   color: _selectedFlow == flow
                       ? AppColors.warmIvory
@@ -212,6 +213,7 @@ class _QuickLogSheetState extends ConsumerState<QuickLogSheet> {
                   onSelected: (s) =>
                       setState(() => _selectedColor = s ? color : null),
                   selectedColor: chipColor(),
+                  checkmarkColor: AppColors.warmIvory,
                   labelStyle: TextStyle(
                     color: _selectedColor == color
                         ? AppColors.warmIvory
@@ -242,6 +244,7 @@ class _QuickLogSheetState extends ConsumerState<QuickLogSheet> {
                 selected: _selectedClots == clot,
                 onSelected: (_) => setState(() => _selectedClots = clot),
                 selectedColor: AppColors.deepInk,
+                checkmarkColor: AppColors.warmIvory,
                 labelStyle: TextStyle(
                   color: _selectedClots == clot
                       ? AppColors.warmIvory
@@ -410,7 +413,7 @@ class _QuickLogSheetState extends ConsumerState<QuickLogSheet> {
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.calendar_month_outlined,
-                  size: 18, color: AppColors.softLavender),
+                  size: 18, color: AppColors.deepInk),
             ),
             const SizedBox(width: 12),
             Expanded(

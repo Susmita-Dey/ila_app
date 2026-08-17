@@ -14,6 +14,7 @@ import 'core/services/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'l10n/app_localizations.dart';
+import 'core/providers/preferences_provider.dart';
 
 void main() async {
   // Preserve the native splash until SplashScreen.initState() explicitly removes it,
@@ -52,9 +53,15 @@ void main() async {
   // NOTE: FlutterNativeSplash.remove() is intentionally NOT called here.
   // It is called inside SplashScreen.initState() so the handoff is seamless.
 
+  // Load SharedPreferences synchronously before app starts
+  final prefs = await SharedPreferences.getInstance();
+
   runApp(
-    const ProviderScope(
-      child: ImyraApp(),
+    ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+      ],
+      child: const ImyraApp(),
     ),
   );
 }
@@ -217,11 +224,17 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
   
-  final List<Widget> _screens = [
-    const TodayScreen(),
-    const ReportScreen(),
-    const SettingsScreen(),
-  ];
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      TodayScreen(onNavigateToSettings: () => setState(() => _currentIndex = 2)),
+      const ReportScreen(),
+      const SettingsScreen(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {

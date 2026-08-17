@@ -33,7 +33,7 @@ final class TodayControllerProvider
   TodayController create() => TodayController();
 }
 
-String _$todayControllerHash() => r'5571a4fb19aefadd8e54e9ca34b4d2a45c2bf254';
+String _$todayControllerHash() => r'cbcac78c53714a2df06686dfff6b83374386f496';
 
 abstract class _$TodayController extends $StreamNotifier<TodayState> {
   Stream<TodayState> build();

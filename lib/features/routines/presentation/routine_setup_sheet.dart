@@ -2,25 +2,59 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_provider.dart';
 import '../../../core/notifications/notification_service.dart';
 
 class RoutineSetupSheet extends ConsumerStatefulWidget {
-  const RoutineSetupSheet({super.key});
+  /// Pass an existing [routine] to open in edit mode; null = add new medicine.
+  final Routine? routine;
+  const RoutineSetupSheet({super.key, this.routine});
 
   @override
   ConsumerState<RoutineSetupSheet> createState() => _RoutineSetupSheetState();
 }
 
 class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _doseController = TextEditingController();
-  final TextEditingController _notesController = TextEditingController();
-  String _selectedRegimen = 'Cyclic_21_7';
-  TimeOfDay _reminderTime = const TimeOfDay(hour: 20, minute: 0); // 8:00 PM default
-  DateTime _startDate = DateTime.now();
-  String _selectedDuration = 'Indefinite'; // Indefinite, 1 Month, 3 Months, 6 Months, Custom
+  late final TextEditingController _nameController;
+  late final TextEditingController _doseController;
+  late final TextEditingController _notesController;
+  late String _selectedRegimen;
+  late TimeOfDay _reminderTime;
+  late DateTime _startDate;
+  late String _selectedDuration;
   DateTime? _customEndDate;
+
+  bool get _isEditing => widget.routine != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final r = widget.routine;
+    _nameController = TextEditingController(text: r?.name ?? '');
+    _doseController = TextEditingController(text: r?.dose ?? '');
+    _notesController = TextEditingController(text: r?.notes ?? '');
+    _selectedRegimen = r?.regimenType ?? 'Cyclic_21_7';
+    _startDate = r?.startDate ?? DateTime.now();
+
+    // Parse reminder time from stored "HH:mm" string
+    if (r != null) {
+      final parts = r.reminderTime.split(':');
+      _reminderTime = TimeOfDay(
+        hour: int.tryParse(parts[0]) ?? 20,
+        minute: int.tryParse(parts.elementAtOrNull(1) ?? '0') ?? 0,
+      );
+    } else {
+      _reminderTime = const TimeOfDay(hour: 20, minute: 0);
+    }
+
+    // Duration
+    _selectedDuration = 'Indefinite';
+    if (r?.endDate != null) {
+      _customEndDate = r!.endDate;
+      _selectedDuration = 'Custom';
+    }
+  }
 
   @override
   void dispose() {
@@ -30,73 +64,65 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
     super.dispose();
   }
 
-  Future<void> _selectTime(BuildContext context) async {
+  // ── Pickers ────────────────────────────────────────────────────────────────
+
+  Future<void> _selectTime() async {
     final picked = await showTimePicker(
       context: context,
       initialTime: _reminderTime,
-      builder: (context, child) {
-        return Theme(
-          data: ThemeData.light().copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.deepInk,
-              onPrimary: AppColors.warmIvory,
-              surface: AppColors.warmIvory,
-              onSurface: AppColors.deepInk,
-            ),
+      builder: (context, child) => Theme(
+        data: ThemeData.light().copyWith(
+          colorScheme: const ColorScheme.light(
+            primary: AppColors.deepInk,
+            onPrimary: AppColors.warmIvory,
+            surface: AppColors.warmIvory,
+            onSurface: AppColors.deepInk,
           ),
-          child: child!,
-        );
-      },
+        ),
+        child: child!,
+      ),
     );
-    if (picked != null) {
-      setState(() => _reminderTime = picked);
-    }
+    if (picked != null) setState(() => _reminderTime = picked);
   }
 
-  Future<void> _selectDate(BuildContext context) async {
+  Future<void> _selectDate() async {
     final picked = await showDatePicker(
       context: context,
       initialDate: _startDate,
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
-      builder: (context, child) {
-        return Theme(
-          data: ThemeData.light().copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.deepInk,
-              onPrimary: AppColors.warmIvory,
-              surface: AppColors.warmIvory,
-              onSurface: AppColors.deepInk,
-            ),
+      builder: (context, child) => Theme(
+        data: ThemeData.light().copyWith(
+          colorScheme: const ColorScheme.light(
+            primary: AppColors.deepInk,
+            onPrimary: AppColors.warmIvory,
+            surface: AppColors.warmIvory,
+            onSurface: AppColors.deepInk,
           ),
-          child: child!,
-        );
-      },
+        ),
+        child: child!,
+      ),
     );
-    if (picked != null) {
-      setState(() => _startDate = picked);
-    }
+    if (picked != null) setState(() => _startDate = picked);
   }
 
-  Future<void> _selectCustomEndDate(BuildContext context) async {
+  Future<void> _selectCustomEndDate() async {
     final picked = await showDatePicker(
       context: context,
       initialDate: _customEndDate ?? _startDate.add(const Duration(days: 30)),
       firstDate: _startDate,
       lastDate: DateTime(2101),
-      builder: (context, child) {
-        return Theme(
-          data: ThemeData.light().copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.deepInk,
-              onPrimary: AppColors.warmIvory,
-              surface: AppColors.warmIvory,
-              onSurface: AppColors.deepInk,
-            ),
+      builder: (context, child) => Theme(
+        data: ThemeData.light().copyWith(
+          colorScheme: const ColorScheme.light(
+            primary: AppColors.deepInk,
+            onPrimary: AppColors.warmIvory,
+            surface: AppColors.warmIvory,
+            onSurface: AppColors.deepInk,
           ),
-          child: child!,
-        );
-      },
+        ),
+        child: child!,
+      ),
     );
     if (picked != null) {
       setState(() {
@@ -104,19 +130,73 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
         _selectedDuration = 'Custom';
       });
     } else if (_selectedDuration == 'Custom' && _customEndDate == null) {
-      // Revert if cancelled and no date was previously selected
       setState(() => _selectedDuration = 'Indefinite');
     }
   }
 
+  // ── Save ───────────────────────────────────────────────────────────────────
+
+  Future<void> _save() async {
+    final name = _nameController.text.trim().isEmpty ? 'My Routine' : _nameController.text.trim();
+    final timeStr =
+        '${_reminderTime.hour.toString().padLeft(2, '0')}:${_reminderTime.minute.toString().padLeft(2, '0')}';
+
+    DateTime? calculatedEndDate;
+    if (_selectedDuration == '1 Month') {
+      calculatedEndDate = _startDate.add(const Duration(days: 30));
+    } else if (_selectedDuration == '3 Months') {
+      calculatedEndDate = _startDate.add(const Duration(days: 90));
+    } else if (_selectedDuration == '6 Months') {
+      calculatedEndDate = _startDate.add(const Duration(days: 180));
+    } else if (_selectedDuration == 'Custom') {
+      calculatedEndDate = _customEndDate;
+    }
+
+    final dao = ref.read(routineDaoProvider);
+
+    if (_isEditing) {
+      await dao.updateRoutine(
+        id: widget.routine!.id,
+        name: name,
+        regimenType: _selectedRegimen,
+        startDate: _startDate,
+        reminderTime: timeStr,
+        dose: _doseController.text.trim().isEmpty ? null : _doseController.text.trim(),
+        notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+        endDate: calculatedEndDate,
+      );
+      await NotificationService.scheduleRoutineReminder(
+          widget.routine!.id, name, _reminderTime.hour, _reminderTime.minute);
+    } else {
+      final routineId = await dao.insertRoutine(
+        name: name,
+        regimenType: _selectedRegimen,
+        startDate: _startDate,
+        reminderTime: timeStr,
+        dose: _doseController.text.trim().isEmpty ? null : _doseController.text.trim(),
+        notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+        endDate: calculatedEndDate,
+      );
+      await NotificationService.scheduleRoutineReminder(
+          routineId, name, _reminderTime.hour, _reminderTime.minute);
+    }
+
+    if (mounted) Navigator.of(context).pop();
+  }
+
+  // ── Build ──────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
+    final isToday = DateUtils.isSameDay(_startDate, DateTime.now());
+    final isFuture = _startDate.isAfter(DateTime.now());
+
     return Container(
       padding: EdgeInsets.only(
-        top: 24,
+        top: MediaQuery.of(context).padding.top + 24,
         left: 24,
         right: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24,
       ),
       decoration: const BoxDecoration(
         color: AppColors.warmIvory,
@@ -127,16 +207,16 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Medication or Supplement Routine',
-              style: TextStyle(
+            Text(
+              _isEditing ? 'Edit Medication' : 'Add Medication',
+              style: const TextStyle(
                 color: AppColors.deepInk,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // Name
             TextField(
               controller: _nameController,
@@ -146,17 +226,17 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Dose
             TextField(
               controller: _doseController,
               decoration: InputDecoration(
-                labelText: 'Dose (e.g. 500mg, 1 cup)',
+                labelText: 'Dose (e.g. 500mg, 1 capsule)',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Notes
             TextField(
               controller: _notesController,
@@ -170,7 +250,7 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
 
             // Regimen Type
             const Text(
-              'Regimen Type',
+              'Schedule',
               style: TextStyle(color: AppColors.deepInk, fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
@@ -197,35 +277,68 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
             // Start Date
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Start Date', style: TextStyle(color: AppColors.deepInk, fontWeight: FontWeight.w600)),
+              title: const Text('Start Date',
+                  style: TextStyle(color: AppColors.deepInk, fontWeight: FontWeight.w600)),
               subtitle: Text(DateFormat('MMM d, yyyy').format(_startDate)),
               trailing: const Icon(Icons.calendar_today, color: AppColors.mutedSage),
-              onTap: () => _selectDate(context),
+              onTap: _selectDate,
             ),
+
+            // Fresh user contextual hint
+            if (isToday || isFuture)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: AppColors.brandAction.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.brandAction.withValues(alpha: 0.2)),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.info_outline, size: 16, color: AppColors.brandAction),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          isToday
+                              ? 'Starting today — Day 1 will be logged from today onwards. You can backdate if your doctor prescribed earlier.'
+                              : 'Future start date set — tracking will begin when that day arrives.',
+                          style: const TextStyle(
+                            color: AppColors.brandAction,
+                            fontSize: 12,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
             const Divider(color: AppColors.lightBorder),
 
             // Duration
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Duration', style: TextStyle(color: AppColors.deepInk, fontWeight: FontWeight.w600)),
+              title: const Text('Duration',
+                  style: TextStyle(color: AppColors.deepInk, fontWeight: FontWeight.w600)),
               subtitle: Text(
                 _selectedDuration == 'Custom' && _customEndDate != null
-                  ? 'Until ${DateFormat('MMM d, yyyy').format(_customEndDate!)}'
-                  : _selectedDuration,
+                    ? 'Until ${DateFormat('MMM d, yyyy').format(_customEndDate!)}'
+                    : _selectedDuration,
               ),
               trailing: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.mutedSage),
                   value: _selectedDuration,
-                  items: ['Indefinite', '1 Month', '3 Months', '6 Months', 'Custom'].map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
+                  items: ['Indefinite', '1 Month', '3 Months', '6 Months', 'Custom']
+                      .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+                      .toList(),
+                  onChanged: (newValue) {
                     if (newValue == 'Custom') {
-                      _selectCustomEndDate(context);
+                      _selectCustomEndDate();
                     } else if (newValue != null) {
                       setState(() => _selectedDuration = newValue);
                     }
@@ -238,46 +351,17 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
             // Reminder Time
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Daily Reminder', style: TextStyle(color: AppColors.deepInk, fontWeight: FontWeight.w600)),
+              title: const Text('Daily Reminder',
+                  style: TextStyle(color: AppColors.deepInk, fontWeight: FontWeight.w600)),
               subtitle: Text(_reminderTime.format(context)),
               trailing: const Icon(Icons.access_time, color: AppColors.mutedSage),
-              onTap: () => _selectTime(context),
+              onTap: _selectTime,
             ),
             const SizedBox(height: 32),
 
             // Save Button
             ElevatedButton(
-              onPressed: () async {
-                final name = _nameController.text.trim().isEmpty ? 'My Routine' : _nameController.text.trim();
-                final timeStr = '${_reminderTime.hour.toString().padLeft(2, '0')}:${_reminderTime.minute.toString().padLeft(2, '0')}';
-                
-                DateTime? calculatedEndDate;
-                if (_selectedDuration == '1 Month') {
-                  calculatedEndDate = _startDate.add(const Duration(days: 30));
-                } else if (_selectedDuration == '3 Months') {
-                  calculatedEndDate = _startDate.add(const Duration(days: 90));
-                } else if (_selectedDuration == '6 Months') {
-                  calculatedEndDate = _startDate.add(const Duration(days: 180));
-                } else if (_selectedDuration == 'Custom') {
-                  calculatedEndDate = _customEndDate;
-                }
-
-                final routineId = await ref.read(routineDaoProvider).insertRoutine(
-                  name: name,
-                  regimenType: _selectedRegimen,
-                  startDate: _startDate,
-                  reminderTime: timeStr,
-                  dose: _doseController.text.trim().isEmpty ? null : _doseController.text.trim(),
-                  notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
-                  endDate: calculatedEndDate,
-                );
-                
-                // Schedule local notification
-                await NotificationService.scheduleRoutineReminder(routineId, name, _reminderTime.hour, _reminderTime.minute);
-                
-                // The provider will automatically update due to the stream
-                if (context.mounted) Navigator.of(context).pop();
-              },
+              onPressed: _save,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.brandAction,
                 foregroundColor: Colors.white,
@@ -285,7 +369,10 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 elevation: 0,
               ),
-              child: const Text('Save Routine', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              child: Text(
+                _isEditing ? 'Update Medication' : 'Save Medication',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
             ),
           ],
         ),
@@ -309,8 +396,10 @@ class _RoutineSetupSheetState extends ConsumerState<RoutineSetupSheet> {
         ),
       ),
       child: RadioListTile<String>(
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.deepInk)),
-        subtitle: Text(subtitle, style: const TextStyle(color: AppColors.mutedSage, fontSize: 12)),
+        title: Text(title,
+            style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.deepInk)),
+        subtitle: Text(subtitle,
+            style: const TextStyle(color: AppColors.mutedSage, fontSize: 12)),
         value: value,
         activeColor: AppColors.deepInk,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

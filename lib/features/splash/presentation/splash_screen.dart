@@ -84,12 +84,12 @@ class _SplashScreenState extends State<SplashScreen> {
 
             // ── "Imyra" wordmark in elegant italic serif ─────────────────────
             Text(
-              'Imyra Health',
+              'imyra health',
               style: const TextStyle(
                 fontFamily: 'FleurDeLeah',
-                fontSize: 56, // Fleur De Leah is quite delicate, so bumping the size up slightly helps legibility
+                fontSize: 56,
                 fontWeight: FontWeight.w600,
-                color: AppColors.charcoalInk,
+                color: AppColors.brandAction,
                 height: 1.0,
               ),
             )

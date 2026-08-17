@@ -20,6 +20,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   bool _notificationGranted = false;
   bool _checkingNotification = false;
 
+  bool _isPcosGoal = false;
+  bool _isRoutineGoal = false;
+
   @override
   void initState() {
     super.initState();
@@ -51,6 +54,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('has_onboarded', true);
+    await prefs.setBool('is_pcos_goal', _isPcosGoal);
+    await prefs.setBool('is_routine_goal', _isRoutineGoal);
     if (_enableAppLock) {
       await prefs.setBool('app_lock_enabled', true);
     }
@@ -87,6 +92,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         'Zero cloud sync. Zero ads. Just you and your data.',
                     icon: Icons.shield_outlined,
                   ),
+                  _buildGoalsPage(),
                   _buildPage(
                     title: 'Track With\nPrecision.',
                     description:
@@ -146,7 +152,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(3, (index) {
+                children: List.generate(4, (index) {
                   return AnimatedContainer(
                     duration: 300.ms,
                     margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -180,7 +186,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: child,
                   ),
                 ),
-                child: _currentPage == 2
+                child: _currentPage == 3
                     ? ElevatedButton(
                         key: const ValueKey('get_started'),
                         onPressed: _completeOnboarding,
@@ -295,36 +301,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     Widget? actionWidget,
   }) {
     return Padding(
-      padding: const EdgeInsets.all(32.0),
+      padding: const EdgeInsets.symmetric(horizontal: 32.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.brandLight,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Icon(icon, size: 64, color: AppColors.brandAction),
-          ).animate().scale(
-              delay: 200.ms,
-              duration: 400.ms,
-              curve: Curves.easeOutBack),
-          const SizedBox(height: 48),
+          Icon(icon, size: 64, color: AppColors.brandAction),
+          const SizedBox(height: 32),
           Text(
             title,
             style: const TextStyle(
-              color: AppColors.deepInk,
-              fontSize: 40,
-              fontWeight: FontWeight.bold,
+              fontSize: 36,
               height: 1.1,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -1,
+              color: AppColors.deepInk,
             ),
-          )
-              .animate()
-              .fadeIn(delay: 400.ms)
-              .slideY(begin: 0.2, end: 0, duration: 400.ms, curve: Curves.easeOut),
-          const SizedBox(height: 24),
+          ),
+          const SizedBox(height: 16),
           Text(
             description,
             style: const TextStyle(
@@ -342,6 +336,129 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 .fadeIn(delay: 800.ms)
                 .slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOut),
         ],
+      ),
+    );
+  }
+
+  Widget _buildGoalsPage() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'What brings you to Imyra?',
+            style: TextStyle(
+              fontSize: 32,
+              height: 1.1,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -1,
+              color: AppColors.deepInk,
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Select the features you need most. You can change this later.',
+            style: TextStyle(fontSize: 15, color: AppColors.charcoalInk),
+          ),
+          const SizedBox(height: 32),
+          _GoalCard(
+            title: 'Cycle & Period Tracking',
+            subtitle: 'Focus on cycle predictions and symptom logging.',
+            icon: Icons.calendar_month,
+            isSelected: true, // Always selected for baseline tracking
+            onTap: () {},
+          ),
+          const SizedBox(height: 16),
+          _GoalCard(
+            title: 'Managing PCOS & Health',
+            subtitle: 'Advanced metabolic tracking and phenotype profile.',
+            icon: Icons.health_and_safety,
+            isSelected: _isPcosGoal,
+            onTap: () => setState(() => _isPcosGoal = !_isPcosGoal),
+          ),
+          const SizedBox(height: 16),
+          _GoalCard(
+            title: 'Medication Adherence',
+            subtitle: 'Daily reminders for supplements and birth control.',
+            icon: Icons.medication,
+            isSelected: _isRoutineGoal,
+            onTap: () => setState(() => _isRoutineGoal = !_isRoutineGoal),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GoalCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _GoalCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: 200.ms,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.brandAction.withValues(alpha: 0.05) : AppColors.cardSurface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? AppColors.brandAction : AppColors.cardBorder,
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: [
+            if (!isSelected)
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 28, color: isSelected ? AppColors.brandAction : AppColors.mutedSage),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.deepInk,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: isSelected ? AppColors.charcoalInk : AppColors.mutedSage,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

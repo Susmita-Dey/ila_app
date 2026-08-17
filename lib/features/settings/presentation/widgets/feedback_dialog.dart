@@ -75,7 +75,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                   selectedColor: AppColors.brandAction,
                   labelStyle: TextStyle(
                     color: isSelected ? Colors.white : AppColors.charcoalInk,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: FontWeight.w600, // Fixed font weight to prevent chip resize on selection
                   ),
                   backgroundColor: AppColors.cardSurface,
                   shape: RoundedRectangleBorder(
@@ -127,24 +127,39 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                 });
               },
             ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      side: const BorderSide(color: AppColors.lightBorder),
+                    ),
+                    child: const Text('Cancel', style: TextStyle(color: AppColors.charcoalInk, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.brandAction,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: const Text('Send via Email', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel', style: TextStyle(color: AppColors.charcoalInk)),
-        ),
-        ElevatedButton(
-          onPressed: _submit,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.brandAction,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-          child: const Text('Send via Email'),
-        ),
-      ],
     );
   }
 }
