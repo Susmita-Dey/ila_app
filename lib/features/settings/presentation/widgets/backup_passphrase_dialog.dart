@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 
 class BackupPassphraseDialog extends StatefulWidget {
-  const BackupPassphraseDialog({super.key});
+  final bool isRestore;
+  const BackupPassphraseDialog({super.key, this.isRestore = false});
 
   @override
   State<BackupPassphraseDialog> createState() => _BackupPassphraseDialogState();
@@ -20,14 +21,14 @@ class _BackupPassphraseDialogState extends State<BackupPassphraseDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: AppColors.warmIvory,
-      title: const Text('Backup Passphrase', style: TextStyle(color: AppColors.deepInk, fontWeight: FontWeight.bold)),
+      backgroundColor: AppColors.cardBg,
+      title: Text(widget.isRestore ? 'Restore Passphrase' : 'Backup Passphrase', style: const TextStyle(color: AppColors.deepInk, fontWeight: FontWeight.bold)),
       content: TextField(
         controller: _controller,
         obscureText: true,
-        decoration: const InputDecoration(
-          hintText: 'Enter a strong passphrase',
-          border: OutlineInputBorder(),
+        decoration: InputDecoration(
+          hintText: widget.isRestore ? 'Enter your backup passphrase' : 'Enter a strong passphrase',
+          border: const OutlineInputBorder(),
         ),
       ),
       actions: [
@@ -42,7 +43,7 @@ class _BackupPassphraseDialogState extends State<BackupPassphraseDialog> {
               Navigator.pop(context, _controller.text);
             }
           },
-          child: const Text('Export'),
+          child: Text(widget.isRestore ? 'Restore' : 'Export'),
         ),
       ],
     );

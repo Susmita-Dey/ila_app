@@ -4,6 +4,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../../main.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import '../../../core/services/backup_service.dart';
+import '../../settings/presentation/widgets/backup_passphrase_dialog.dart';
+import '../../../core/utils/snackbar_utils.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/providers/database_provider.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -91,6 +98,57 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         'Imyra stores all your records securely on this device. '
                         'Zero cloud sync. Zero ads. Just you and your data.',
                     icon: Icons.shield_outlined,
+                    actionWidget: Padding(
+                      padding: const EdgeInsets.only(top: 24.0),
+                      child: Consumer(
+                        builder: (context, ref, child) {
+                          return TextButton.icon(
+                            icon: const Icon(Icons.restore, color: AppColors.brandAction),
+                            label: const Text(
+                              'Already have a backup? Restore your data',
+                              style: TextStyle(color: AppColors.brandAction, fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () async {
+                              try {
+                                final file = await FilePicker.pickFile(type: FileType.any);
+                                if (file != null && file.path != null) {
+                                  if (context.mounted) {
+                                    final passphrase = await showDialog<String>(
+                                      context: context,
+                                      builder: (context) => const BackupPassphraseDialog(isRestore: true),
+                                    );
+                                    if (passphrase != null && context.mounted) {
+                                      SnackbarUtils.show(
+                                        context: context,
+                                        title: 'Restoring...',
+                                        message: 'Decrypting and importing data.',
+                                        contentType: ContentType.help,
+                                      );
+                                      final db = ref.read(appDatabaseProvider);
+                                      await BackupService.restoreEncryptedBackup(db, file, passphrase);
+                                      if (context.mounted) {
+                                        Navigator.of(context).pushReplacement(
+                                          MaterialPageRoute(builder: (context) => const MainNavigation()),
+                                        );
+                                      }
+                                    }
+                                  }
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  SnackbarUtils.show(
+                                    context: context,
+                                    title: 'Restore Failed',
+                                    message: e.toString().contains('Exception:') ? e.toString().split('Exception:').last.trim() : 'Invalid backup file or incorrect passphrase.',
+                                    contentType: ContentType.failure,
+                                  );
+                                }
+                              }
+                            },
+                          );
+                        },
+                      ),
+                    ),
                   ),
                   _buildGoalsPage(),
                   _buildPage(

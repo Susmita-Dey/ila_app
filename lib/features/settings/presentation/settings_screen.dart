@@ -15,6 +15,7 @@ import '../../../core/utils/snackbar_utils.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import '../../../core/providers/preferences_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:file_picker/file_picker.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -123,6 +124,64 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       );
                       final db = ref.read(appDatabaseProvider);
                       await BackupService.exportEncryptedBackup(db, passphrase);
+                    }
+                  },
+                ),
+                const Divider(height: 1, color: AppColors.lightBorder),
+                ListTile(
+                  leading: const Icon(Icons.restore, color: AppColors.brandAction),
+                  title: const Text('Restore from Backup', style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Import and decrypt a .imyrabackup file (replaces current local data).'),
+                  trailing: const Icon(Icons.upload_file_outlined, color: AppColors.mutedSage),
+                  onTap: () async {
+                    try {
+                      final file = await FilePicker.pickFile(
+                        type: FileType.any,
+                      );
+
+                      if (file != null && file.path != null) {
+                        if (context.mounted) {
+                          final passphrase = await showDialog<String>(
+                            context: context,
+                            builder: (context) => const BackupPassphraseDialog(isRestore: true),
+                          );
+
+                          if (passphrase != null && context.mounted) {
+                            SnackbarUtils.show(
+                              context: context,
+                              title: 'Restoring...',
+                              message: 'Decrypting and importing data.',
+                              contentType: ContentType.help,
+                            );
+
+                            final db = ref.read(appDatabaseProvider);
+                            await BackupService.restoreEncryptedBackup(db, file, passphrase);
+
+                            if (context.mounted) {
+                              SnackbarUtils.show(
+                                context: context,
+                                title: 'Restore Complete',
+                                message: 'Data imported successfully.',
+                                contentType: ContentType.success,
+                              );
+                              
+                              ref.invalidate(appDatabaseProvider);
+                              ref.invalidate(todayControllerProvider);
+                              ref.invalidate(cycleControllerProvider);
+                              ref.invalidate(reportControllerProvider);
+                            }
+                          }
+                        }
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        SnackbarUtils.show(
+                          context: context,
+                          title: 'Restore Failed',
+                          message: e.toString().contains('Exception:') ? e.toString().split('Exception:').last.trim() : 'Invalid backup file or incorrect passphrase.',
+                          contentType: ContentType.failure,
+                        );
+                      }
                     }
                   },
                 ),
