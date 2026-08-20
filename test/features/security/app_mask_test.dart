@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:imyra_app/main.dart';
@@ -11,6 +12,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   testWidgets('App obscures UI when inactive or paused to prevent screenshots', (tester) async {
+    // Mock the local_auth channel to prevent hanging during the test
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/local_auth'),
+      (MethodCall methodCall) async {
+        if (methodCall.method == 'getAvailableBiometrics') {
+          return <String>[];
+        }
+        return true;
+      },
+    );
+
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     SharedPreferences.setMockInitialValues({'app_lock_enabled': true, 'has_onboarded': true});
     final prefs = await SharedPreferences.getInstance();
@@ -36,6 +48,11 @@ void main() {
     
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump(const Duration(seconds: 1));
+    
+    // Pump enough time to flush out SplashScreen and authentication Future.delayed timers
+    // Otherwise the fakeAsync zone hangs forever waiting for them to complete.
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
     
     // Dispose container and flush streams
     container.dispose();

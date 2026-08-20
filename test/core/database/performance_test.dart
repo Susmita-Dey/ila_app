@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/services.dart';
 import 'package:drift/native.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:imyra_app/core/database/app_database.dart';
@@ -6,6 +7,13 @@ import 'package:imyra_app/core/diagnostics/error_logger.dart';
 
 void main() {
   test('5-Year Payload Stress Test generates report efficiently', () async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (MethodCall methodCall) async {
+        return '.';
+      },
+    );
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(db.close);
 
