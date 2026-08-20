@@ -109,17 +109,21 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.cardSurface,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.brandAction.withValues(alpha: 0.3)),
-                  boxShadow: [
-                    BoxShadow(color: AppColors.brandAction.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4)),
-                  ],
+                  border: Border.all(
+                    color: (data == null || data.isEmptyData) 
+                      ? AppColors.lightBorder 
+                      : AppColors.brandAction.withValues(alpha: 0.3)
+                  ),
+                  boxShadow: (data == null || data.isEmptyData)
+                      ? [] 
+                      : [BoxShadow(color: AppColors.brandAction.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))],
                 ),
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     ElevatedButton.icon(
-                      onPressed: state.isGenerating || data == null
+                      onPressed: state.isGenerating || data == null || data.isEmptyData
                           ? null
                           : () {
                               showModalBottomSheet(
@@ -129,13 +133,19 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                                 builder: (_) => const PdfExportConfigSheet(),
                               );
                             },
-                      icon: const Icon(Icons.picture_as_pdf_outlined),
-                      label: const Text('Export Clinical PDF for Doctor', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                      icon: state.isGenerating 
+                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Icon(Icons.picture_as_pdf_outlined),
+                      label: Text(
+                        state.isGenerating ? 'Generating...' : 'Export Clinical PDF for Doctor',
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.brandAction,
                         foregroundColor: Colors.white,
                         iconColor: Colors.white,
-                        disabledBackgroundColor: AppColors.lightBorder,
+                        disabledBackgroundColor: AppColors.lightBorder.withValues(alpha: 0.5),
+                        disabledForegroundColor: AppColors.mutedSage,
                         disabledIconColor: AppColors.mutedSage,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -143,11 +153,26 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
-                      'Generates a human-readable PDF summary of your cycle health, symptoms, and medications to share with your healthcare provider. (This is different from the encrypted .imyrabackup data file in Settings).',
-                      style: TextStyle(fontSize: 12, color: AppColors.mutedSage, height: 1.4),
-                      textAlign: TextAlign.center,
-                    ),
+                    if (data == null || data.isEmptyData)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.info_outline, size: 16, color: AppColors.mutedSage),
+                          const SizedBox(width: 8),
+                          const Expanded(
+                            child: Text(
+                              'Not enough data to generate a report. Please log symptoms or a cycle in this date range first.',
+                              style: TextStyle(fontSize: 12, color: AppColors.mutedSage, height: 1.4),
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      const Text(
+                        'Generates a human-readable PDF summary of your cycle health, symptoms, and medications to share with your healthcare provider. (This is different from the encrypted .imyrabackup data file in Settings).',
+                        style: TextStyle(fontSize: 12, color: AppColors.mutedSage, height: 1.4),
+                        textAlign: TextAlign.center,
+                      ),
                   ],
                 ),
               ),

@@ -346,7 +346,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         await db.delete(db.routineLogs).go();
                         await db.delete(db.routines).go();
                         await db.delete(db.treatmentInterventions).go();
+                        await db.delete(db.labResults).go();
+                        await db.delete(db.clinicalProfile).go();
+                        await db.delete(db.metabolicLogs).go();
                       });
+                      
+                      // Force SQLite to physically rebuild the file and overwrite free space
+                      await db.customStatement('VACUUM');
+                      
                       ref.invalidate(appDatabaseProvider);
                       ref.invalidate(todayControllerProvider);
                       ref.invalidate(cycleControllerProvider);
