@@ -47,7 +47,7 @@ class _QuickLogSheetState extends ConsumerState<QuickLogSheet> {
     'Pelvic & Cycle': [
       'Pelvic Pain',
       'Cramps',
-      'Ovulation Pain (Mittelschmerz)',
+      'Ovulation Pain',
       'Lower Backache',
     ],
     'PCOS & Androgenic': [
@@ -59,7 +59,7 @@ class _QuickLogSheetState extends ConsumerState<QuickLogSheet> {
     ],
     'Systemic & Mood': [
       'Extreme Fatigue',
-      'Mood Lability / Irritability',
+      'Mood Swings / Irritability',
       'Anxiety',
       'Insomnia / Sleep Disruption',
     ],

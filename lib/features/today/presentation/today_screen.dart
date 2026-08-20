@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -11,14 +10,9 @@ import '../../cycle/presentation/cycle_controller.dart';
 import '../../cycle/presentation/widgets/quick_log_sheet.dart';
 import '../../cycle/presentation/widgets/cycle_graph.dart';
 import '../../routines/presentation/routine_setup_sheet.dart';
-import 'widgets/phenotype_setup_sheet.dart';
 import 'widgets/metabolic_log_sheet.dart';
 import '../../../core/database/app_database.dart';
-import '../../../core/providers/database_provider.dart';
-import '../../../core/utils/dev_seed_data.dart';
 import '../../../core/widgets/imyra_logo.dart';
-import '../../../core/utils/snackbar_utils.dart';
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import '../../../core/widgets/illustrations/illustration_caught_up.dart';
 import '../../../core/widgets/illustrations/illustration_routine.dart';
 import '../../../core/providers/preferences_provider.dart';
@@ -68,23 +62,6 @@ class TodayScreen extends ConsumerWidget {
                 ),
               ),
               actions: [
-                if (kDebugMode)
-                  IconButton(
-                    icon: const Icon(Icons.science_outlined),
-                    tooltip: 'Seed 6-Month Test Data',
-                    onPressed: () async {
-                      final db = ref.read(appDatabaseProvider);
-                      await DevDataSeeder.seedSixMonths(db);
-                      if (context.mounted) {
-                        SnackbarUtils.show(
-                          context: context,
-                          title: 'Data Seeded',
-                          message: 'Seeded 6 months of clinical records.',
-                          contentType: ContentType.success,
-                        );
-                      }
-                    },
-                  ),
                 if (isRoutineGoal)
                   IconButton(
                     icon: const Icon(Icons.add_circle_outline,
@@ -140,8 +117,6 @@ class TodayScreen extends ConsumerWidget {
                           // Clinical & Metabolic Cards
                           if (isAdvancedClinical) ...[
                             _buildMetabolicCard(context),
-                            const SizedBox(height: 12),
-                            _buildPhenotypeCard(context),
                             const SizedBox(height: 24),
                           ],
 
@@ -201,9 +176,21 @@ class TodayScreen extends ConsumerWidget {
                           ],
                         ],
                       ).animate().fade(duration: 400.ms).slideY(begin: 0.05),
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
-                      error: (err, _) => Text('Error: $err'),
+                      loading: () => const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 40),
+                        child: Center(
+                            child: CircularProgressIndicator(
+                                color: AppColors.brandAction)),
+                      ),
+                      error: (err, _) => const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Center(
+                          child: Text(
+                              'We couldn\'t load your routines. Please pull to refresh.',
+                              style: TextStyle(
+                                  color: AppColors.mutedSage, fontSize: 13)),
+                        ),
+                      ),
                     ),
 
                     const SizedBox(height: 16),
@@ -544,52 +531,7 @@ class TodayScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildPhenotypeCard(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (_) => const PhenotypeSetupSheet(),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.brandAction.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-              color: AppColors.brandAction.withValues(alpha: 0.15)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Clinical Profile',
-                    style: TextStyle(
-                        color: AppColors.deepInk,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold)),
-                SizedBox(height: 4),
-                Text('Rotterdam Phenotype Config',
-                    style: TextStyle(color: AppColors.mutedSage, fontSize: 14)),
-              ],
-            ),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: const BoxDecoration(
-                  color: AppColors.cardBg, shape: BoxShape.circle),
-              child: const Icon(Icons.medical_information_outlined,
-                  color: AppColors.brandAction),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 } // end TodayScreen
 
 // ── Premium Greeting Block ────────────────────────────────────────────────────

@@ -96,7 +96,18 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                     border: Border.all(color: AppColors.lightBorder),
                   ),
                   child: state.isGenerating
-                      ? const Center(child: CircularProgressIndicator())
+                      ? const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(
+                                  color: AppColors.brandAction),
+                              SizedBox(height: 16),
+                              Text('Synthesizing your clinical report...',
+                                  style: TextStyle(color: AppColors.mutedSage)),
+                            ],
+                          ),
+                        )
                       : (data == null || data.isEmptyData)
                           ? _buildEmptyState(isCustomRange: _selectedMonths == 0)
                           : _buildDataView(data, isRoutineGoal),

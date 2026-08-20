@@ -8,6 +8,7 @@ import '../../today/presentation/today_controller.dart';
 import '../../cycle/presentation/cycle_controller.dart';
 import '../../report/presentation/report_controller.dart';
 import '../../../core/services/backup_service.dart';
+import '../../../core/services/auth_service.dart';
 import 'widgets/feedback_dialog.dart';
 import 'widgets/backup_passphrase_dialog.dart';
 import '../../../l10n/app_localizations.dart';
@@ -75,10 +76,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 final isLocked = prefs.getBool('app_lock_enabled') ?? false;
                 return SwitchListTile(
                   title: const Text('Biometric App Lock', style: TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: const Text('Require Face ID / Touch ID to open the app', style: TextStyle(fontSize: 12)),
+                  subtitle: const Text('Require Face ID / Touch ID (Locks after 10 seconds in the background)', style: TextStyle(fontSize: 12)),
                   value: isLocked,
                   activeThumbColor: AppColors.brandAction,
                   onChanged: (val) async {
+                    if (val) {
+                      final authResult = await AuthService.authenticate();
+                      if (authResult != AuthResult.success) {
+                        if (context.mounted) {
+                          SnackbarUtils.show(
+                            context: context,
+                            title: 'Setup Failed',
+                            message: 'You must set up a device passcode or pass the authentication challenge to enable App Lock.',
+                            contentType: ContentType.failure,
+                          );
+                        }
+                        return; // Abort turning it on
+                      }
+                    }
                     await prefs.setBool('app_lock_enabled', val);
                     setState(() {});
                   },

@@ -5,12 +5,17 @@ void main() {
   group('BackupService Cryptography Tests', () {
     const testPassphrase = 'my_super_secret_password_123!';
     final Map<String, dynamic> dummyData = {
-      'LabResults': [
+      'cycleEvents': [],
+      'routines': [],
+      'routineLogs': [],
+      'interventions': [],
+      'labResults': [
         {'id': 1, 'testName': 'HbA1c', 'value': 5.4}
       ],
-      'ClinicalProfile': [
+      'clinicalProfile': [
         {'id': 1, 'phenotype': 'PCOS_A', 'isDiagnosed': true}
-      ]
+      ],
+      'metabolicLogs': [],
     };
 
     test('Encryption and Decryption are lossless', () {
@@ -38,9 +43,9 @@ void main() {
       final decryptedData = performHeavyDecryption(decryptionArgs);
 
       // 3. Verify Lossless Nature
-      expect(decryptedData['LabResults'], isNotEmpty);
-      expect(decryptedData['LabResults'][0]['testName'], 'HbA1c');
-      expect(decryptedData['ClinicalProfile'][0]['phenotype'], 'PCOS_A');
+      expect(decryptedData['labResults'], isNotEmpty);
+      expect(decryptedData['labResults'][0]['testName'], 'HbA1c');
+      expect(decryptedData['clinicalProfile'][0]['phenotype'], 'PCOS_A');
     });
 
     test('Decryption fails with incorrect passphrase', () {

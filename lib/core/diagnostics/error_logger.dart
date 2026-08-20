@@ -6,13 +6,26 @@ class ErrorLogger {
   static const int _maxLines = 500;
   static const String _fileName = 'Ila_diagnostics.log';
 
+  static List<String> _activeRoutineNames = [];
+
+  static void setRoutineNames(List<String> names) {
+    _activeRoutineNames = names;
+  }
+
   /// Ensure we don't log health data by replacing obvious patterns
   /// (In a real clinical app, this sanitization would be far more robust)
   static String _sanitize(String message) {
-    return message
+    String sanitized = message
         .replaceAll(RegExp(r'\d{4}-\d{2}-\d{2}'), '[DATE_REDACTED]')
         .replaceAll(RegExp(r'\b(?:spotting|heavy|medium|light|cramps|clots|flooding)\b', caseSensitive: false), '[CLINICAL_TERM_REDACTED]')
         .replaceAll(RegExp(r'\b(?:medroxyprogesterone|pill|medication)\b', caseSensitive: false), '[MED_TERM_REDACTED]');
+    
+    for (final name in _activeRoutineNames) {
+      if (name.isNotEmpty) {
+        sanitized = sanitized.replaceAll(RegExp(RegExp.escape(name), caseSensitive: false), '[ROUTINE_NAME_REDACTED]');
+      }
+    }
+    return sanitized;
   }
 
   static Future<File> _getLogFile() async {

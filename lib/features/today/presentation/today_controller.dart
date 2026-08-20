@@ -4,6 +4,7 @@ import '../../../core/providers/database_provider.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../routines/domain/phase_state_machine.dart';
+import '../../../core/diagnostics/error_logger.dart';
 
 part 'today_controller.g.dart';
 
@@ -57,6 +58,8 @@ class TodayController extends _$TodayController {
 
     // Watch all active routines
     routinesSub = dao.watchActiveRoutines().listen((routines) {
+      ErrorLogger.setRoutineNames(routines.map((r) => r.name).toList());
+      
       if (routines.isEmpty) {
         logsSub?.cancel();
         controller.add(const TodayState());

@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/notifications/notification_service.dart';
+import '../../../core/services/auth_service.dart';
 import '../../../main.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
@@ -198,7 +199,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ),
                           value: _enableAppLock,
                           activeThumbColor: AppColors.brandAction,
-                          onChanged: (val) {
+                          onChanged: (val) async {
+                            if (val) {
+                              final authResult = await AuthService.authenticate();
+                              if (authResult != AuthResult.success) {
+                                if (context.mounted) {
+                                  SnackbarUtils.show(
+                                    context: context,
+                                    title: 'Setup Failed',
+                                    message: 'You must set up a device passcode or pass the authentication challenge to enable App Lock.',
+                                    contentType: ContentType.failure,
+                                  );
+                                }
+                                setState(() => _enableAppLock = false);
+                                return; // Abort turning it on
+                              }
+                            }
                             setState(() => _enableAppLock = val);
                           },
                         ),

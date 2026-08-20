@@ -78,6 +78,7 @@ class ImyraApp extends ConsumerStatefulWidget {
 class _ImyraAppState extends ConsumerState<ImyraApp> with WidgetsBindingObserver {
   bool _obscureUI = false; // Default to false until we know app lock is enabled
   bool _isAuthenticating = false;
+  bool _deviceSecurityMissing = false;
 
   DateTime? _backgroundedTime;
 
@@ -114,11 +115,12 @@ class _ImyraAppState extends ConsumerState<ImyraApp> with WidgetsBindingObserver
       _obscureUI = true;
     });
 
-    final success = await AuthService.authenticate();
+    final result = await AuthService.authenticate();
 
     if (mounted) {
       setState(() {
-        _obscureUI = !success;
+        _obscureUI = result != AuthResult.success;
+        _deviceSecurityMissing = result == AuthResult.missingSecurity;
       });
       
       // Delay resetting the authenticating flag by 500ms.
@@ -228,14 +230,28 @@ class _ImyraAppState extends ConsumerState<ImyraApp> with WidgetsBindingObserver
                         const ImyraLogo(size: 80),
                         if (!_isAuthenticating) ...[
                           const SizedBox(height: 24),
-                          const Text(
-                            'Tap to unlock',
-                            style: TextStyle(
-                              color: AppColors.charcoalInk,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
+                          if (_deviceSecurityMissing)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 32),
+                              child: Text(
+                                'Device Security Disabled: Please set up a phone passcode to unlock Ila.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            )
+                          else
+                            const Text(
+                              'Tap to unlock',
+                              style: TextStyle(
+                                color: AppColors.charcoalInk,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
                         ],
                       ],
                     ),

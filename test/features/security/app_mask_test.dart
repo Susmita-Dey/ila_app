@@ -6,13 +6,19 @@ import 'package:imyra_app/core/widgets/imyra_logo.dart';
 import 'package:imyra_app/core/providers/database_provider.dart';
 import 'package:imyra_app/core/database/app_database.dart';
 import 'package:drift/native.dart';
+import 'package:imyra_app/core/providers/preferences_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   testWidgets('App obscures UI when inactive or paused to prevent screenshots', (tester) async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
+    SharedPreferences.setMockInitialValues({'app_lock_enabled': true, 'has_onboarded': true});
+    final prefs = await SharedPreferences.getInstance();
+
     final container = ProviderContainer(
       overrides: [
         appDatabaseProvider.overrideWithValue(db),
+        sharedPreferencesProvider.overrideWithValue(prefs),
       ],
     );
     

@@ -17,7 +17,7 @@ class _MetabolicLogSheetState extends ConsumerState<MetabolicLogSheet> {
   
   final List<String> _selectedSigns = [];
   final List<String> _commonSigns = [
-    'Acanthosis Nigricans',
+    'Dark skin patches (neck/armpits)',
     'Severe Sugar Cravings',
     'Extreme Fatigue',
     'Skin Tags',

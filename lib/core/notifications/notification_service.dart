@@ -108,7 +108,7 @@ class NotificationService {
       await _notificationsPlugin.zonedSchedule(
         id: routineId,
         title: 'Imyra',
-        body: 'Time for your $routineName routine.',
+        body: 'Time for your scheduled routine.',
         scheduledDate: scheduledDate,
         notificationDetails: platformDetails,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
@@ -143,7 +143,7 @@ class NotificationService {
             await _notificationsPlugin.zonedSchedule(
               id: routineId * 1000 + scheduledCount,
               title: 'Imyra',
-              body: 'Time for your $routineName routine.',
+              body: 'Time for your scheduled routine.',
               scheduledDate: scheduledDate,
               notificationDetails: platformDetails,
               androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,

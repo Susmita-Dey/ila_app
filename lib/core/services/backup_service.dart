@@ -180,5 +180,24 @@ Map<String, dynamic> performHeavyDecryption(Map<String, dynamic> args) {
   }
 
   final payload = jsonDecode(decryptedString) as Map<String, dynamic>;
-  return payload['data'] as Map<String, dynamic>;
+  
+  if (!payload.containsKey('version') || payload['version'] != 1) {
+    throw const FormatException('Unsupported backup version or corrupted file.');
+  }
+  
+  if (!payload.containsKey('data')) {
+    throw const FormatException('Backup file is missing required data.');
+  }
+  
+  final data = payload['data'] as Map<String, dynamic>;
+  
+  // Validate expected arrays exist
+  final expectedKeys = ['cycleEvents', 'routines', 'routineLogs', 'interventions', 'labResults', 'clinicalProfile', 'metabolicLogs'];
+  for (final key in expectedKeys) {
+    if (!data.containsKey(key) || data[key] is! List) {
+      throw const FormatException('Backup file has invalid or missing table data.');
+    }
+  }
+
+  return data;
 }
